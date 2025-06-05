@@ -1,0 +1,13 @@
+ContextCraft/
+├── src/
+│   └── contextcraft/
+│       ├── tools/
+│       │   ├── __init__.py
+│       │   └── tree_generator.py
+│       ├── __init__.py
+│       └── main.py
+├── tests/
+│   └── __init__.py
+├── poetry.lock
+├── pyproject.toml
+└── README.md

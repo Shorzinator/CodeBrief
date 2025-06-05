@@ -1,0 +1,65 @@
+# pyproject.toml
+
+[tool.poetry]
+name = "contextcraft"
+version = "0.1.0"
+description = "A CLI toolkit to generate comprehensive project context for LLMs."
+authors = ["Your Name <you@example.com>"]
+license = "MIT" # Or Apache-2.0
+readme = "README.md" # if you have one, or poetry will create a default
+
+[tool.poetry.dependencies]
+python = "^3.9" # Or your chosen version
+typer = "^0.9.0" # Example version, poetry will pick latest
+rich = "^13.0.0"  # Example version
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.0" # Example version
+mypy = "^1.0.0" # Example version
+pytest = "^7.0.0" # Example version
+bandit = "^1.7.0" # Example version
+pytest-cov = "^4.0.0" # Example version
+
+# Configuration for Ruff
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "SIM", "PT", "PTH", "RUF"] # Common selections
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+# Add any specific lint rule configurations here if needed
+
+# Configuration for Mypy
+[tool.mypy]
+python_version = "3.9" # Match your poetry.dependencies.python
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true # Start with this, can become stricter later
+# For stricter checks, consider adding:
+# disallow_untyped_defs = true
+# disallow_incomplete_defs = true
+# check_untyped_defs = true
+
+# Configuration for Pytest (optional, many things are auto-discovered)
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=contextcraft --cov-report=term-missing" # Basic options
+testpaths = [
+    "tests",
+]
+
+# Configuration for Coverage
+[tool.coverage.run]
+source = ["contextcraft"] # Directory where your source code lives
+
+[tool.coverage.report]
+fail_under = 80 # Example: Fail CI if coverage drops below 80%
+show_missing = true
+
+# Add a script entry point for your CLI
+[tool.poetry.scripts]
+contextcraft = "contextcraft.main:app" # We'll create this file next
