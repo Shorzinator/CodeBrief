@@ -1,0 +1,54 @@
+# .pre-commit-config.yaml
+
+# Global settings (optional, but good practice)
+# default_stages: [commit] # Run hooks on commit (default)
+# default_language_version:
+#   python: python3.11 # Or your project's Python version
+
+# Define a list of repositories and the hooks to use from them
+repos:
+  # Standard hooks for general file linting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0 # Use the latest stable version
+    hooks:
+      - id: check-yaml # Checks yaml files for parseable syntax.
+      - id: check-toml # Checks toml files for parseable syntax.
+      - id: end-of-file-fixer # Ensures files end with a newline.
+      - id: trailing-whitespace # Trims trailing whitespace.
+      # - id: check-docstring-first # Checks that modules and classes have docstrings. (Can be noisy initially)
+      - id: check-added-large-files # Prevents committing large files.
+      - id: check-merge-conflict # Checks for files that contain merge conflict strings.
+      - id: debug-statements # Checks for debugger imports and calls.
+
+  # Ruff: Super-fast Python linter and formatter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version. Must be maintained from time to time.
+    rev: v0.1.9 # Use a recent version compatible with your ruff settings
+    hooks:
+      - id: ruff # Runs ruff --fix
+        args: [--fix, --exit-non-zero-on-fix] # Apply fixes and exit if fixes were made
+      - id: ruff-format # Runs ruff format
+
+  # Mypy: Static type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0 # Use the latest stable version
+    hooks:
+      - id: mypy
+        # Pass arguments to mypy.
+        # We use `pass_filenames: false` because mypy works best when given package/module names.
+        # However, for pre-commit, it's often simpler to let it run on all files.
+        # The `args` below point to your `pyproject.toml` for config.
+        # If you have files that Mypy shouldn't check (e.g., setup.py if not typed), exclude them.
+        args: [--config-file=pyproject.toml]
+        # You might need to add `additional_dependencies` if mypy needs specific stubs
+        # not automatically picked up, or if you use plugins.
+        # additional_dependencies: ['types-requests', 'pandas-stubs'] # Example
+
+  # Bandit: Security linter for Python
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6 # Use the latest stable version
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"] # Tell bandit to use config from pyproject.toml
+        # Exclude test files if they contain intentional "vulnerabilities" for testing purposes
+        # exclude: ^tests/

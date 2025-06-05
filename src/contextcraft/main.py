@@ -14,18 +14,20 @@ or for general project understanding.
 from pathlib import Path
 from typing import List, Optional
 
-import typer # Typer is used for creating the CLI application and commands
-from rich.console import Console # Rich is used for enhanced console output (colors, styles, tables, etc.)
+import typer  # Typer is used for creating the CLI application and commands
+from rich.console import (
+    Console,  # Rich is used for enhanced console output (colors, styles, tables, etc.)
+)
 
 # Import specific tool modules or functions from the 'tools' sub-package.
 # The '.' indicates a relative import from the current package ('contextcraft').
-from .tools import tree_generator, flattener
+from .tools import flattener, tree_generator
 
 # Initialize a Typer application instance.
 # This 'app' object will be used to register commands.
 app = typer.Typer(
     name="contextcraft",  # The name of the CLI application
-    help="A CLI toolkit to generate comprehensive project context for LLMs.", # Short help displayed for the app
+    help="A CLI toolkit to generate comprehensive project context for LLMs.",  # Short help displayed for the app
     add_completion=False,  # Shell completion can be enabled later if desired (adds some overhead)
     # no_args_is_help=True, # Consider adding this: if no command is given, show help.
 )
@@ -33,7 +35,8 @@ app = typer.Typer(
 # Initialize a Rich Console instance for consistent styled output throughout the app.
 console = Console()
 
-@app.command() # Registers the following function as a CLI command
+
+@app.command()  # Registers the following function as a CLI command
 def hello(name: str = typer.Option("World", help="The person to greet.")):
     """
     Greets a person. (Example command)
@@ -45,36 +48,34 @@ def hello(name: str = typer.Option("World", help="The person to greet.")):
     console.print(f"Hello [bold green]{name}[/bold green] from ContextCraft!")
     # Rich's print supports console markup for styling.
 
-@app.command(name="tree") # Registers 'tree_command' as the 'tree' subcommand
+
+@app.command(name="tree")  # Registers 'tree_command' as the 'tree' subcommand
 def tree_command(
     root_dir: Path = typer.Argument(
         ".",  # Default value for the argument if not provided
-        help="Root directory to generate tree for.", # Help text for this argument
+        help="Root directory to generate tree for.",  # Help text for this argument
         exists=True,  # Typer will validate that the path exists
-        file_okay=False, # Path must not be a file
-        dir_okay=True,   # Path must be a directory
-        readable=True,   # Path must be readable
-        resolve_path=True, # Converts the path to an absolute path
-        show_default="Current directory", # How the default is displayed in --help
+        file_okay=False,  # Path must not be a file
+        dir_okay=True,  # Path must be a directory
+        readable=True,  # Path must be readable
+        resolve_path=True,  # Converts the path to an absolute path
+        show_default="Current directory",  # How the default is displayed in --help
     ),
     output_file: Optional[Path] = typer.Option(
-        None, # Default is None, meaning output to console
+        None,  # Default is None, meaning output to console
         "--output",  # Long option name
-        "-o",        # Short option name
+        "-o",  # Short option name
         help="Output file to save the tree. If not provided, prints to console.",
-        writable=True, # If path is given, Typer checks if it's writable
-        resolve_path=True, # Converts to absolute path if given
-        show_default="Print to console", # How default is displayed in --help
+        writable=True,  # If path is given, Typer checks if it's writable
+        resolve_path=True,  # Converts to absolute path if given
+        show_default="Print to console",  # How default is displayed in --help
     ),
     ignore: Optional[List[str]] = typer.Option(
-        None, # Default is an empty list (no user-specified ignores beyond defaults)
+        None,  # Default is an empty list (no user-specified ignores beyond defaults)
         "--ignore",
         "-i",
-        help=(
-            "Specific directory or file names to ignore. "
-            "Can be used multiple times (e.g., -i node_modules -i build)."
-        ),
-        show_default="Default internal exclusion list", # Describes the behavior if not specified
+        help=("Specific directory or file names to ignore. " "Can be used multiple times (e.g., -i node_modules -i build)."),
+        show_default="Default internal exclusion list",  # Describes the behavior if not specified
     ),
 ):
     """
@@ -107,7 +108,7 @@ def tree_command(
         # For debugging, you might want to uncomment the following lines to print the full traceback:
         # import traceback
         # console.print(f"[red]{traceback.format_exc()}[/red]")
-        raise typer.Exit(code=1) # Exit with a non-zero status code to indicate failure.
+        raise typer.Exit(code=1) from e  # FIX: Added 'from e'
 
 
 @app.command(name="flatten")
@@ -119,7 +120,7 @@ def flatten_command(
         file_okay=False,
         dir_okay=True,
         readable=True,
-        resolve_path=True, # Converts to an absolute path internally
+        resolve_path=True,  # Converts to an absolute path internally
         show_default="Current directory",
     ),
     output_file: Optional[Path] = typer.Option(
@@ -127,8 +128,8 @@ def flatten_command(
         "--output",
         "-o",
         help="Output file to save the flattened content. If not specified, content is printed to the console.",
-        writable=True, # Typer checks if the path (if given) is writable
-        resolve_path=True, # Converts to an absolute path if provided
+        writable=True,  # Typer checks if the path (if given) is writable
+        resolve_path=True,  # Converts to an absolute path if provided
         show_default="Print to console",
     ),
     include: Optional[List[str]] = typer.Option(
@@ -187,8 +188,8 @@ def flatten_command(
         # For detailed debugging, one might uncomment the following lines:
         # import traceback
         # console.print(f"[red]{traceback.format_exc()}[/red]")
-        raise typer.Exit(code=1) # Exit with a non-zero status code to indicate failure.
-    
+        raise typer.Exit(code=1) from e  # FIX: Added 'from e'
+
 
 # This block ensures that the Typer app runs when the script is executed directly
 # (e.g., `python -m src.contextcraft.main`) or via the Poetry script entry point.

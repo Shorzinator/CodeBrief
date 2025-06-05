@@ -21,10 +21,11 @@ bandit = "^1.7.0" # Example version
 pytest-cov = "^4.0.0" # Example version
 
 # Configuration for Ruff
+pre-commit = "^4.2.0"
 [tool.ruff]
-line-length = 88
+line-length = 150
 select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "SIM", "PT", "PTH", "RUF"] # Common selections
-ignore = []
+ignore = ["B008"] # Ignore B008 globally
 
 [tool.ruff.format]
 quote-style = "double"
@@ -60,6 +61,25 @@ source = ["contextcraft"] # Directory where your source code lives
 fail_under = 80 # Example: Fail CI if coverage drops below 80%
 show_missing = true
 
+[tool.bandit]
+# Example: Exclude certain tests if they are too noisy or not applicable.
+# Refer to Bandit documentation for available test IDs:
+# https://bandit.readthedocs.io/en/latest/plugins/index.html
+# skips = ["B101", "B404", "B603"] # Example: skip assert_used, import_subprocess, subprocess_without_shell_equals_true
+# tests = [] # To run only specific tests
+# Example: Set confidence level to MEDIUM or HIGH to reduce noise from LOW findings.
+# severity = ["MEDIUM", "HIGH"]
+# confidence = ["MEDIUM", "HIGH"]
+
+# For now, let's start with a simple config.
+# You can specify which directories to scan or exclude here as well.
+# By default, it scans all Python files in the repo.
+# We'll let pre-commit pass files, but this section is good for global config.
+# exclude_dirs = ["tests", "docs"] # If you want to exclude directories globally
+
+[tool.ruff.lint.per-file-ignores]
+"src/contextcraft/main.py" = ["B008"]
+
 # Add a script entry point for your CLI
 [tool.poetry.scripts]
-contextcraft = "contextcraft.main:app" # We'll create this file next
+contextcraft = "contextcraft.main:app"

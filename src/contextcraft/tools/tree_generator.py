@@ -13,13 +13,14 @@ Core functionalities:
 - Generation of a Rich `Tree` object for styled console output.
 """
 
-import os # Used by os.walk in some implementations, though pathlib is preferred here.
-from pathlib import Path # Core library for object-oriented path manipulation.
-from typing import Set, List, Optional # Type hints for clarity and static analysis.
+from pathlib import Path  # Core library for object-oriented path manipulation.
+from typing import List, Optional, Set  # Type hints for clarity and static analysis.
 
-import typer # Used for typer.Exit for controlled exits.
-from rich.console import Console # For styled console output.
-from rich.tree import Tree as RichTree # Rich's specific Tree widget for console display.
+import typer  # Used for typer.Exit for controlled exits.
+from rich.console import Console  # For styled console output.
+from rich.tree import (
+    Tree as RichTree,  # Rich's specific Tree widget for console display.
+)
 
 # Initialize a Rich Console instance for any direct console output from this module.
 console = Console()
@@ -49,8 +50,8 @@ DEFAULT_EXCLUDED_ITEMS: Set[str] = {
     "*.egg-info",
     # Node.js specific
     "node_modules",
-    "package-lock.json", # Often very large, may not be needed for tree
-    "yarn.lock",        # Same as above
+    "package-lock.json",  # Often very large, may not be needed for tree
+    "yarn.lock",  # Same as above
     # IDE specific
     ".vscode",
     ".idea",
@@ -58,16 +59,16 @@ DEFAULT_EXCLUDED_ITEMS: Set[str] = {
     # Build artifacts & Distribution
     "dist",
     "build",
-    "target", # Common in Java/Rust
+    "target",  # Common in Java/Rust
     "out",
     # OS specific
-    ".DS_Store", # macOS
-    "Thumbs.db", # Windows
+    ".DS_Store",  # macOS
+    "Thumbs.db",  # Windows
     # Logs and temp files
     "*.log",
     "*.tmp",
-    "*.swp", # Vim swap files
-    "project_tree.txt"
+    "*.swp",  # Vim swap files
+    "project_tree.txt",
 }
 
 
@@ -118,8 +119,8 @@ def _generate_tree_lines_recursive(
         children = sorted(
             [
                 child
-                for child in current_dir.iterdir() # Iterate over items in the current directory
-                if child.name not in excluded_items # Apply exclusion filter
+                for child in current_dir.iterdir()  # Iterate over items in the current directory
+                if child.name not in excluded_items  # Apply exclusion filter
             ],
             key=lambda x: (x.is_file(), x.name.lower()),
         )
@@ -137,10 +138,10 @@ def _generate_tree_lines_recursive(
     for i, child in enumerate(children):
         # Determine the connector prefix based on whether this is the last item in the list.
         connector = "└── " if i == len(children) - 1 else "├── "
-        line_prefix_for_child = parent_prefix + connector # Prefix for the child's line
+        line_prefix_for_child = parent_prefix + connector  # Prefix for the child's line
 
         if child.is_dir():
-            lines.append(f"{line_prefix_for_child}{child.name}/") # Append directory name with a slash
+            lines.append(f"{line_prefix_for_child}{child.name}/")  # Append directory name with a slash
             # Prepare the prefix for items *inside* this child directory.
             # If current child is the last one (└──), its children don't need the vertical bar │.
             # Otherwise (├──), its children do need the vertical bar.
@@ -148,9 +149,9 @@ def _generate_tree_lines_recursive(
             # Recursively call for the subdirectory.
             lines.extend(
                 _generate_tree_lines_recursive(
-                    child, # The subdirectory to process
-                    parent_prefix + child_contents_prefix_extension, # New prefix for its children
-                    excluded_items, # Pass along the exclusion set
+                    child,  # The subdirectory to process
+                    parent_prefix + child_contents_prefix_extension,  # New prefix for its children
+                    excluded_items,  # Pass along the exclusion set
                     is_root=False,  # Subsequent calls are not for the overall root
                 )
             )
@@ -163,7 +164,7 @@ def _generate_tree_lines_recursive(
 def _add_nodes_to_rich_tree_recursive(
     rich_tree_node: RichTree,
     current_path_obj: Path,
-    excluded_items: Optional[Set[str]] = None
+    excluded_items: Optional[Set[str]] = None,
 ):
     """
     Recursively adds nodes to a Rich.Tree object for styled console display.
@@ -187,17 +188,13 @@ def _add_nodes_to_rich_tree_recursive(
     try:
         # Retrieve children, filter, and sort as in the text-based generator.
         children = sorted(
-            [
-                child
-                for child in current_path_obj.iterdir()
-                if child.name not in excluded_items
-            ],
+            [child for child in current_path_obj.iterdir() if child.name not in excluded_items],
             key=lambda x: (x.is_file(), x.name.lower()),
         )
     except PermissionError:
         rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")
         return
-    except FileNotFoundError: # Should be less likely if root_dir check passed
+    except FileNotFoundError:  # Should be less likely if root_dir check passed
         rich_tree_node.add(f"[dim italic](Directory {current_path_obj.name} not found)[/dim italic]")
         return
 
@@ -208,7 +205,7 @@ def _add_nodes_to_rich_tree_recursive(
             # Use a folder emoji and make the name a clickable link (in supporting terminals).
             branch = rich_tree_node.add(
                 f":file_folder: [link file://{child.resolve()}]{child.name}",
-                guide_style="blue", # Style for the guide lines of this branch
+                guide_style="blue",  # Style for the guide lines of this branch
             )
             # Recursively populate this new branch.
             _add_nodes_to_rich_tree_recursive(branch, child, excluded_items)
@@ -261,8 +258,7 @@ def generate_and_output_tree(
         abs_root_dir = root_dir.resolve()
         # Check if the output file is inside the root directory (or its subdirectories)
         # and if its name isn't already in the exclusion set.
-        if abs_output_file.is_relative_to(abs_root_dir) and \
-           abs_output_file.name not in current_excluded_set:
+        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in current_excluded_set:
             # console.print(f"[dim]Note: Excluding output file '{abs_output_file.name}' from tree view.[/dim]")
             current_excluded_set.add(abs_output_file.name)
 
@@ -272,17 +268,17 @@ def generate_and_output_tree(
         tree_lines = _generate_tree_lines_recursive(
             root_dir,
             excluded_items=current_excluded_set,
-            is_root=True # Initial call is for the root
+            is_root=True,  # Initial call is for the root
         )
         try:
             # Write the generated lines to the specified output file.
-            with open(output_file_path, "w", encoding="utf-8") as f:
+            with output_file_path.open(mode="w", encoding="utf-8") as f:
                 f.write("\n".join(tree_lines))
             console.print(f"Directory tree saved to [cyan]{output_file_path.resolve()}[/cyan]")
-        except IOError as e:
+        except OSError as e:
             # Handle potential errors during file writing.
             console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
     else:
         # Generate and print a RichTree for console output.
         # Define the label for the root node of the RichTree.
@@ -290,7 +286,7 @@ def generate_and_output_tree(
         # Create the main RichTree object.
         rich_tree_root = RichTree(
             rich_tree_root_label,
-            guide_style="bold bright_blue", # Style for the connecting guide lines
+            guide_style="bold bright_blue",  # Style for the connecting guide lines
         )
         # Recursively populate the RichTree starting from the root directory.
         _add_nodes_to_rich_tree_recursive(rich_tree_root, root_dir, current_excluded_set)
