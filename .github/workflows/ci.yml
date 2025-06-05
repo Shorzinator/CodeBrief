@@ -1,0 +1,115 @@
+# .github/workflows/ci.yml
+# GitHub Actions CI Workflow for the ContextCraft project.
+#
+# This workflow automates the process of linting, type checking, security scanning,
+# and running tests for the project on every push and pull request to the
+# `main` and `develop` branches.
+#
+# It ensures code quality and catches potential issues early in the development cycle.
+# The workflow uses Poetry for dependency management and caching to speed up builds.
+
+name: ContextCraft CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main", "develop" ] # Run on pushes to main and develop
+  pull_request:
+    branches: [ "main", "develop" ] # Run on PRs targeting main and develop
+  workflow_dispatch: {} # Allows manual triggering from the GitHub Actions UI
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    # Runs on the latest version of Ubuntu.
+    # You can also use a matrix strategy to test on multiple OS or Python versions.
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Define the Python version(s) to test against.
+        # For now, we'll use one, matching our project's target.
+        # Example: python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.11"] # Update this to your project's target Python version
+
+    steps:
+      - name: Checkout repository
+        # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        # Sets up the specified Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        # Installs Poetry, a dependency manager for Python
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true # Create a virtual environment
+          virtualenvs-in-project: true # Create .venv in the project directory (optional, but can be useful for local consistency)
+          installer-parallel: true # Speed up installation
+
+      - name: Load cached Poetry virtual environment
+        # Caches dependencies to speed up subsequent runs.
+        # The cache key includes the Python version and the hash of poetry.lock.
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv # Path to the virtual environment directory (if virtualenvs-in-project: true)
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies with Poetry
+        # Installs project dependencies using Poetry.
+        # Runs only if the cache was not hit (i.e., if dependencies changed).
+        # Includes development dependencies needed for linting, testing, etc.
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --with dev
+
+      - name: Activate virtual environment and install project (if not done by poetry install)
+        # Ensure the project itself is installed in editable mode for tools like pytest to find it.
+        # `poetry install --with dev` (without --no-root) should handle this.
+        # If you used --no-root above, you might need: poetry install --with dev
+        # For clarity, let's ensure a full install if cache wasn't hit.
+        # The previous step handles cache miss. This is just to ensure project is installed.
+        run: poetry install --no-interaction --with dev
+
+      - name: Run Ruff (Linting and Formatting Check)
+        # Runs Ruff to check for linting errors and formatting issues.
+        # --output-format=github makes Ruff output annotations directly in PRs/Actions UI.
+        # We don't use --fix here; CI should report issues, not fix them.
+        run: |
+          poetry run ruff check . --output-format=github
+          poetry run ruff format . --check --diff
+
+      - name: Run Mypy (Static Type Checking)
+        # Runs Mypy to perform static type checking.
+        # Uses the configuration from pyproject.toml.
+        run: |
+          poetry run mypy src --config-file pyproject.toml
+
+      - name: Run Bandit (Security Linting)
+        # Runs Bandit to check for common security vulnerabilities.
+        # Uses the configuration from pyproject.toml.
+        # -r flag for recursive scan.
+        run: |
+          poetry run bandit -r src -c pyproject.toml -f custom --msg-template "{abspath}:{line}: {test_id}[{severity}][{confidence}]: {msg}"
+
+      - name: Run Pytest (Unit Tests and Coverage)
+        # Runs Pytest to execute unit tests.
+        # Generates a coverage report.
+        # This step will run even if no tests are written yet (it will pass with 0 tests).
+        run: |
+          poetry run pytest \
+            --cov=src/contextcraft \
+            --cov-report=xml \
+            --cov-report=term-missing tests/
+          # The --cov-report=xml is useful for uploading coverage to services like Codecov.
+
+      # Optional: Upload Coverage Report (e.g., to Codecov)
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }} # Create this secret in your GitHub repo settings
+      #     files: ./coverage.xml
+      #     fail_ci_if_error: true

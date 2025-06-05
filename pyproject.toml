@@ -19,9 +19,9 @@ mypy = "^1.0.0" # Example version
 pytest = "^7.0.0" # Example version
 bandit = "^1.7.0" # Example version
 pytest-cov = "^4.0.0" # Example version
+pre-commit = "^4.2.0"
 
 # Configuration for Ruff
-pre-commit = "^4.2.0"
 [tool.ruff]
 line-length = 150
 select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "SIM", "PT", "PTH", "RUF"] # Common selections
@@ -82,4 +82,4 @@ show_missing = true
 
 # Add a script entry point for your CLI
 [tool.poetry.scripts]
-contextcraft = "contextcraft.main:app"
+contextcraft = "src.contextcraft.main:app"  # Fixed to use correct module path
