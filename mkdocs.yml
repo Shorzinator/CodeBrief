@@ -1,0 +1,99 @@
+# mkdocs.yml
+# This comment indicates the path of the file relative to the project root.
+
+# MkDocs configuration for the ContextCraft project documentation.
+
+
+# Project information
+site_name: ContextCraft
+site_url: "" # Replace with your GitHub Pages URL or custom domain later
+site_author: Your Name # Replace with your name/org
+site_description: "A CLI toolkit to generate comprehensive project context for LLMs."
+
+# Repository
+repo_url: https://github.com/YOUR_USERNAME/ContextCraft # Replace with your repo URL
+repo_name: YOUR_USERNAME/ContextCraft # Replace
+edit_uri: "" # Optional: "edit/main/docs/" if your docs folder is 'docs/'
+
+# Copyright
+# copyright: Copyright © 2023 Your Name # Uncomment and update year/name
+
+# Theme Configuration
+theme:
+  name: material
+  # language: en # Default language
+  features:
+    - navigation.tabs # Use tabs for top-level navigation sections
+    - navigation.sections # Group pages into sections in the sidebar
+    - navigation.top # Back-to-top button
+    - search.suggest # Search suggestions
+    - search.highlight # Highlight search terms
+    - content.code.annotate # Code annotation feature
+    - content.code.copy # Copy button for code blocks
+  palette:
+    # Palette toggle for light/dark mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github # GitHub icon for the repo link
+
+# Extensions
+markdown_extensions:
+  - admonition # For admonition blocks (note, warning, etc.)
+  - pymdownx.details # For collapsible sections
+  - pymdownx.superfences # For nested code blocks and more
+  - pymdownx.highlight: # Code highlighting
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - toc: # Table of contents
+      permalink: true # Add permalinks to headings
+
+plugins:
+  - search # Built-in search plugin
+  - mkdocstrings:
+      default_handler: python # Default handler for docstrings
+      handlers:
+        python:
+          options:
+            # --- Docstring style ---
+            docstring_style: google # Or numpy, sphinx. Google is common.
+            # --- Member options ---
+            show_root_heading: true # Show a heading for the root object
+            show_root_toc_entry: true
+            show_object_full_path: false # Show full path or just the name
+            show_category_heading: false # Don't group methods by "Methods", "Attributes"
+            show_if_no_docstring: false # Hide members with no docstrings
+            # --- Heading levels ---
+            heading_level: 2 # Start headings for objects at level 2
+            # --- Other options ---
+            # members_order: source # Order members as they appear in source
+            # show_source: true # Show a "View Source" link (requires repo_url and edit_uri)
+
+# Navigation structure (nav)
+# This defines the order and hierarchy of your documentation pages.
+nav:
+  - Home: index.md
+  - User Guide:
+    - Installation: user-guide/installation.md
+    - CLI Usage: user-guide/cli-usage.md
+  - API Reference:
+    # We will populate this with references to our modules/functions
+    - Main CLI: reference/main.md
+    - Tree Generator: reference/tree_generator.md
+    - Flattener: reference/flattener.md
+  # - Contributing: contributing.md
+  # - Changelog: changelog.md
+
+# Where your Markdown documentation files are located
+docs_dir: docs
