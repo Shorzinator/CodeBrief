@@ -19,7 +19,7 @@ from rich.console import Console # Rich is used for enhanced console output (col
 
 # Import specific tool modules or functions from the 'tools' sub-package.
 # The '.' indicates a relative import from the current package ('contextcraft').
-from .tools import tree_generator
+from .tools import tree_generator, flattener
 
 # Initialize a Typer application instance.
 # This 'app' object will be used to register commands.
@@ -108,6 +108,87 @@ def tree_command(
         # import traceback
         # console.print(f"[red]{traceback.format_exc()}[/red]")
         raise typer.Exit(code=1) # Exit with a non-zero status code to indicate failure.
+
+
+@app.command(name="flatten")
+def flatten_command(
+    root_dir: Path = typer.Argument(
+        ".",
+        help="Root directory to flatten files from. All paths are resolved relative to this directory.",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True, # Converts to an absolute path internally
+        show_default="Current directory",
+    ),
+    output_file: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output file to save the flattened content. If not specified, content is printed to the console.",
+        writable=True, # Typer checks if the path (if given) is writable
+        resolve_path=True, # Converts to an absolute path if provided
+        show_default="Print to console",
+    ),
+    include: Optional[List[str]] = typer.Option(
+        None,
+        "--include",
+        "-inc",
+        help=(
+            "Specify file inclusion criteria. Can be file extensions (e.g., '.py'), "
+            "glob patterns (e.g., '*.js', 'src/**/*.ts'), or exact filenames (e.g., 'Makefile'). "
+            "Use multiple times for multiple criteria (e.g., -inc '*.py' -inc '*.md'). "
+            "If not provided, a default list of common code/text file types is used."
+        ),
+        show_default="Default common code/text extensions/filenames",
+    ),
+    exclude: Optional[List[str]] = typer.Option(
+        None,
+        "--exclude",
+        "-exc",
+        help=(
+            "Specify files or patterns to exclude. Can be glob patterns (e.g., '*.log', 'dist/*') "
+            "or exact filenames. Exclusions apply after general default exclusions (like .git, venv) "
+            "and take precedence over include patterns. Use multiple times for multiple criteria."
+        ),
+        show_default="None (beyond default internal exclusions like .git, venv)",
+    ),
+):
+    """
+    Flattens specified files from a directory into a single text output.
+
+    This command recursively searches the `ROOT_DIR` for files that match the
+    inclusion criteria (either user-defined via --include or a default set of
+    common code/text file types) and do not match exclusion criteria
+    (user-defined via --exclude or default general exclusions like .git, venv).
+
+    The content of each processed file is concatenated into the output,
+    with each file's content being prefixed by a standardized header comment
+    indicating its original relative path (e.g., `# --- File: src/main.py ---`).
+
+    This is useful for creating a single context bundle for LLMs, archiving
+    key project files, or performing global searches/reviews.
+    """
+    try:
+        # Delegate the core flattening logic to the flattener module.
+        flattener.flatten_code_logic(
+            root_dir_path=root_dir,
+            output_file_path=output_file,
+            include_patterns=include,
+            exclude_patterns=exclude,
+        )
+    except typer.Exit:
+        # Allow Typer's own Exit exceptions (e.g., from failed path validation) to pass through.
+        raise
+    except Exception as e:
+        # Catch any other unexpected errors from the flattening logic.
+        console.print(f"[bold red]An unexpected error occurred during code flattening: {e}[/bold red]")
+        # For detailed debugging, one might uncomment the following lines:
+        # import traceback
+        # console.print(f"[red]{traceback.format_exc()}[/red]")
+        raise typer.Exit(code=1) # Exit with a non-zero status code to indicate failure.
+    
 
 # This block ensures that the Typer app runs when the script is executed directly
 # (e.g., `python -m src.contextcraft.main`) or via the Poetry script entry point.
