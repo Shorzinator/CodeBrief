@@ -9,24 +9,23 @@ license = "MIT" # Or Apache-2.0
 readme = "README.md" # if you have one, or poetry will create a default
 
 [tool.poetry.dependencies]
-python = "^3.9" # Or your chosen version
-typer = "^0.9.0" # Example version, poetry will pick latest
-rich = "^13.0.0"  # Example version
+python = "^3.9"
+typer = "^0.9.0"
+rich = "^13.0.0"
 pathspec = "^0.12.1"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.1.0" # Example version
-mypy = "^1.0.0" # Example version
-pytest = "^7.0.0" # Example version
-bandit = "^1.7.0" # Example version
-pytest-cov = "^4.0.0" # Example version
+ruff = "^0.1.0"
+mypy = "^1.0.0"
+pytest = "^7.0.0"
+bandit = "^1.7.0"
+pytest-cov = "^4.0.0"
 pre-commit = "^4.2.0"
-
-# Configuration for Ruff
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.6.14"
 mkdocstrings = "^0.29.1"
 mkdocstrings-python = "^1.16.12"
+
 [tool.ruff]
 line-length = 150
 select = ["E", "F", "W", "I", "UP", "B", "A", "C4", "SIM", "PT", "PTH", "RUF"] # Common selections
@@ -39,28 +38,34 @@ indent-style = "space"
 [tool.ruff.lint]
 # Add any specific lint rule configurations here if needed
 
-# Configuration for Mypy
+[tool.ruff.lint.per-file-ignores]
+"src/contextcraft/main.py" = ["E501"]
+
 [tool.mypy]
-python_version = "3.9" # Match your poetry.dependencies.python
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
-ignore_missing_imports = true # Start with this, can become stricter later
-# For stricter checks, consider adding:
-# disallow_untyped_defs = true
-# disallow_incomplete_defs = true
-# check_untyped_defs = true
+ignore_missing_imports = true
+explicit_package_bases = true
+mypy_path = ["src"]  # Changed to a list format
+namespace_packages = true  # Added to help with package discovery
+# Optional, but can be more explicit for what to check:
+files = ["contextcraft", "tests"] # Check these specific packages/dirs
+# packages = ["contextcraft"] # Check this specific package (when src is on path)
 
 # Configuration for Pytest (optional, many things are auto-discovered)
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --cov=contextcraft --cov-report=term-missing" # Basic options
+addopts = "-ra -q --cov=src/contextcraft --cov-report=term-missing --cov-report=xml" # Ensure xml for CI later
 testpaths = [
     "tests",
 ]
+pythonpath = ["src"]
 
 # Configuration for Coverage
 [tool.coverage.run]
-source = ["contextcraft"] # Directory where your source code lives
+source = ["src/contextcraft"] # Directory where your source code lives
+branch = true
 
 [tool.coverage.report]
 fail_under = 80 # Example: Fail CI if coverage drops below 80%
@@ -70,7 +75,7 @@ show_missing = true
 # Example: Exclude certain tests if they are too noisy or not applicable.
 # Refer to Bandit documentation for available test IDs:
 # https://bandit.readthedocs.io/en/latest/plugins/index.html
-# skips = ["B101", "B404", "B603"] # Example: skip assert_used, import_subprocess, subprocess_without_shell_equals_true
+skips = ["B101"]  # Skip assert_used since we use asserts in tests
 # tests = [] # To run only specific tests
 # Example: Set confidence level to MEDIUM or HIGH to reduce noise from LOW findings.
 # severity = ["MEDIUM", "HIGH"]
@@ -81,9 +86,6 @@ show_missing = true
 # By default, it scans all Python files in the repo.
 # We'll let pre-commit pass files, but this section is good for global config.
 # exclude_dirs = ["tests", "docs"] # If you want to exclude directories globally
-
-[tool.ruff.lint.per-file-ignores]
-"src/contextcraft/main.py" = ["B008"]
 
 # Add a script entry point for your CLI
 [tool.poetry.scripts]

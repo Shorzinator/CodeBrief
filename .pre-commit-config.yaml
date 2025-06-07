@@ -31,18 +31,15 @@ repos:
 
   # Mypy: Static type checker
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0 # Use the latest stable version
+    rev: v1.8.0 # Or latest
     hooks:
       - id: mypy
-        # Pass arguments to mypy.
-        # We use `pass_filenames: false` because mypy works best when given package/module names.
-        # However, for pre-commit, it's often simpler to let it run on all files.
-        # The `args` below point to your `pyproject.toml` for config.
-        # If you have files that Mypy shouldn't check (e.g., setup.py if not typed), exclude them.
-        args: [--config-file=pyproject.toml]
-        # You might need to add `additional_dependencies` if mypy needs specific stubs
-        # not automatically picked up, or if you use plugins.
-        # additional_dependencies: ['types-requests', 'pandas-stubs'] # Example
+        args: [
+            "--config-file=pyproject.toml",
+            "-m", "contextcraft",
+            "-m", "tests"
+          ]
+        pass_filenames: false
 
   # Bandit: Security linter for Python
   - repo: https://github.com/PyCQA/bandit

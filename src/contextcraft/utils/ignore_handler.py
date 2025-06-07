@@ -5,6 +5,7 @@ Handles parsing of .llmignore files and mathcing paths against ignore patterns.
 This module uses the pathspec library to provide functionality similar
 """
 
+from contextlib import suppress
 from pathlib import Path
 from typing import List, Optional, Set
 
@@ -19,8 +20,8 @@ LLMIGNORE_FILENAME = ".llmignore"
 # primarily for security and tool stability.
 
 CORE_SYSTEM_EXCLUSIONS: Set[str] = {
-    ".got",
-    ".env",
+    ".git",
+    # ".env",
 }
 
 
@@ -41,17 +42,59 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
     if llmignore_file.is_file():
         try:
             with llmignore_file.open("r", encoding="utf-8") as f:
-                patterns = f.read()
+                lines = f.read().splitlines()
 
-            if patterns.strip():  # Ensure there are actual patterns
-                # `pathspec.GitIgnoreSpec.from_lines` is an alias for `PathSpec.from_lines('gitwildmatch', lines)`
-                # It handles .gitignore-style syntax
+            processed_lines = []
+            for line_content in lines:  # Iterate with line number for potential debug
+                # 1. Remove potential BOM and leading/trailing whitespace from the whole line first
+                current_line = line_content.strip()
 
-                spec = pathspec.PathSpec.from_lines(pathspec.pattersn.GitWildMatchPattern, patterns.splitlines())
-                return spec
-            else:
-                console.print(f"[dim]Loaded {len(spec.patterns)} patterns from {llmignore_file}[/dim]")
+                # 2. Ignore empty lines or lines that are purely comments
+                if not current_line or current_line.startswith("#"):
+                    continue
+
+                # 3. Separate pattern from trailing comments
+                pattern_part = current_line
+                if "#" in current_line:
+                    # Ensure '#' is not part of a valid filename/pattern (e.g. escaped \#)
+                    # For simplicity, we assume '#' always starts a comment if not at the beginning.
+                    # A more robust parser would handle escaped '#'.
+                    # Find the first '#' that is likely a comment starter
+                    # comment_start_index = -1
+                    # Gitignore: A hash HASH `"#"` marks the beginning of a comment.
+                    # Put a backslash `"\#"` in front of the first hash if it is part of a pattern.
+                    # For now, we'll assume unescaped # is a comment.
+
+                    # Simplistic approach: split by "#" and take the first part
+                    # This might fail if "#" is a valid character in a filename and not escaped.
+                    # Git's behavior is nuanced here. For now, let's be pragmatic.
+                    parts = current_line.split("#", 1)
+                    pattern_part = parts[0].strip()  # Pattern is before the first #, then strip
+
+                    # If pattern_part becomes empty after removing comment, skip
+                    if not pattern_part:
+                        continue
+
+                # 4. Handle negation '!' specifically for stripping
+                if pattern_part.startswith("!"):
+                    # Preserve '!', strip the actual pattern content after '!'
+                    actual_pattern = pattern_part[1:].strip()
+                    if actual_pattern:  # Ensure pattern after '!' is not empty
+                        processed_lines.append("!" + actual_pattern)
+                elif pattern_part:  # Ensure non-negated pattern is not empty
+                    processed_lines.append(pattern_part)
+
+            if not processed_lines:
+                # console.print(f"[dim].llmignore file at {llmignore_file} contains no active patterns after processing.[/dim]")
                 return None
+
+            # console.print(f"[dim]PATTERNS TO PATHSPEC: {processed_lines}[/dim]") # DEBUG
+            spec = pathspec.PathSpec.from_lines(pathspec.patterns.GitWildMatchPattern, processed_lines)
+
+            if not spec.patterns:
+                # console.print(f"[dim].llmignore file at {llmignore_file} resulted in no patterns in spec.[/dim]")
+                return None
+            return spec
 
         except Exception as e:
             console.print(f"[yellow]Warning: Could not read or parse {llmignore_file}: {e}[/yellow]")
@@ -60,89 +103,82 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
 
 
 def is_path_ignored(
-    path_to_check: Path,  # The absolute path to check
-    root_dir: Path,  # The absolute root directory where .llmignore was found/applies
+    path_to_check: Path,
+    root_dir: Path,
     ignore_spec: Optional[pathspec.PathSpec],
-    cli_ignore_patterns: Optional[List[str]] = None,  # Additional patterns from CLI
-    # default_tool_exclusions: Optional[Set[str]] = None, # Tool-specific name exclusions
+    cli_ignore_patterns: Optional[List[str]] = None,
 ) -> bool:
-    """
-    Checks if a given path should be ignored based on various criteria.
+    path_to_check_abs = path_to_check.resolve()
+    root_dir_abs = root_dir.resolve()
 
-    Order of precedence for ignoring:
-    1. Core system exclusions (e.g., .git/).
-    2. Patterns from .llmignore file (matched relative to root_dir).
-    3. CLI-provided ignore patterns (matched as globs against the path name or relative path).
-    4. (Future: Tool-specific default name exclusions like __pycache__ if not covered by .llmignore)
+    # 1. Check against core system exclusions
+    for i, part_name in enumerate(path_to_check_abs.parts):
+        if part_name in CORE_SYSTEM_EXCLUSIONS:
+            excluded_base = Path(*path_to_check_abs.parts[: i + 1])
+            if path_to_check_abs == excluded_base or path_to_check_abs.is_relative_to(excluded_base):
+                return True
 
-    Args:
-        path_to_check: The absolute pathlib.Path object for the file or directory.
-        root_dir: The absolute root directory of the project/scan, used as base for relative paths.
-        ignore_spec: The pathspec.PathSpec object loaded from .llmignore.
-        cli_ignore_patterns: A list of additional patterns from CLI --ignore/--exclude flags.
-        # default_tool_exclusions: A set of names that tools like tree/flatten might exclude by default if not covered.
+    relative_path_for_spec: Optional[Path] = None
+    with suppress(ValueError):
+        relative_path_for_spec = path_to_check_abs.relative_to(root_dir_abs)
 
-    Returns:
-        True if the path should be ignored, False otherwise.
-    """
-    # Ensure paths are absolute for reliable comparison
-    path_to_check = path_to_check.resolve()
-    root_dir = root_dir.resolve()
+    # 2. Check against .llmignore patterns
+    if ignore_spec and relative_path_for_spec is not None:
+        # Path string without trailing slash for patterns like "name" (matching file or dir)
+        path_str_name_only = relative_path_for_spec.as_posix()
 
-    # 1. Check against core system exclusions (applied to any part of the path)
-    # This is a basic name check within the path parts.
-    # More robust would be to check if path_to_check is *within* a core excluded dir.
-    # E.g. if path_to_check is root_dir/.git/config
-    if any(part in CORE_SYSTEM_EXCLUSIONS for part in path_to_check.parts):
-        # Check if path_to_check is exactly a core system exclusion or inside one
-        for i, part_name in enumerate(path_to_check.parts):
-            if part_name in CORE_SYSTEM_EXCLUSIONS:
-                # Construct the path up to this excluded part
-                excluded_base = Path(*path_to_check.parts[: i + 1])
-                if path_to_check == excluded_base or path_to_check.is_relative_to(excluded_base):
-                    # console.print(f"[dim]Ignoring '{path_to_check}' due to core system exclusion '{part_name}'[/dim]")
-                    return True
+        # Path string with trailing slash for patterns like "name/" (matching dir explicitly)
+        path_str_as_dir = path_str_name_only
+        if path_to_check_abs.is_dir():
+            if str(relative_path_for_spec) == ".":  # Root directory itself
+                path_str_as_dir = "./"  # Note: pathspec matches "./" against "/" pattern.
+            elif not path_str_as_dir.endswith("/"):
+                path_str_as_dir += "/"
 
-    # Path relative to root_dir for matching against ignore_spec and some CLI patterns
-    try:
-        relative_path = path_to_check.relative_to(root_dir)
-    except ValueError:
-        # path_to_check is not under root_dir, shouldn't happen if called correctly
-        # For safety, if it's outside the root, we probably don't ignore it based on root_dir's spec
-        # unless it's a core system exclusion (already checked).
-        # Alternatively, one might choose to ignore such paths by default. For now, let it pass.
-        relative_path = None
+        # Debug print for clarity before matching attempts
+        print(f"    SpecCheck Input: Path='{path_to_check_abs.name}', IsDir={path_to_check_abs.is_dir()}, RelPathForSpec='{relative_path_for_spec}'")
+        print(f"    SpecCheck Attempt1 (as_dir if applicable): PathStr='{path_str_as_dir}', Match={ignore_spec.match_file(path_str_as_dir)}")
+        print(f"    SpecCheck Attempt2 (name_only if different): PathStr='{path_str_name_only}', Match={ignore_spec.match_file(path_str_name_only)}")
 
-    # 2. Check against .llmignore patterns (if spec exists and path is relative)
-    if ignore_spec and relative_path and ignore_spec.match_file(str(relative_path)):
-        # pathspec matches against paths relative to where the ignore file is (root_dir)
-        # It expects string paths.
-        console.print(f"[dim]Ignoring '{path_to_check}' due to .llmignore pattern matching '{relative_path}'[/dim]")
-        return True
+        # A. Check if a directory-specific pattern (e.g., "build/") matches the directory.
+        #    For this, we use the path_str_as_dir (e.g., "build/").
+        if path_to_check_abs.is_dir() and ignore_spec.match_file(path_str_as_dir):
+            print(f"    [MATCHED DIR AS DIR_PATTERN] SpecCheck: Path='{path_str_as_dir}', IsDir={path_to_check_abs.is_dir()}, Match=True")
+            return True
+
+        # B. Check if a name pattern (e.g., "some_name" which can be file or dir)
+        #    matches the path (file or directory name).
+        #    For this, we use path_str_name_only (e.g., "build" or "file.txt").
+        #    This also handles files correctly.
+        if ignore_spec.match_file(path_str_name_only):
+            print(f"    [MATCHED AS NAME_PATTERN] SpecCheck: Path='{path_str_name_only}', IsDir={path_to_check_abs.is_dir()}, Match=True")
+            return True
 
     # 3. Check against CLI-provided ignore patterns
-    # These are simple name or glob checks for now.
-    if cli_ignore_patterns and relative_path:  # Also check relative_path for globs
+    if cli_ignore_patterns:
+        filename = path_to_check_abs.name
         for pattern in cli_ignore_patterns:
-            if path_to_check.name == pattern:  # Exact name match
-                # console.print(f"[dim]Ignoring '{path_to_check.name}' due to CLI ignore pattern '{pattern}'[/dim]")
+            if filename == pattern:
                 return True
-            # Path.match() handles simple globs like '*.log' or 'build/*' against the filename or full path.
-            # For patterns like 'build/', we want to match if path_to_check.name is 'build' and is_dir,
-            # or if relative_path starts with 'build/'.
-            if pattern.endswith("/") and path_to_check.is_dir() and path_to_check.name == pattern[:-1]:
-                return True
-            if pattern.endswith("/") and relative_path and str(relative_path).startswith(pattern):
-                return True
-            if path_to_check.match(pattern):  # Check against absolute path (might be too broad)
-                # console.print(f"[dim]Ignoring '{path_to_check}' due to CLI glob match '{pattern}'[/dim]")
-                return True
-            if relative_path and Path(str(relative_path)).match(pattern):  # Check against relative path
-                # console.print(f"[dim]Ignoring '{relative_path}' due to CLI glob match '{pattern}'[/dim]")
-                return True
+            if Path(filename).match(pattern):
+                return True  # Simple glob on name
+            if relative_path_for_spec:
+                # More complex CLI patterns might need pathspec-like handling too
+                # For now, keep it simpler.
+                rel_path_str_cli = relative_path_for_spec.as_posix()
+                current_path_for_cli_match = Path(rel_path_str_cli)  # Path object for .match()
 
-    # 4. (Future placeholder for tool-specific default exclusions like __pycache__ if not handled by user's .llmignore)
-    # if default_tool_exclusions and path_to_check.name in default_tool_exclusions:
-    #     return True
+                if pattern.endswith("/") and path_to_check_abs.is_dir():
+                    # Ensure rel_path_str_cli for dir also ends with / for comparison
+                    path_to_match_cli_dir = rel_path_str_cli
+                    if not path_to_match_cli_dir.endswith("/"):
+                        path_to_match_cli_dir += "/"
+                    if path_to_match_cli_dir == pattern:
+                        return True
+                    # Match "build/" pattern against directory name "build"
+                    if current_path_for_cli_match.name + "/" == pattern:
+                        return True
 
+                if current_path_for_cli_match.match(pattern):
+                    return True
     return False
