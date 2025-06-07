@@ -12,6 +12,7 @@ readme = "README.md" # if you have one, or poetry will create a default
 python = "^3.9" # Or your chosen version
 typer = "^0.9.0" # Example version, poetry will pick latest
 rich = "^13.0.0"  # Example version
+pathspec = "^0.12.1"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.1.0" # Example version

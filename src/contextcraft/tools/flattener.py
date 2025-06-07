@@ -29,6 +29,8 @@ from typing import List, Optional, Set  # Type hints for clarity and static anal
 import typer  # For typer.Exit for controlled exits from logic functions.
 from rich.console import Console  # For styled and rich console output.
 
+from ..utils import ignore_handler
+
 # Initialize a Rich Console instance for any direct console output from this module.
 # This allows for consistent styling of messages (e.g., errors, warnings, success).
 console = Console()
@@ -38,7 +40,7 @@ console = Console()
 # This list aims to cover common development artifacts, version control systems,
 # virtual environments, and OS-specific metadata files.
 # This will be augmented by .llmignore patterns in the future.
-DEFAULT_EXCLUDED_ITEMS_GENERAL: Set[str] = {
+DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK: Set[str] = {
     # Version Control
     ".git",
     ".hg",
@@ -82,7 +84,7 @@ DEFAULT_EXCLUDED_ITEMS_GENERAL: Set[str] = {
 # Default file extensions to include if no specific include patterns are given by the user.
 # This list prioritizes common source code, markup, configuration, and text files.
 # The patterns are typically suffixes (e.g., ".py") but can be full filenames too.
-DEFAULT_INCLUDE_EXTENSIONS: List[str] = [
+DEFAULT_INCLUDE_PATTERNS: List[str] = [
     # Python
     ".py",
     ".pyw",
@@ -180,205 +182,172 @@ DEFAULT_INCLUDE_EXTENSIONS: List[str] = [
 ]
 
 
-def should_include_file(
+def _file_matches_include_criteria(
     file_path: Path,
-    include_patterns: Optional[List[str]],
-    exclude_patterns: Optional[List[str]],
-    default_general_exclusions: Set[str],
+    cli_include_patterns: Optional[List[str]],
 ) -> bool:
     """
-    Determines if a file should be included in the flattening process
-    based on include, exclude, and general exclusion criteria.
-
-    The logic is as follows:
-    1. If the file's name or its immediate parent directory's name matches any
-       entry in `default_general_exclusions`, it's excluded. (This is a basic check;
-       `os.walk` handles directory traversal exclusion more robustly).
-    2. If `exclude_patterns` are provided, and the file matches any of these
-       (either by direct name or glob pattern), it's excluded.
-    3. If `include_patterns` are provided by the user, the file *must* match one of them
-       (by extension, glob, or exact name).
-    4. If no `include_patterns` are user-provided, `DEFAULT_INCLUDE_EXTENSIONS` are used,
-       and the file *must* match one of these (typically by extension or exact name).
-    5. If a file passes all exclusion checks and matches the relevant include criteria,
-       it is included.
+    Determines if a file should be included based *only* on --include CLI patterns
+    or `DEFAULT_INCLUDE_PATTERNS` if no CLI patterns are given.
+    This function assumes all exclusion/ignore checks have already been performed.
 
     Args:
         file_path: The `pathlib.Path` object for the file being considered.
-        include_patterns: A list of user-provided glob patterns or extensions
-                          (e.g., "*.py", ".js"). If None or empty,
-                          `DEFAULT_INCLUDE_EXTENSIONS` is used.
-        exclude_patterns: A list of user-provided glob patterns or names to explicitly exclude.
-        default_general_exclusions: A set of general item names (files/dirs) to always
-                                    exclude as a baseline.
+        cli_include_patterns: A list of user-provided glob patterns, extensions, or filenames
+                              from the --include CLI option.
 
     Returns:
-        True if the file should be included for flattening, False otherwise.
+        True if the file matches the inclusion criteria, False otherwise.
     """
     file_name = file_path.name
     file_suffix_lower = file_path.suffix.lower()
 
-    # 1. Check against general default exclusions for the file itself or its parent directory.
-    # This is a secondary check; os.walk handles broader directory exclusions.
-    if file_name in default_general_exclusions or file_path.parent.name in default_general_exclusions:
-        # console.print(f"[dim]Skipping '{file_path}' due to general exclusion rule.[/dim]")
-        return False
+    # Determine effective include patterns: user's or defaults.
+    active_include_patterns = cli_include_patterns if cli_include_patterns else DEFAULT_INCLUDE_PATTERNS
 
-    # 2. Check against explicit user-defined exclude patterns.
-    # These take precedence.
-    if exclude_patterns:
-        for pattern in exclude_patterns:
-            if pattern.startswith("*.") and file_suffix_lower == pattern[1:].lower():  # Simple suffix glob like *.log
-                return False
-            elif file_path.match(pattern) or file_name == pattern:  # Path.match for globs, or exact name
-                # console.print(f"[dim]Excluding '{file_path}' due to exclude pattern: '{pattern}'[/dim]")
-                return False
+    if not active_include_patterns:  # If even defaults are empty (shouldn't be)
+        return True  # Or False, depending on desired behavior for "no include rules"
 
-    # 3. Determine effective include patterns.
-    # If user specified --include, use those. Otherwise, use defaults.
-    active_include_patterns = include_patterns if include_patterns else DEFAULT_INCLUDE_EXTENSIONS
+    for pattern in active_include_patterns:
+        if pattern.startswith("."):  # Primarily for matching extensions like ".py"
+            if file_suffix_lower == pattern.lower():
+                return True
+        elif pattern.startswith("*."):  # For matching glob extensions like "*.txt"
+            if file_suffix_lower == pattern[1:].lower():  # e.g. pattern is "*.txt", suffix is ".txt"
+                return True
+        # Path.match() is powerful for globs against the full path.
+        # To match globs against only the filename, construct a temporary Path object.
+        elif Path(file_name).match(pattern):  # For patterns like "file*.txt" against filename
+            return True
+        elif file_path.match(pattern):  # For patterns like "src/**/*.py" against full path relative to CWD or absolute
+            # This might need care if file_path is absolute and pattern is relative.
+            # For consistency, if pattern contains '/', assume it's meant for path matching.
+            # If not, assume it's for filename.
+            # Let's stick to simple Path(file_name).match for filename globs,
+            # and full file_path.match for path globs.
+            # This behavior of Path.match can be tricky.
+            # A more explicit glob library might be better if complex include globs are needed.
+            # For now, Path(file_name).match for simple file globs, and exact name match.
+            # Let's assume non-extension, non-*.ext patterns are exact names or simple filename globs.
+            pass  # Covered by Path(file_name).match(pattern) or exact name check
 
-    # 4. Check against include patterns.
-    # The file must match at least one include pattern if any are active.
-    if active_include_patterns:
-        matched_an_include_pattern = False
-        for pattern in active_include_patterns:
-            if pattern.startswith("."):  # Primarily for matching extensions like ".py"
-                if file_suffix_lower == pattern.lower():
-                    matched_an_include_pattern = True
-                    break
-            elif pattern.startswith("*."):  # For matching glob extensions like "*.txt"
-                if file_suffix_lower == pattern[1:].lower():
-                    matched_an_include_pattern = True
-                    break
-            elif file_path.match(pattern) or file_name == pattern:  # For more complex glob patterns like "src/**/*.py"
-                matched_an_include_pattern = True
-                break
+        if file_name == pattern:  # For exact filename matches like "Makefile"
+            return True
 
-        if not matched_an_include_pattern:
-            # console.print(f"[dim]Skipping '{file_path}' as it doesn't match include patterns.[/dim]")
-            return False  # File did not match any of the required include patterns.
+    # If pattern contains path separators, assume it's a path glob for the relative path
+    # (This part requires having the relative path available or careful use of absolute path matching)
+    # For simplicity, for now, we'll rely on Path(file_name).match for filename globs
+    # and exact name match for non-extension patterns. Full path globbing for includes
+    # via Path.match can be added if needed but makes the logic more complex here.
 
-    # If all checks passed, the file should be included.
-    return True
+    return False  # Did not match any include pattern.
 
 
 def flatten_code_logic(
     root_dir_path: Path,
     output_file_path: Optional[Path] = None,
-    include_patterns: Optional[List[str]] = None,
-    exclude_patterns: Optional[List[str]] = None,
+    include_patterns: Optional[List[str]] = None,  # CLI --include
+    exclude_patterns: Optional[List[str]] = None,  # CLI --exclude (acts as additional ignores)
 ) -> None:
     """
     Main logic function for flattening files within a directory into a single text output.
-
-    It traverses the `root_dir_path`, filters files based on include/exclude criteria,
-    reads their content, prepends a path header, and concatenates everything.
-    The result is either printed to the console or saved to `output_file_path`.
+    Integrates .llmignore handling.
 
     Args:
-        root_dir_path: The `pathlib.Path` object for the root directory from which to start flattening.
-        output_file_path: Optional `pathlib.Path` to save the flattened content.
-                          If None, the content is printed to the console.
-        include_patterns: Optional list of user-specified include patterns (extensions, globs, filenames).
-                          If None or empty, `DEFAULT_INCLUDE_EXTENSIONS` are used by `should_include_file`.
-        exclude_patterns: Optional list of user-specified exclude patterns (names, globs).
-                          These are evaluated by `should_include_file`.
-
-    Raises:
-        typer.Exit: If critical errors occur, such as the root directory not being valid
-                    or issues writing to the output file.
+        root_dir_path: The root directory from which to start flattening.
+        output_file_path: Optional path to save the flattened content. If None, prints to console.
+        include_patterns: List of patterns from CLI --include.
+        exclude_patterns: List of patterns from CLI --exclude, treated as additional ignore patterns.
     """
-    # Validate that the root directory exists and is indeed a directory.
     if not root_dir_path.is_dir():
         console.print(f"[bold red]Error: Root directory '{root_dir_path}' not found or is not a directory.[/bold red]")
         raise typer.Exit(code=1)
 
-    # Prepare the set of general exclusions for os.walk's directory pruning.
-    # This prevents traversal into directories like .git, node_modules, etc.
-    current_general_exclusions_for_walk = DEFAULT_EXCLUDED_ITEMS_GENERAL.copy()
+    # Load .llmignore patterns from the specified root_dir_path
+    llmignore_spec = ignore_handler.load_ignore_patterns(root_dir_path)
+    if llmignore_spec:
+        console.print(f"[dim]Using .llmignore patterns from '{root_dir_path / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
 
-    # If an output file is specified and it's within the root directory,
-    # ensure its name is added to the general exclusions to prevent it from being read.
-    # Note: `should_include_file` might also catch this, but `os.walk` pruning is more efficient.
+    # Prepare the final list of CLI-based ignore patterns, including the output file if necessary.
+    # These are passed to ignore_handler.is_path_ignored.
+    effective_cli_ignores = list(exclude_patterns) if exclude_patterns else []
     if output_file_path:
         abs_output_file = output_file_path.resolve()
         abs_root_dir = root_dir_path.resolve()
-        if abs_output_file.is_relative_to(abs_root_dir):
-            # Add the output file's name to prevent it from being processed if it's directly in a walked dir.
-            current_general_exclusions_for_walk.add(abs_output_file.name)
-            # If the output file is, e.g. `out/bundle.txt`, add `out` to dir exclusions for os.walk
-            # This ensures os.walk doesn't even enter the 'out' directory if output is there.
-            try:
-                output_parent_relative_to_root = abs_output_file.parent.relative_to(abs_root_dir)
-                if output_parent_relative_to_root.parts:  # Check if parent is not root itself
-                    first_part_of_output_path = output_parent_relative_to_root.parts[0]
-                    current_general_exclusions_for_walk.add(first_part_of_output_path)
-            except ValueError:  # output_file_path.parent is not under root_dir_path
-                pass
+        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in effective_cli_ignores:  # Avoid duplicates
+            effective_cli_ignores.append(abs_output_file.name)
+            # console.print(f"[dim]Output file '{abs_output_file.name}' will be dynamically ignored for this run.[/dim]")
 
-    flattened_content_parts: List[str] = []  # Stores parts of the final output string
+    flattened_content_parts: List[str] = []
     files_processed_count = 0
     files_skipped_binary_count = 0
 
     console.print(f"[dim]Starting flattening process in '{root_dir_path.resolve()}'...[/dim]")
 
-    # Traverse the directory tree using os.walk.
-    # topdown=True allows modification of `dirs` list to prune search.
     for current_subdir_str, dirs, files in os.walk(root_dir_path, topdown=True):
-        # Prune directories from traversal if their names are in general exclusions.
-        dirs[:] = [d_name for d_name in dirs if d_name not in current_general_exclusions_for_walk]
-
         current_subdir_path = Path(current_subdir_str)
 
-        # Process each file in the current directory.
-        for file_name in sorted(files):  # Sort files for deterministic output order
+        # Prune directories from os.walk traversal
+        # A directory is pruned if its absolute path is ignored by the ignore_handler
+        dirs_to_keep = []
+        for dir_name in dirs:
+            dir_path_abs = current_subdir_path / dir_name
+            if not ignore_handler.is_path_ignored(
+                path_to_check=dir_path_abs,
+                root_dir=root_dir_path,  # Base for .llmignore relative paths
+                ignore_spec=llmignore_spec,
+                cli_ignore_patterns=effective_cli_ignores,
+            ):
+                # Optional: Fallback check against simple names for walk pruning if desired
+                # if dir_name not in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
+                #     dirs_to_keep.append(dir_name)
+                dirs_to_keep.append(dir_name)  # Simpler: rely on comprehensive ignore_handler
+        dirs[:] = dirs_to_keep
+
+        for file_name in sorted(files):
             file_path = current_subdir_path / file_name
 
-            # Determine if the file should be included based on combined criteria.
-            if not should_include_file(
-                file_path,
-                include_patterns,
-                exclude_patterns,
-                DEFAULT_EXCLUDED_ITEMS_GENERAL,
+            # 1. Check if the file is ignored by .llmignore, CLI excludes, or core system rules
+            if ignore_handler.is_path_ignored(
+                path_to_check=file_path,
+                root_dir=root_dir_path,
+                ignore_spec=llmignore_spec,
+                cli_ignore_patterns=effective_cli_ignores,
             ):
-                continue  # Skip this file if it doesn't meet criteria.
+                continue  # File is ignored, skip to next file.
 
-            # Calculate the relative path for the file header.
+            # 2. If not ignored, check if it matches include criteria (CLI --include or defaults)
+            if not _file_matches_include_criteria(file_path, include_patterns):
+                continue  # File does not match inclusion criteria, skip.
+
+            # If we reach here, the file is not ignored AND matches include criteria.
+
             try:
                 relative_path_str = str(file_path.relative_to(root_dir_path))
-            except ValueError:  # Should not happen if os.walk starts from root_dir_path
+            except ValueError:
                 relative_path_str = str(file_path)
 
-            # Add a standardized header comment for the file.
             flattened_content_parts.append(f"\n\n# --- File: {relative_path_str} ---")
             try:
-                # Attempt to read the file as UTF-8, ignoring undecodable characters.
-                # This is a balance between getting content and avoiding crashes on
-                # files with minor encoding issues or embedded binary data.
                 with file_path.open(mode="r", encoding="utf-8", errors="ignore") as infile:
                     content = infile.read()
                     flattened_content_parts.append(content)
                 files_processed_count += 1
-            except UnicodeDecodeError:  # This catch is a fallback. errors='ignore' should handle most.
+            except UnicodeDecodeError:
                 warning_msg = f"Skipping binary or non-UTF-8 file: {file_path}"
                 console.print(f"[yellow]Warning: {warning_msg}[/yellow]")
                 flattened_content_parts.append(f"# --- {warning_msg} ---")
                 files_skipped_binary_count += 1
-            except Exception as e:  # Catch other potential IOErrors.
+            except Exception as e:
                 error_msg = f"Error reading file {file_path}: {e}"
                 console.print(f"[red]{error_msg}[/red]")
                 flattened_content_parts.append(f"# --- {error_msg} ---")
-                # Optionally, increment a 'files_errored_count' here.
 
-    # Join all collected parts into the final output string.
-    # Use strip to remove leading/trailing newlines that might result from the initial "\n\n".
     final_output_str = "\n".join(flattened_content_parts).strip()
 
-    # Output the result to a file or console.
     if output_file_path:
         try:
-            output_file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure parent dir exists
+            output_file_path.parent.mkdir(parents=True, exist_ok=True)
             with output_file_path.open(mode="w", encoding="utf-8") as outfile:
                 outfile.write(final_output_str)
             console.print(f"[green]Successfully flattened {files_processed_count} file(s) " f"to '{output_file_path.resolve()}'[/green]")
@@ -388,9 +357,6 @@ def flatten_code_logic(
             console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
             raise typer.Exit(code=1) from e
     else:
-        # Print to console. For very large outputs, Rich's print handles it well.
-        # If syntax highlighting were desired for a specific language, Rich's Syntax could be used here,
-        # but the combined output is multi-language, so plain print is appropriate.
         console.print(final_output_str)
         console.print(
             f"[blue]\n--- Flattened {files_processed_count} file(s). " f"Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s). ---[/blue]"

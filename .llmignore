@@ -1,0 +1,16 @@
+# .llmignore
+
+# Comments are ignored
+*.log
+build/
+temp.*
+
+# Ignore all pyc files
+*.pyc
+__pycache__/
+
+# But don't ignore this specific important log
+!important.log
+
+# Ignore all files in 'secrets' directory
+secrets/

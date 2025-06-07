@@ -8,29 +8,36 @@ and can output the tree to the console or a file.
 
 Core functionalities:
 - Recursive traversal of directories.
-- Filtering of items based on a predefined exclusion list and user-provided ignores.
+- Filtering of items based on .llmignore files, CLI arguments, core system
+  exclusions, and a default set of common development artifacts.
 - Generation of plain text tree for file output.
 - Generation of a Rich `Tree` object for styled console output.
 """
 
-from pathlib import Path  # Core library for object-oriented path manipulation.
-from typing import List, Optional, Set  # Type hints for clarity and static analysis.
+from pathlib import Path
+from typing import List, Optional, Set
 
-import typer  # Used for typer.Exit for controlled exits.
-from rich.console import Console  # For styled console output.
-from rich.tree import (
-    Tree as RichTree,  # Rich's specific Tree widget for console display.
-)
+import pathspec  # For type hinting the llmignore_spec
+import typer
+from rich.console import Console
+from rich.tree import Tree as RichTree
 
-# Initialize a Rich Console instance for any direct console output from this module.
+# Import the ignore handler utility
+from ..utils import ignore_handler  # Assuming utils is in the parent package
+
 console = Console()
 
-# A set of default directory and file names/patterns to exclude from the tree.
-# This list aims to cover common development artifacts, version control systems,
-# virtual environments, and OS-specific metadata files.
-# This will be augmented by .llmignore patterns in the future.
-DEFAULT_EXCLUDED_ITEMS: Set[str] = {
-    # Version Control
+# DEFAULT_EXCLUDED_ITEMS: This set can act as a fallback or for items
+# not typically in .llmignore but that this tool should generally skip
+# if no other rules apply. Its role is reduced now that .llmignore is primary.
+# It's checked if ignore_handler.is_path_ignored returns False and no specific
+# llmignore file was found. Consider removing or significantly reducing this list
+# if .llmignore + CORE_SYSTEM_EXCLUSIONS in ignore_handler is sufficient.
+DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC: Set[str] = {
+    # Items that might be specific to tree generation context,
+    # e.g., the output file name if not handled by other means.
+    # For now, let's keep the original list and see how it plays out.
+    # Version Control (already in ignore_handler.CORE_SYSTEM_EXCLUSIONS but good for direct name check)
     ".git",
     ".hg",
     ".svn",
@@ -50,8 +57,8 @@ DEFAULT_EXCLUDED_ITEMS: Set[str] = {
     "*.egg-info",
     # Node.js specific
     "node_modules",
-    "package-lock.json",  # Often very large, may not be needed for tree
-    "yarn.lock",  # Same as above
+    "package-lock.json",
+    "yarn.lock",
     # IDE specific
     ".vscode",
     ".idea",
@@ -59,104 +66,98 @@ DEFAULT_EXCLUDED_ITEMS: Set[str] = {
     # Build artifacts & Distribution
     "dist",
     "build",
-    "target",  # Common in Java/Rust
+    "target",
     "out",
     # OS specific
-    ".DS_Store",  # macOS
-    "Thumbs.db",  # Windows
-    # Logs and temp files
-    "*.log",
-    "*.tmp",
-    "*.swp",  # Vim swap files
-    "project_tree.txt",
+    ".DS_Store",
+    "Thumbs.db",
+    # Logs and temp files (better handled by .llmignore or CLI)
+    # "*.log", "*.tmp", "*.swp", # Commenting out, as .llmignore is better for patterns
+    # "project_tree.txt", # This should be handled dynamically if it's the output file
 }
+
+
+def _should_skip_this_item_name_fallback(item_name: str, fallback_exclusions: Set[str]) -> bool:
+    """
+    Fallback check against a simple set of names/basic patterns.
+    Used if .llmignore spec doesn't exist or doesn't cover everything.
+    """
+    if item_name in fallback_exclusions:
+        return True
+    return any(pattern.startswith("*.") and item_name.endswith(pattern[1:]) for pattern in fallback_exclusions)
 
 
 def _generate_tree_lines_recursive(
     current_dir: Path,
+    root_dir_for_ignores: Path,
+    llmignore_spec: Optional[pathspec.PathSpec],
+    cli_ignores: Optional[List[str]],
+    tool_specific_fallback_exclusions: Set[str],
     parent_prefix: str = "",
-    excluded_items: Optional[Set[str]] = None,
     is_root: bool = True,
 ) -> List[str]:
     """
     Recursively generates plain text directory tree lines for file output.
-
-    This function walks the directory structure from `current_dir` and creates
-    a list of strings, each representing a line in the traditional 'tree' command output.
-    It uses simple prefix characters (│, ├──, └──) to denote structure.
+    Now integrates with the ignore_handler.
 
     Args:
-        current_dir: The pathlib.Path object for the directory currently being processed.
-        parent_prefix: The string prefix (indentation and connectors) inherited from the parent level.
-        excluded_items: A set of item names (files/directories) to exclude.
-                         If None, `DEFAULT_EXCLUDED_ITEMS` is used.
-        is_root: Boolean flag indicating if the current_dir is the root of the tree traversal.
-                 This is used to correctly print the root directory's name.
+        current_dir: The directory currently being processed.
+        root_dir_for_ignores: The main root directory of the command, base for .llmignore.
+        llmignore_spec: Parsed .llmignore specification.
+        cli_ignores: List of ignore patterns from CLI arguments.
+        tool_specific_fallback_exclusions: Fallback set of names to ignore.
+        parent_prefix: Indentation and connectors from the parent.
+        is_root: True if this is the initial call for the root directory.
 
     Returns:
-        A list of strings, where each string is a line of the generated tree.
-
-    Raises:
-        Does not explicitly raise exceptions but relies on `Path.iterdir()` which can
-        raise `PermissionError` or `FileNotFoundError` if issues occur during iteration.
-        These are expected to be caught by the caller.
+        A list of strings representing the tree lines.
     """
-    # Ensure excluded_items is initialized if not provided
-    if excluded_items is None:
-        # Use a copy to avoid modifying the global default set if this function
-        # were to alter it (though it currently doesn't).
-        excluded_items = DEFAULT_EXCLUDED_ITEMS.copy()
-
     lines: List[str] = []
 
-    # Add the current directory's name as the first line if it's the root of this sub-tree call.
     if is_root:
         lines.append(f"{current_dir.name}/")
 
     try:
-        # Retrieve children, filter out excluded items, and sort them.
-        # Sorting key: directories first, then files, then alphabetically (case-insensitive).
-        children = sorted(
-            [
-                child
-                for child in current_dir.iterdir()  # Iterate over items in the current directory
-                if child.name not in excluded_items  # Apply exclusion filter
-            ],
-            key=lambda x: (x.is_file(), x.name.lower()),
-        )
+        children_to_process: List[Path] = []
+        for child_path in current_dir.iterdir():
+            # Primary check using the comprehensive ignore_handler
+            if not ignore_handler.is_path_ignored(
+                path_to_check=child_path,
+                root_dir=root_dir_for_ignores,
+                ignore_spec=llmignore_spec,
+                cli_ignore_patterns=cli_ignores,
+            ) and not (llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions)):
+                # Fallback check if no llmignore_spec or if it's a very specific tool need
+                children_to_process.append(child_path)
+
+        sorted_children = sorted(children_to_process, key=lambda x: (x.is_file(), x.name.lower()))
+
     except PermissionError:
-        # If access to the directory is denied, add a note and return.
-        # The formatting [dim italic] is Rich console markup, which will be plain text in the file.
         lines.append(f"{parent_prefix}└── [dim italic](Permission Denied for {current_dir.name}/)[/dim italic]")
         return lines
     except FileNotFoundError:
-        # If the directory itself is not found (e.g., deleted during traversal), note it.
         lines.append(f"{parent_prefix}└── [dim italic](Directory not found: {current_dir.name}/)[/dim italic]")
         return lines
 
-    # Iterate over the sorted and filtered children to build the tree lines.
-    for i, child in enumerate(children):
-        # Determine the connector prefix based on whether this is the last item in the list.
-        connector = "└── " if i == len(children) - 1 else "├── "
-        line_prefix_for_child = parent_prefix + connector  # Prefix for the child's line
+    for i, child in enumerate(sorted_children):
+        connector = "└── " if i == len(sorted_children) - 1 else "├── "
+        line_prefix_for_child = parent_prefix + connector
 
         if child.is_dir():
-            lines.append(f"{line_prefix_for_child}{child.name}/")  # Append directory name with a slash
-            # Prepare the prefix for items *inside* this child directory.
-            # If current child is the last one (└──), its children don't need the vertical bar │.
-            # Otherwise (├──), its children do need the vertical bar.
+            lines.append(f"{line_prefix_for_child}{child.name}/")
             child_contents_prefix_extension = "    " if connector == "└── " else "│   "
-            # Recursively call for the subdirectory.
             lines.extend(
                 _generate_tree_lines_recursive(
-                    child,  # The subdirectory to process
-                    parent_prefix + child_contents_prefix_extension,  # New prefix for its children
-                    excluded_items,  # Pass along the exclusion set
-                    is_root=False,  # Subsequent calls are not for the overall root
+                    current_dir=child,
+                    root_dir_for_ignores=root_dir_for_ignores,
+                    llmignore_spec=llmignore_spec,
+                    cli_ignores=cli_ignores,
+                    tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
+                    parent_prefix=parent_prefix + child_contents_prefix_extension,
+                    is_root=False,
                 )
             )
         else:
-            # If it's a file, just append its name with the current prefix.
             lines.append(f"{line_prefix_for_child}{child.name}")
     return lines
 
@@ -164,131 +165,115 @@ def _generate_tree_lines_recursive(
 def _add_nodes_to_rich_tree_recursive(
     rich_tree_node: RichTree,
     current_path_obj: Path,
-    excluded_items: Optional[Set[str]] = None,
+    # --- New parameters for ignore handling ---
+    root_dir_for_ignores: Path,
+    llmignore_spec: Optional[pathspec.PathSpec],
+    cli_ignores: Optional[List[str]],
+    tool_specific_fallback_exclusions: Set[str],
 ):
     """
-    Recursively adds nodes to a Rich.Tree object for styled console display.
-
-    This function populates a given Rich `Tree` node with children from the
-    `current_path_obj`. It uses emojis and styling for a more visually appealing
-    console output.
-
-    Args:
-        rich_tree_node: The parent Rich.Tree node to which children will be added.
-        current_path_obj: The pathlib.Path object for the directory whose contents are being added.
-        excluded_items: A set of item names to exclude. If None, `DEFAULT_EXCLUDED_ITEMS` is used.
-
-    Raises:
-        Relies on `Path.iterdir()` which can raise `PermissionError` or `FileNotFoundError`.
-        These are handled by adding a note to the RichTree.
+    Recursively adds nodes to a Rich.Tree object for console display.
+    Now integrates with the ignore_handler.
     """
-    if excluded_items is None:
-        excluded_items = DEFAULT_EXCLUDED_ITEMS.copy()
-
     try:
-        # Retrieve children, filter, and sort as in the text-based generator.
-        children = sorted(
-            [child for child in current_path_obj.iterdir() if child.name not in excluded_items],
-            key=lambda x: (x.is_file(), x.name.lower()),
-        )
+        children_to_process: List[Path] = []
+        for child_path in current_path_obj.iterdir():
+            if not ignore_handler.is_path_ignored(
+                path_to_check=child_path,
+                root_dir=root_dir_for_ignores,
+                ignore_spec=llmignore_spec,
+                cli_ignore_patterns=cli_ignores,
+            ) and not (llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions)):
+                children_to_process.append(child_path)
+
+        sorted_children = sorted(children_to_process, key=lambda x: (x.is_file(), x.name.lower()))
+
     except PermissionError:
         rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")
         return
-    except FileNotFoundError:  # Should be less likely if root_dir check passed
+    except FileNotFoundError:
         rich_tree_node.add(f"[dim italic](Directory {current_path_obj.name} not found)[/dim italic]")
         return
 
-    # Add each child to the RichTree.
-    for child in children:
+    for child in sorted_children:
         if child.is_dir():
-            # Create a new branch (sub-tree) for directories.
-            # Use a folder emoji and make the name a clickable link (in supporting terminals).
             branch = rich_tree_node.add(
                 f":file_folder: [link file://{child.resolve()}]{child.name}",
-                guide_style="blue",  # Style for the guide lines of this branch
+                guide_style="blue",
             )
-            # Recursively populate this new branch.
-            _add_nodes_to_rich_tree_recursive(branch, child, excluded_items)
+            _add_nodes_to_rich_tree_recursive(
+                rich_tree_node=branch,
+                current_path_obj=child,
+                root_dir_for_ignores=root_dir_for_ignores,  # Pass through
+                llmignore_spec=llmignore_spec,  # Pass through
+                cli_ignores=cli_ignores,  # Pass through
+                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,  # Pass through
+            )
         else:
-            # Add files as leaf nodes with a page emoji.
             rich_tree_node.add(f":page_facing_up: {child.name}")
 
 
 def generate_and_output_tree(
     root_dir: Path,
     output_file_path: Optional[Path] = None,
-    ignore_list: Optional[List[str]] = None,
+    ignore_list: Optional[List[str]] = None,  # This is from CLI --ignore
 ):
     """
     Main logic function for generating and outputting the directory tree.
-
-    This function is typically called by a Typer command. It orchestrates
-    the tree generation process, deciding whether to output to a file (plain text)
-    or to the console (using Rich Tree). It also handles the initial setup of
-    excluded items, including the special case of not listing the output file itself.
-
-    Args:
-        root_dir: The root directory (as a pathlib.Path object) from which to generate the tree.
-        output_file_path: Optional path to a file where the tree should be saved.
-                          If None, the tree is printed to the console.
-        ignore_list: An optional list of additional item names (strings) to exclude.
-                     These are combined with `DEFAULT_EXCLUDED_ITEMS`.
-
-    Raises:
-        typer.Exit: If critical errors occur, such as inability to write to the output file
-                    or if the root directory is invalid (though Typer often catches this first).
+    Integrates .llmignore handling.
     """
-    # Initial validation of root_dir (Typer usually handles this with `exists=True`, etc.,
-    # but this provides a fallback or can be used if called directly).
     if not root_dir.is_dir():
         console.print(f"[bold red]Error: Root directory '{root_dir}' not found or is not a directory.[/bold red]")
         raise typer.Exit(code=1)
 
-    # Prepare the set of all items to be excluded.
-    current_excluded_set = DEFAULT_EXCLUDED_ITEMS.copy()
-    if ignore_list:
-        current_excluded_set.update(ignore_list)
-        # Future enhancement: This is where .llmignore patterns would be processed and added.
+    # Load .llmignore patterns from the specified root_dir
+    llmignore_spec = ignore_handler.load_ignore_patterns(root_dir)
+    if llmignore_spec:
+        console.print(f"[dim]Using .llmignore patterns from '{root_dir / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
 
-    # If outputting to a file, and that file is within the traversed directory,
-    # ensure the output file itself is not listed in the tree.
+    # Prepare the final set of CLI ignores, including the output file if necessary
+    effective_cli_ignores = list(ignore_list) if ignore_list else []
     if output_file_path:
-        # Resolve paths to absolute to ensure correct comparison with `is_relative_to`.
         abs_output_file = output_file_path.resolve()
-        abs_root_dir = root_dir.resolve()
-        # Check if the output file is inside the root directory (or its subdirectories)
-        # and if its name isn't already in the exclusion set.
-        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in current_excluded_set:
-            # console.print(f"[dim]Note: Excluding output file '{abs_output_file.name}' from tree view.[/dim]")
-            current_excluded_set.add(abs_output_file.name)
+        if abs_output_file.is_relative_to(root_dir.resolve()) and abs_output_file.name not in effective_cli_ignores:
+            # Add output file name to CLI ignores for this run to prevent it from appearing in its own tree
+            effective_cli_ignores.append(abs_output_file.name)
+            console.print(f"[dim]Output file '{abs_output_file.name}' will be dynamically ignored for this run.[/dim]")
 
-    # --- Output Generation ---
+    # Use the tool-specific fallback exclusions
+    # These are less critical if .llmignore is comprehensive.
+    current_tool_specific_exclusions = DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy()
+
     if output_file_path:
-        # Generate plain text lines for file output using the recursive helper.
         tree_lines = _generate_tree_lines_recursive(
-            root_dir,
-            excluded_items=current_excluded_set,
-            is_root=True,  # Initial call is for the root
+            current_dir=root_dir,
+            root_dir_for_ignores=root_dir,
+            llmignore_spec=llmignore_spec,
+            cli_ignores=effective_cli_ignores,
+            tool_specific_fallback_exclusions=current_tool_specific_exclusions,
+            parent_prefix="",
+            is_root=True,
         )
         try:
-            # Write the generated lines to the specified output file.
+            output_file_path.parent.mkdir(parents=True, exist_ok=True)
             with output_file_path.open(mode="w", encoding="utf-8") as f:
                 f.write("\n".join(tree_lines))
             console.print(f"Directory tree saved to [cyan]{output_file_path.resolve()}[/cyan]")
         except OSError as e:
-            # Handle potential errors during file writing.
             console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
             raise typer.Exit(code=1) from e
     else:
-        # Generate and print a RichTree for console output.
-        # Define the label for the root node of the RichTree.
         rich_tree_root_label = f":file_folder: [link file://{root_dir.resolve()}]{root_dir.name}"
-        # Create the main RichTree object.
         rich_tree_root = RichTree(
             rich_tree_root_label,
-            guide_style="bold bright_blue",  # Style for the connecting guide lines
+            guide_style="bold bright_blue",
         )
-        # Recursively populate the RichTree starting from the root directory.
-        _add_nodes_to_rich_tree_recursive(rich_tree_root, root_dir, current_excluded_set)
-        # Print the fully constructed RichTree to the console.
+        _add_nodes_to_rich_tree_recursive(
+            rich_tree_node=rich_tree_root,
+            current_path_obj=root_dir,
+            root_dir_for_ignores=root_dir,
+            llmignore_spec=llmignore_spec,
+            cli_ignores=effective_cli_ignores,
+            tool_specific_fallback_exclusions=current_tool_specific_exclusions,
+        )
         console.print(rich_tree_root)
