@@ -1,0 +1,5 @@
+test_tree_fallback_exclusions_0/
+├── __pycache__/
+│   └── cache.pyc
+├── keeper.py
+└── main.py

@@ -14,8 +14,9 @@ Core functionalities:
 - Generation of a Rich `Tree` object for styled console output.
 """
 
+from contextlib import suppress
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 import pathspec  # For type hinting the llmignore_spec
 import typer
@@ -87,6 +88,37 @@ def _should_skip_this_item_name_fallback(item_name: str, fallback_exclusions: Se
     return any(pattern.startswith("*.") and item_name.endswith(pattern[1:]) for pattern in fallback_exclusions)
 
 
+def _should_show_path(
+    path: Path,
+    root_dir_for_ignores: Path,
+    llmignore_spec: Optional[pathspec.PathSpec],
+    cli_ignores: Optional[List[str]],
+    tool_specific_fallback_exclusions: Set[str],
+) -> bool:
+    """
+    Determine if a path should be shown in the tree.
+    """
+    path_to_check_abs = path.resolve()
+    root_dir_abs = root_dir_for_ignores.resolve()
+    relative_path_for_spec = None
+    with suppress(Exception):
+        relative_path_for_spec = path_to_check_abs.relative_to(root_dir_abs)
+
+    if llmignore_spec and relative_path_for_spec is not None:
+        path_str = relative_path_for_spec.as_posix()
+        if path.is_dir() and not path_str.endswith("/"):
+            path_str += "/"
+        # pathspec: last matching pattern wins (negation or not)
+        is_ignored = llmignore_spec.match_file(path_str)
+        return not is_ignored
+
+    # Fallback: use ignore_handler for CLI and fallback exclusions
+    is_ignored = ignore_handler.is_path_ignored(path, root_dir_for_ignores, llmignore_spec, cli_ignores)
+    if not is_ignored and llmignore_spec is None and _should_skip_this_item_name_fallback(path.name, tool_specific_fallback_exclusions):
+        is_ignored = True
+    return not is_ignored
+
+
 def _generate_tree_lines_recursive(
     current_dir: Path,
     root_dir_for_ignores: Path,
@@ -113,9 +145,9 @@ def _generate_tree_lines_recursive(
     displayable_children: List[Path] = []
     child_to_displayed_lines: dict = {}
     for child_path in all_children_sorted:
-        is_displayed = not ignore_handler.is_path_ignored(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores)
-        if is_displayed and llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions):
-            is_displayed = False
+        # Check if the path itself should be shown
+        is_displayed = _should_show_path(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions)
+
         # Always recurse into directories to check for unignored children
         generated_child_lines = []
         if child_path.is_dir():
@@ -128,8 +160,13 @@ def _generate_tree_lines_recursive(
                 parent_prefix="",
                 is_root_call_for_display=False,
             )
-        child_to_displayed_lines[child_path] = (is_displayed, generated_child_lines)
-        if is_displayed or (child_path.is_dir() and generated_child_lines):
+
+        # A directory should be shown if either:
+        # 1. It's not ignored itself, or
+        # 2. It has unignored children (even if the dir itself is ignored)
+        should_display = is_displayed or (child_path.is_dir() and generated_child_lines)
+        child_to_displayed_lines[child_path] = (should_display, generated_child_lines)
+        if should_display:
             displayable_children.append(child_path)
 
     num_displayable = len(displayable_children)
@@ -146,15 +183,6 @@ def _generate_tree_lines_recursive(
                 child_prefix = "    " if connector == "└── " else "│   "
                 for child_line in generated_child_lines:
                     lines.append(parent_prefix + child_prefix + child_line)
-        elif child_path.is_dir() and generated_child_lines:
-            # Directory is ignored but has visible children: show the directory and its children
-            displayed_count += 1
-            connector = "└── " if displayed_count == num_displayable else "├── "
-            line_prefix = parent_prefix + connector
-            lines.append(f"{line_prefix}{child_path.name}/")
-            child_prefix = "    " if connector == "└── " else "│   "
-            for child_line in generated_child_lines:
-                lines.append(parent_prefix + child_prefix + child_line)
 
     return lines
 
@@ -162,29 +190,17 @@ def _generate_tree_lines_recursive(
 def _add_nodes_to_rich_tree_recursive(
     rich_tree_node: RichTree,
     current_path_obj: Path,
-    # --- New parameters for ignore handling ---
     root_dir_for_ignores: Path,
     llmignore_spec: Optional[pathspec.PathSpec],
     cli_ignores: Optional[List[str]],
     tool_specific_fallback_exclusions: Set[str],
 ):
     """
-    Recursively adds nodes to a Rich.Tree object for console display.
-    Now integrates with the ignore_handler.
+    Recursively adds nodes to a Rich.Tree object for styled console display.
+    Integrates with the ignore_handler and handles negations correctly.
     """
     try:
-        children_to_process: List[Path] = []
-        for child_path in current_path_obj.iterdir():
-            if not ignore_handler.is_path_ignored(
-                path_to_check=child_path,
-                root_dir=root_dir_for_ignores,
-                ignore_spec=llmignore_spec,
-                cli_ignore_patterns=cli_ignores,
-            ) and not (llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions)):
-                children_to_process.append(child_path)
-
-        sorted_children = sorted(children_to_process, key=lambda x: (x.is_file(), x.name.lower()))
-
+        all_children_sorted = sorted(current_path_obj.iterdir(), key=lambda x: (x.is_file(), x.name.lower()))
     except PermissionError:
         rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")
         return
@@ -192,22 +208,54 @@ def _add_nodes_to_rich_tree_recursive(
         rich_tree_node.add(f"[dim italic](Directory {current_path_obj.name} not found)[/dim italic]")
         return
 
-    for child in sorted_children:
-        if child.is_dir():
-            branch = rich_tree_node.add(
-                f":file_folder: [link file://{child.resolve()}]{child.name}",
-                guide_style="blue",
+    # First pass: determine which children are displayable and collect results of recursion for dirs
+    child_processing_results: Dict[Path, Dict[str, Any]] = {}
+
+    for child_path in all_children_sorted:
+        # Check if the path itself should be shown
+        is_child_itself_displayable = _should_show_path(
+            child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions
+        )
+
+        # For directories, check if they have any displayable descendants
+        has_displayable_descendants = False
+        if child_path.is_dir():
+            temp_dummy_branch = RichTree("dummy")
+            _add_nodes_to_rich_tree_recursive(
+                rich_tree_node=temp_dummy_branch,
+                current_path_obj=child_path,
+                root_dir_for_ignores=root_dir_for_ignores,
+                llmignore_spec=llmignore_spec,
+                cli_ignores=cli_ignores,
+                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
             )
+            has_displayable_descendants = bool(temp_dummy_branch.children)
+
+        # A directory should be shown if either:
+        # 1. It's not ignored itself, or
+        # 2. It has unignored children (even if the dir itself is ignored)
+        should_display = is_child_itself_displayable or (child_path.is_dir() and has_displayable_descendants)
+        child_processing_results[child_path] = {"is_displayable": should_display, "has_descendants": has_displayable_descendants}
+
+    # Second pass: Add nodes to the tree
+    displayable_children = [p for p in all_children_sorted if child_processing_results[p]["is_displayable"]]
+    for i, child_path in enumerate(displayable_children):
+        is_last = i == len(displayable_children) - 1
+        if child_path.is_dir():
+            # Use consistent tree characters
+            branch_label = f"{'└── ' if is_last else '├── '}📁 {child_path.name}"
+            branch = rich_tree_node.add(branch_label, guide_style="blue")
             _add_nodes_to_rich_tree_recursive(
                 rich_tree_node=branch,
-                current_path_obj=child,
-                root_dir_for_ignores=root_dir_for_ignores,  # Pass through
-                llmignore_spec=llmignore_spec,  # Pass through
-                cli_ignores=cli_ignores,  # Pass through
-                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,  # Pass through
+                current_path_obj=child_path,
+                root_dir_for_ignores=root_dir_for_ignores,
+                llmignore_spec=llmignore_spec,
+                cli_ignores=cli_ignores,
+                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
             )
         else:
-            rich_tree_node.add(f":page_facing_up: {child.name}")
+            file_label = f"{'└── ' if is_last else '├── '}📄 {child_path.name}"
+            rich_tree_node.add(file_label)
 
 
 def generate_and_output_tree(
