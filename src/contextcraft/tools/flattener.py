@@ -22,6 +22,7 @@ Core functionalities:
 - Outputting the combined content to the console or a specified file, ensuring
   UTF-8 encoding for the output.
 """
+
 import os  # Used for os.walk to traverse directory structures.
 from pathlib import Path  # Core library for object-oriented path manipulation.
 from typing import List, Optional, Set  # Type hints for clarity and static analysis.
@@ -202,45 +203,28 @@ def _file_matches_include_criteria(
     file_name = file_path.name
     file_suffix_lower = file_path.suffix.lower()
 
-    # Determine effective include patterns: user's or defaults.
-    active_include_patterns = cli_include_patterns if cli_include_patterns else DEFAULT_INCLUDE_PATTERNS
+    active_patterns = cli_include_patterns if cli_include_patterns else DEFAULT_INCLUDE_PATTERNS
 
-    if not active_include_patterns:  # If even defaults are empty (shouldn't be)
-        return True  # Or False, depending on desired behavior for "no include rules"
+    if not active_patterns:  # Should ideally not happen if DEFAULT_INCLUDE_PATTERNS is populated
+        return True  # Default to include if no include rules are active at all
 
-    for pattern in active_include_patterns:
-        if pattern.startswith("."):  # Primarily for matching extensions like ".py"
+    for pattern in active_patterns:
+        if pattern.startswith("."):  # Match by extension (e.g., ".py")
             if file_suffix_lower == pattern.lower():
                 return True
-        elif pattern.startswith("*."):  # For matching glob extensions like "*.txt"
-            if file_suffix_lower == pattern[1:].lower():  # e.g. pattern is "*.txt", suffix is ".txt"
+        elif pattern.startswith("*."):  # Match by glob extension (e.g., "*.txt")
+            if file_suffix_lower == pattern[1:].lower():
                 return True
-        # Path.match() is powerful for globs against the full path.
-        # To match globs against only the filename, construct a temporary Path object.
-        elif Path(file_name).match(pattern):  # For patterns like "file*.txt" against filename
+        # For non-extension patterns, treat as exact filename or simple filename glob
+        elif Path(file_name).match(pattern):  # Handles exact name and simple globs like "file*.txt", "Makefile"
             return True
-        elif file_path.match(pattern):  # For patterns like "src/**/*.py" against full path relative to CWD or absolute
-            # This might need care if file_path is absolute and pattern is relative.
-            # For consistency, if pattern contains '/', assume it's meant for path matching.
-            # If not, assume it's for filename.
-            # Let's stick to simple Path(file_name).match for filename globs,
-            # and full file_path.match for path globs.
-            # This behavior of Path.match can be tricky.
-            # A more explicit glob library might be better if complex include globs are needed.
-            # For now, Path(file_name).match for simple file globs, and exact name match.
-            # Let's assume non-extension, non-*.ext patterns are exact names or simple filename globs.
-            pass  # Covered by Path(file_name).match(pattern) or exact name check
+        # Note: Complex path-based include globs (e.g., "src/**/*.py") are not explicitly handled
+        # by this helper. If needed, the main loop would have to pass relative_path_to_root
+        # and this helper would need another argument, or Path.match would be used on an
+        # absolute file_path carefully if patterns are also absolute or resolvable.
+        # For now, include patterns are mostly for extensions and filenames/filename_globs.
 
-        if file_name == pattern:  # For exact filename matches like "Makefile"
-            return True
-
-    # If pattern contains path separators, assume it's a path glob for the relative path
-    # (This part requires having the relative path available or careful use of absolute path matching)
-    # For simplicity, for now, we'll rely on Path(file_name).match for filename globs
-    # and exact name match for non-extension patterns. Full path globbing for includes
-    # via Path.match can be added if needed but makes the logic more complex here.
-
-    return False  # Did not match any include pattern.
+    return False
 
 
 def flatten_code_logic(
@@ -287,21 +271,34 @@ def flatten_code_logic(
     for current_subdir_str, dirs, files in os.walk(root_dir_path, topdown=True):
         current_subdir_path = Path(current_subdir_str)
 
-        # Prune directories from os.walk traversal
-        # A directory is pruned if its absolute path is ignored by the ignore_handler
+        # --- Fix 1: Directory pruning with negation patterns ---
+        # If .llmignore has any negation patterns, do not prune any directories
+        has_negation = False
+        if llmignore_spec:
+            # Check if any pattern in the .llmignore spec is a negation
+            for pat in getattr(llmignore_spec, "patterns", []):
+                if getattr(pat, "include", False):
+                    has_negation = True
+                    break
         dirs_to_keep = []
         for dir_name in dirs:
             dir_path_abs = current_subdir_path / dir_name
-            if not ignore_handler.is_path_ignored(
-                path_to_check=dir_path_abs,
-                root_dir=root_dir_path,  # Base for .llmignore relative paths
-                ignore_spec=llmignore_spec,
-                cli_ignore_patterns=effective_cli_ignores,
-            ):
-                # Optional: Fallback check against simple names for walk pruning if desired
-                # if dir_name not in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
-                #     dirs_to_keep.append(dir_name)
-                dirs_to_keep.append(dir_name)  # Simpler: rely on comprehensive ignore_handler
+            # Only prune if there are no negation patterns
+            if not has_negation:
+                # Primary prune via ignore_handler (checks CORE, .llmignore, CLI excludes)
+                if ignore_handler.is_path_ignored(
+                    path_to_check=dir_path_abs,
+                    root_dir=root_dir_path,  # Base for .llmignore relative paths
+                    ignore_spec=llmignore_spec,
+                    cli_ignore_patterns=effective_cli_ignores,
+                ):
+                    continue  # Prune this directory
+
+                # Fallback: if no .llmignore, apply general default name-based exclusions for walk
+                if not llmignore_spec and dir_name in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
+                    continue  # Prune this directory
+            # If has_negation, never prune any directory
+            dirs_to_keep.append(dir_name)
         dirs[:] = dirs_to_keep
 
         for file_name in sorted(files):
@@ -314,32 +311,46 @@ def flatten_code_logic(
                 ignore_spec=llmignore_spec,
                 cli_ignore_patterns=effective_cli_ignores,
             ):
-                continue  # File is ignored, skip to next file.
+                continue
 
-            # 2. If not ignored, check if it matches include criteria (CLI --include or defaults)
+            # --- Fix 3: Fallback exclusion for files (exact and glob) ---
+            if not llmignore_spec:
+                is_match_in_fallback = False
+                for fallback_pattern in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
+                    if file_name == fallback_pattern or Path(file_name).match(fallback_pattern):
+                        is_match_in_fallback = True
+                        break
+                if is_match_in_fallback:
+                    continue
+
             if not _file_matches_include_criteria(file_path, include_patterns):
-                continue  # File does not match inclusion criteria, skip.
-
-            # If we reach here, the file is not ignored AND matches include criteria.
+                continue
 
             try:
-                relative_path_str = str(file_path.relative_to(root_dir_path))
+                relative_path_str = str(file_path.relative_to(root_dir_path).as_posix())  # Use as_posix for consistent /
             except ValueError:
-                relative_path_str = str(file_path)
+                relative_path_str = str(file_path.as_posix())
 
-            flattened_content_parts.append(f"\n\n# --- File: {relative_path_str} ---")
+            # --- Fix 2: Binary file skipping ---
+
             try:
+                # Binary detection: read first 1024 bytes in binary mode
+                with file_path.open(mode="rb") as binfile:
+                    start_bytes = binfile.read(1024)
+                if b"\x00" in start_bytes:
+                    warning_msg = f"Skipped binary or non-UTF-8 file: {relative_path_str}"
+                    console.print(f"[yellow]Warning: Skipping binary or non-UTF-8 file: {file_path.as_posix()}[/yellow]")
+                    flattened_content_parts.append(f"\n\n# --- {warning_msg} ---")
+                    files_skipped_binary_count += 1
+                    continue
+                # If not binary, read as text
                 with file_path.open(mode="r", encoding="utf-8", errors="ignore") as infile:
                     content = infile.read()
-                    flattened_content_parts.append(content)
+                flattened_content_parts.append(f"\n\n# --- File: {relative_path_str} ---")
+                flattened_content_parts.append(content)
                 files_processed_count += 1
-            except UnicodeDecodeError:
-                warning_msg = f"Skipping binary or non-UTF-8 file: {file_path}"
-                console.print(f"[yellow]Warning: {warning_msg}[/yellow]")
-                flattened_content_parts.append(f"# --- {warning_msg} ---")
-                files_skipped_binary_count += 1
             except Exception as e:
-                error_msg = f"Error reading file {file_path}: {e}"
+                error_msg = f"Error reading file {file_path.as_posix()}: {e}"
                 console.print(f"[red]{error_msg}[/red]")
                 flattened_content_parts.append(f"# --- {error_msg} ---")
 
