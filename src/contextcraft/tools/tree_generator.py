@@ -94,44 +94,15 @@ def _generate_tree_lines_recursive(
     cli_ignores: Optional[List[str]],
     tool_specific_fallback_exclusions: Set[str],
     parent_prefix: str = "",
-    is_root: bool = True,
+    is_root_call_for_display: bool = True,  # Is this the initial dir whose name we print?
 ) -> List[str]:
-    """
-    Recursively generates plain text directory tree lines for file output.
-    Now integrates with the ignore_handler.
-
-    Args:
-        current_dir: The directory currently being processed.
-        root_dir_for_ignores: The main root directory of the command, base for .llmignore.
-        llmignore_spec: Parsed .llmignore specification.
-        cli_ignores: List of ignore patterns from CLI arguments.
-        tool_specific_fallback_exclusions: Fallback set of names to ignore.
-        parent_prefix: Indentation and connectors from the parent.
-        is_root: True if this is the initial call for the root directory.
-
-    Returns:
-        A list of strings representing the tree lines.
-    """
     lines: List[str] = []
 
-    if is_root:
+    if is_root_call_for_display:
         lines.append(f"{current_dir.name}/")
 
     try:
-        children_to_process: List[Path] = []
-        for child_path in current_dir.iterdir():
-            # Primary check using the comprehensive ignore_handler
-            if not ignore_handler.is_path_ignored(
-                path_to_check=child_path,
-                root_dir=root_dir_for_ignores,
-                ignore_spec=llmignore_spec,
-                cli_ignore_patterns=cli_ignores,
-            ) and not (llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions)):
-                # Fallback check if no llmignore_spec or if it's a very specific tool need
-                children_to_process.append(child_path)
-
-        sorted_children = sorted(children_to_process, key=lambda x: (x.is_file(), x.name.lower()))
-
+        all_children_sorted = sorted(current_dir.iterdir(), key=lambda x: (x.is_file(), x.name.lower()))
     except PermissionError:
         lines.append(f"{parent_prefix}└── [dim italic](Permission Denied for {current_dir.name}/)[/dim italic]")
         return lines
@@ -139,26 +110,52 @@ def _generate_tree_lines_recursive(
         lines.append(f"{parent_prefix}└── [dim italic](Directory not found: {current_dir.name}/)[/dim italic]")
         return lines
 
-    for i, child in enumerate(sorted_children):
-        connector = "└── " if i == len(sorted_children) - 1 else "├── "
-        line_prefix_for_child = parent_prefix + connector
-
-        if child.is_dir():
-            lines.append(f"{line_prefix_for_child}{child.name}/")
-            child_contents_prefix_extension = "    " if connector == "└── " else "│   "
-            lines.extend(
-                _generate_tree_lines_recursive(
-                    current_dir=child,
-                    root_dir_for_ignores=root_dir_for_ignores,
-                    llmignore_spec=llmignore_spec,
-                    cli_ignores=cli_ignores,
-                    tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
-                    parent_prefix=parent_prefix + child_contents_prefix_extension,
-                    is_root=False,
-                )
+    displayable_children: List[Path] = []
+    child_to_displayed_lines: dict = {}
+    for child_path in all_children_sorted:
+        is_displayed = not ignore_handler.is_path_ignored(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores)
+        if is_displayed and llmignore_spec is None and _should_skip_this_item_name_fallback(child_path.name, tool_specific_fallback_exclusions):
+            is_displayed = False
+        # Always recurse into directories to check for unignored children
+        generated_child_lines = []
+        if child_path.is_dir():
+            generated_child_lines = _generate_tree_lines_recursive(
+                current_dir=child_path,
+                root_dir_for_ignores=root_dir_for_ignores,
+                llmignore_spec=llmignore_spec,
+                cli_ignores=cli_ignores,
+                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
+                parent_prefix="",
+                is_root_call_for_display=False,
             )
-        else:
-            lines.append(f"{line_prefix_for_child}{child.name}")
+        child_to_displayed_lines[child_path] = (is_displayed, generated_child_lines)
+        if is_displayed or (child_path.is_dir() and generated_child_lines):
+            displayable_children.append(child_path)
+
+    num_displayable = len(displayable_children)
+    displayed_count = 0
+
+    for child_path in all_children_sorted:
+        is_child_displayed, generated_child_lines = child_to_displayed_lines[child_path]
+        if is_child_displayed:
+            displayed_count += 1
+            connector = "└── " if displayed_count == num_displayable else "├── "
+            line_prefix = parent_prefix + connector
+            lines.append(f"{line_prefix}{child_path.name}{'/' if child_path.is_dir() else ''}")
+            if child_path.is_dir() and generated_child_lines:
+                child_prefix = "    " if connector == "└── " else "│   "
+                for child_line in generated_child_lines:
+                    lines.append(parent_prefix + child_prefix + child_line)
+        elif child_path.is_dir() and generated_child_lines:
+            # Directory is ignored but has visible children: show the directory and its children
+            displayed_count += 1
+            connector = "└── " if displayed_count == num_displayable else "├── "
+            line_prefix = parent_prefix + connector
+            lines.append(f"{line_prefix}{child_path.name}/")
+            child_prefix = "    " if connector == "└── " else "│   "
+            for child_line in generated_child_lines:
+                lines.append(parent_prefix + child_prefix + child_line)
+
     return lines
 
 
@@ -252,7 +249,7 @@ def generate_and_output_tree(
             cli_ignores=effective_cli_ignores,
             tool_specific_fallback_exclusions=current_tool_specific_exclusions,
             parent_prefix="",
-            is_root=True,
+            is_root_call_for_display=True,
         )
         try:
             output_file_path.parent.mkdir(parents=True, exist_ok=True)

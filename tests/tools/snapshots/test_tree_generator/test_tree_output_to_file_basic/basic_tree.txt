@@ -1,0 +1,7 @@
+test_tree_output_to_file_basic0/
+├── dir1/
+│   ├── subdir/
+│   │   └── file3.txt
+│   └── file2.txt
+├── empty_dir/
+└── file1.txt

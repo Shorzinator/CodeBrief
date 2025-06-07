@@ -25,6 +25,7 @@ mkdocs = "^1.6.1"
 mkdocs-material = "^9.6.14"
 mkdocstrings = "^0.29.1"
 mkdocstrings-python = "^1.16.12"
+pytest-snapshot = "^0.9.0"
 
 [tool.ruff]
 line-length = 150

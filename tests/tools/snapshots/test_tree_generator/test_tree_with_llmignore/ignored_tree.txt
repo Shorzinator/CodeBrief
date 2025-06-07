@@ -1,0 +1,7 @@
+test_tree_with_llmignore0/
+├── build/
+│   └── important.md
+├── src/
+│   └── main.py
+├── .llmignore
+└── app.py
