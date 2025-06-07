@@ -74,7 +74,8 @@ def main_options(
         # Optionally, print help if no command is given and no other global option like version was processed
         # console.print(ctx.get_help())
         # typer.Exit()
-        pass  # Allow Typer to show help by default or handle via no_args_is_help in app constructor
+        # Allow Typer to show help by default or handle via no_args_is_help in app constructor
+        pass  # pragma: no cover
 
 
 # Initialize a Rich Console instance for consistent styled output throughout the app.

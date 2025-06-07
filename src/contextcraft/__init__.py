@@ -7,7 +7,7 @@ import importlib.metadata
 try:
     # This will try to get the version from the installed package metadata
     __version__ = importlib.metadata.version("contextcraft")
-except importlib.metadata.PackageNotFoundError:
+except importlib.metadata.PackageNotFoundError:  # pragma: no cover
     # Fallback for when the package is not installed (e.g., during development directly from source)
     # You might need to adjust this if you have a single source of truth for the version
     # For now, let's assume it can be found or default to a dev version.

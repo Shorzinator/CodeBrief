@@ -22,7 +22,7 @@ runner = CliRunner(mix_stderr=False)
 
 def test_hello_command_default_name():
     """Test the hello command with the default name."""
-    result = runner.invoke(app, ["hello"])
+    result = runner.invoke(app, ["hello"], env={"NO_COLOR": "1"})
     assert result.exit_code == 0
     assert "Hello World from ContextCraft!" in result.stdout
 
