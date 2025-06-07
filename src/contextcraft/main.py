@@ -19,9 +19,19 @@ from rich.console import (
     Console,  # Rich is used for enhanced console output (colors, styles, tables, etc.)
 )
 
+from . import __version__
+
 # Import specific tool modules or functions from the 'tools' sub-package.
 # The '.' indicates a relative import from the current package ('contextcraft').
 from .tools import flattener, tree_generator
+
+
+# Callback function for the version option
+def version_callback(value: bool):
+    if value:
+        console.print(f"ContextCraft Version: {__version__}")
+        raise typer.Exit()
+
 
 # Initialize a Typer application instance.
 # This 'app' object will be used to register commands.
@@ -31,6 +41,41 @@ app = typer.Typer(
     add_completion=False,  # Shell completion can be enabled later if desired (adds some overhead)
     # no_args_is_help=True, # Consider adding this: if no command is given, show help.
 )
+
+# Add a top-level Typer Option for --version
+# Note: We declare it at the app level, not as a command parameter.
+# It's a bit unusual to put it directly in the Typer() constructor, usually it's a parameter to the main callback.
+# A common way is to have a main function that Typer calls, and add it there.
+# For a simple app like this, we can add it as a global parameter using a callback.
+
+
+@app.callback(invoke_without_command=True)  # invoke_without_command needed if you have other global options
+def main_options(
+    ctx: typer.Context,  # Context object, useful if you have subcommands
+    version: Optional[bool] = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show the application's version and exit.",
+        callback=version_callback,
+        is_eager=True,  # Eager means it runs before other processing, good for --version
+    ),
+):
+    """
+    ContextCraft: A CLI toolkit to generate comprehensive project context for LLMs.
+    (Main app callback docstring, can be omitted if simple)
+    """
+    # If version_callback was called, it would have exited.
+    # If other global options were present, they'd be processed here.
+    # If no command is given and invoke_without_command=True, this function runs.
+    # If a command IS given, this callback still runs first (due to how Typer handles callbacks),
+    # then the command runs.
+    if ctx.invoked_subcommand is None and not version:  # If no subcommand was called and version wasn't requested
+        # Optionally, print help if no command is given and no other global option like version was processed
+        # console.print(ctx.get_help())
+        # typer.Exit()
+        pass  # Allow Typer to show help by default or handle via no_args_is_help in app constructor
+
 
 # Initialize a Rich Console instance for consistent styled output throughout the app.
 console = Console()
@@ -193,5 +238,5 @@ def flatten_command(
 
 # This block ensures that the Typer app runs when the script is executed directly
 # (e.g., `python -m src.contextcraft.main`) or via the Poetry script entry point.
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app()

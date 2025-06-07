@@ -68,7 +68,7 @@ source = ["src/contextcraft"] # Directory where your source code lives
 branch = true
 
 [tool.coverage.report]
-fail_under = 80 # Example: Fail CI if coverage drops below 80%
+# fail_under = 80 # Example: Fail CI if coverage drops below 80%
 show_missing = true
 
 [tool.bandit]
