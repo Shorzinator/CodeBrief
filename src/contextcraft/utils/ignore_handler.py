@@ -135,15 +135,9 @@ def is_path_ignored(
             elif not path_str_as_dir.endswith("/"):
                 path_str_as_dir += "/"
 
-        # Debug print for clarity before matching attempts
-        print(f"    SpecCheck Input: Path='{path_to_check_abs.name}', IsDir={path_to_check_abs.is_dir()}, RelPathForSpec='{relative_path_for_spec}'")
-        print(f"    SpecCheck Attempt1 (as_dir if applicable): PathStr='{path_str_as_dir}', Match={ignore_spec.match_file(path_str_as_dir)}")
-        print(f"    SpecCheck Attempt2 (name_only if different): PathStr='{path_str_name_only}', Match={ignore_spec.match_file(path_str_name_only)}")
-
         # A. Check if a directory-specific pattern (e.g., "build/") matches the directory.
         #    For this, we use the path_str_as_dir (e.g., "build/").
         if path_to_check_abs.is_dir() and ignore_spec.match_file(path_str_as_dir):
-            print(f"    [MATCHED DIR AS DIR_PATTERN] SpecCheck: Path='{path_str_as_dir}', IsDir={path_to_check_abs.is_dir()}, Match=True")
             return True
 
         # B. Check if a name pattern (e.g., "some_name" which can be file or dir)
@@ -151,7 +145,6 @@ def is_path_ignored(
         #    For this, we use path_str_name_only (e.g., "build" or "file.txt").
         #    This also handles files correctly.
         if ignore_spec.match_file(path_str_name_only):
-            print(f"    [MATCHED AS NAME_PATTERN] SpecCheck: Path='{path_str_name_only}', IsDir={path_to_check_abs.is_dir()}, Match=True")
             return True
 
     # 3. Check against CLI-provided ignore patterns

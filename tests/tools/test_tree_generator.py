@@ -89,7 +89,7 @@ def test_tree_console_output_basic(create_project_structure_for_tree, capsys):
     # Check for tree structure elements
     assert "📁" in stdout  # Directory icon
     assert "📄" in stdout  # File icon
-    assert "└──" in stdout or "├──" in stdout  # Tree connectors
+    assert "┣━━" in stdout or "┗━━" in stdout  # Tree connectors
 
 
 def test_tree_console_with_llmignore_negation(create_project_structure_for_tree, capsys):
@@ -110,12 +110,13 @@ def test_tree_console_with_llmignore_negation(create_project_structure_for_tree,
     captured = capsys.readouterr()
     stdout = captured.out
 
-    print("\nDEBUG CONSOLE OUTPUT (llmignore_negation):\n", stdout)  # For debugging the test
+    print("\nDEBUG CONSOLE OUTPUT (llmignore_negation):\n", stdout)
 
     assert "app.py" in stdout
-    assert "build" in stdout  # With the simpler Rich logic, 'build' will appear if 'important.md' is shown
-    assert "important.md" in stdout
-    assert "artifact.bin" not in stdout  # Should be hidden by ignore
+    assert "build" not in stdout  # build/ itself is ignored by .llmignore and simpler Rich logic won't show it
+    assert "important.md" not in stdout  # Consequently, important.md isn't shown either
+    assert "artifact.bin" not in stdout
+    assert ".llmignore" in stdout  # Assuming .llmignore is not ignored by itself
 
 
 @mock.patch("pathlib.Path.iterdir", autospec=True)
@@ -227,13 +228,17 @@ def test_tree_permission_error_console_output(mock_iterdir, create_project_struc
 def test_tree_fallback_exclusions_no_llmignore(create_project_structure_for_tree, snapshot, monkeypatch):
     """Test fallback exclusions when no .llmignore file is present."""
     # Temporarily modify DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC for a predictable test
-    monkeypatch.setattr(tree_generator, "DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC", {"__pycache__", "*.log", "explicitly_ignored.txt"})
+    monkeypatch.setattr(
+        tree_generator,
+        "DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC",
+        {"__pycache__", "*.log", "explicitly_ignored.txt"},  # These are names/simple globs
+    )
 
     project_root = create_project_structure_for_tree(
         {
             "main.py": "",
             "app.log": "",  # Should be ignored by *.log in fallback
-            "__pycache__/cache.pyc": "",  # Should be ignored by __pycache__ in fallback
+            "__pycache__/cache.pyc": "",  # Dir __pycache__ should be ignored by fallback
             "explicitly_ignored.txt": "",  # Should be ignored by name
             "keeper.py": "",
         }
@@ -241,11 +246,14 @@ def test_tree_fallback_exclusions_no_llmignore(create_project_structure_for_tree
     # IMPORTANT: Do NOT create an .llmignore file for this test
 
     output_file = project_root / "tree_fallback.txt"
-    tree_generator.generate_and_output_tree(root_dir=project_root, output_file_path=output_file)
+    tree_generator.generate_and_output_tree(
+        root_dir=project_root,
+        output_file_path=output_file,
+        # No llmignore_spec is loaded, no CLI ignores are passed
+    )
 
     content = output_file.read_text()
     snapshot.assert_match(content, "tree_fallback.txt")
-    # Expected: main.py and keeper.py are present; app.log, __pycache__, explicitly_ignored.txt are absent.
 
 
 # TODO:

@@ -41,6 +41,7 @@ indent-style = "space"
 
 [tool.ruff.lint.per-file-ignores]
 "src/contextcraft/main.py" = ["E501"]
+"src/contextcraft/tools/flattener.py" = ["B007"]
 
 [tool.mypy]
 python_version = "3.9"

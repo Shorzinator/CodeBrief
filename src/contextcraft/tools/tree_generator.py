@@ -14,9 +14,8 @@ Core functionalities:
 - Generation of a Rich `Tree` object for styled console output.
 """
 
-from contextlib import suppress
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import List, Optional, Set
 
 import pathspec  # For type hinting the llmignore_spec
 import typer
@@ -83,9 +82,9 @@ def _should_skip_this_item_name_fallback(item_name: str, fallback_exclusions: Se
     Fallback check against a simple set of names/basic patterns.
     Used if .llmignore spec doesn't exist or doesn't cover everything.
     """
-    if item_name in fallback_exclusions:
+    if item_name in fallback_exclusions:  # Exact name match
         return True
-    return any(pattern.startswith("*.") and item_name.endswith(pattern[1:]) for pattern in fallback_exclusions)
+    return any(Path(item_name).match(pattern) for pattern in fallback_exclusions)  # Glob match like *.log
 
 
 def _should_show_path(
@@ -96,27 +95,23 @@ def _should_show_path(
     tool_specific_fallback_exclusions: Set[str],
 ) -> bool:
     """
-    Determine if a path should be shown in the tree.
+    Determine if a path should be shown in the tree, considering all ignore sources.
     """
-    path_to_check_abs = path.resolve()
-    root_dir_abs = root_dir_for_ignores.resolve()
-    relative_path_for_spec = None
-    with suppress(Exception):
-        relative_path_for_spec = path_to_check_abs.relative_to(root_dir_abs)
+    # First, check against primary ignore mechanisms: CORE, .llmignore, CLI
+    is_ignored_by_primary = ignore_handler.is_path_ignored(
+        path_to_check=path, root_dir=root_dir_for_ignores, ignore_spec=llmignore_spec, cli_ignore_patterns=cli_ignores
+    )
 
-    if llmignore_spec and relative_path_for_spec is not None:
-        path_str = relative_path_for_spec.as_posix()
-        if path.is_dir() and not path_str.endswith("/"):
-            path_str += "/"
-        # pathspec: last matching pattern wins (negation or not)
-        is_ignored = llmignore_spec.match_file(path_str)
-        return not is_ignored
+    if is_ignored_by_primary:
+        return False  # Path is definitely ignored by a primary rule
 
-    # Fallback: use ignore_handler for CLI and fallback exclusions
-    is_ignored = ignore_handler.is_path_ignored(path, root_dir_for_ignores, llmignore_spec, cli_ignores)
-    if not is_ignored and llmignore_spec is None and _should_skip_this_item_name_fallback(path.name, tool_specific_fallback_exclusions):
-        is_ignored = True
-    return not is_ignored
+    # If not ignored by primary rules and no .llmignore was active, check fallback
+    if llmignore_spec is None and _should_skip_this_item_name_fallback(path.name, tool_specific_fallback_exclusions):
+        return False  # Ignored by tool-specific fallback
+
+    # If not ignored by primary rules, and either .llmignore was present (so fallback not used)
+    # or not matched by fallback, then show the path.
+    return True
 
 
 def _generate_tree_lines_recursive(
@@ -187,6 +182,9 @@ def _generate_tree_lines_recursive(
     return lines
 
 
+# src/contextcraft/tools/tree_generator.py
+
+
 def _add_nodes_to_rich_tree_recursive(
     rich_tree_node: RichTree,
     current_path_obj: Path,
@@ -195,67 +193,41 @@ def _add_nodes_to_rich_tree_recursive(
     cli_ignores: Optional[List[str]],
     tool_specific_fallback_exclusions: Set[str],
 ):
-    """
-    Recursively adds nodes to a Rich.Tree object for styled console display.
-    Integrates with the ignore_handler and handles negations correctly.
-    """
     try:
-        all_children_sorted = sorted(current_path_obj.iterdir(), key=lambda x: (x.is_file(), x.name.lower()))
+        all_children_sorted = sorted(
+            current_path_obj.iterdir(),  # Removed unnecessary list() call
+            key=lambda x: (x.is_file(), x.name.lower()),
+        )
     except PermissionError:
-        rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")
+        rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")  # Keep this simple for now
         return
     except FileNotFoundError:
         rich_tree_node.add(f"[dim italic](Directory {current_path_obj.name} not found)[/dim italic]")
         return
 
-    # First pass: determine which children are displayable and collect results of recursion for dirs
-    child_processing_results: Dict[Path, Dict[str, Any]] = {}
-
     for child_path in all_children_sorted:
-        # Check if the path itself should be shown
-        is_child_itself_displayable = _should_show_path(
-            child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions
-        )
-
-        # For directories, check if they have any displayable descendants
-        has_displayable_descendants = False
-        if child_path.is_dir():
-            temp_dummy_branch = RichTree("dummy")
-            _add_nodes_to_rich_tree_recursive(
-                rich_tree_node=temp_dummy_branch,
-                current_path_obj=child_path,
-                root_dir_for_ignores=root_dir_for_ignores,
-                llmignore_spec=llmignore_spec,
-                cli_ignores=cli_ignores,
-                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
-            )
-            has_displayable_descendants = bool(temp_dummy_branch.children)
-
-        # A directory should be shown if either:
-        # 1. It's not ignored itself, or
-        # 2. It has unignored children (even if the dir itself is ignored)
-        should_display = is_child_itself_displayable or (child_path.is_dir() and has_displayable_descendants)
-        child_processing_results[child_path] = {"is_displayable": should_display, "has_descendants": has_displayable_descendants}
-
-    # Second pass: Add nodes to the tree
-    displayable_children = [p for p in all_children_sorted if child_processing_results[p]["is_displayable"]]
-    for i, child_path in enumerate(displayable_children):
-        is_last = i == len(displayable_children) - 1
-        if child_path.is_dir():
-            # Use consistent tree characters
-            branch_label = f"{'└── ' if is_last else '├── '}📁 {child_path.name}"
-            branch = rich_tree_node.add(branch_label, guide_style="blue")
-            _add_nodes_to_rich_tree_recursive(
-                rich_tree_node=branch,
-                current_path_obj=child_path,
-                root_dir_for_ignores=root_dir_for_ignores,
-                llmignore_spec=llmignore_spec,
-                cli_ignores=cli_ignores,
-                tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
-            )
-        else:
-            file_label = f"{'└── ' if is_last else '├── '}📄 {child_path.name}"
-            rich_tree_node.add(file_label)
+        # Directly decide if this child should be shown
+        if _should_show_path(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions):
+            # If it should be shown, add it and recurse if it's a directory
+            if child_path.is_dir():
+                # Using your updated label style for icons, removing manual connectors
+                branch_label = f"📁 {child_path.name}"
+                branch = rich_tree_node.add(branch_label, guide_style="blue")
+                _add_nodes_to_rich_tree_recursive(  # Recurse on the new branch
+                    rich_tree_node=branch,
+                    current_path_obj=child_path,
+                    root_dir_for_ignores=root_dir_for_ignores,
+                    llmignore_spec=llmignore_spec,
+                    cli_ignores=cli_ignores,
+                    tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
+                )
+            else:  # It's a file
+                file_label = f"📄 {child_path.name}"
+                rich_tree_node.add(file_label)
+        # If _should_show_path is False for child_path, we do nothing with it for Rich output.
+        # This means if `build/` itself is ignored by _should_show_path, it won't be added,
+        # and `!build/important.md` won't make `build/` appear.
+        # This is the simpler logic I mentioned earlier. Let's see if this makes `artifact.bin` disappear.
 
 
 def generate_and_output_tree(
@@ -273,7 +245,7 @@ def generate_and_output_tree(
 
     # Load .llmignore patterns from the specified root_dir
     llmignore_spec = ignore_handler.load_ignore_patterns(root_dir)
-    if llmignore_spec:
+    if output_file_path:
         console.print(f"[dim]Using .llmignore patterns from '{root_dir / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
 
     # Prepare the final set of CLI ignores, including the output file if necessary
