@@ -5,6 +5,7 @@ Unit tests for the src.contextcraft.utils.ignore_handler module.
 
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -410,6 +411,146 @@ def test_is_path_ignored_anchored_patterns(setup_test_directory):
     assert ignore_handler.is_path_ignored(
         root_dir / "sub" / "anywhere.txt", root_dir, current_spec
     ), "Unanchored pattern should match file in subdirectory."
+
+
+# --- Tests for load_ignore_patterns ---
+
+
+def test_load_ignore_patterns_whitespace_only_lines():
+    """Test .llmignore with lines that are only whitespace after stripping comments."""
+    content = "  \n\t\n# comment\n   # another comment"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root_dir = Path(tmpdir)
+        create_temp_llmignore(root_dir, content)
+        spec = ignore_handler.load_ignore_patterns(root_dir)
+        assert spec is None  # Should result in no processed lines
+
+
+def test_load_ignore_patterns_patterns_become_empty_after_comment_strip():
+    """Test patterns that become empty after stripping inline comments."""
+    content = " # only comment here \npattern1 # comment \n ! # comment after bang"
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root_dir = Path(tmpdir)
+        create_temp_llmignore(root_dir, content)
+        spec = ignore_handler.load_ignore_patterns(root_dir)
+        assert spec is not None
+        # 'pattern1' should be loaded. '!' should likely be ignored or result in an empty pattern.
+        # Pathspec might just ignore a lone '!' or an empty string after '!'.
+        assert spec.match_file("pattern1")
+        # Check how a lone "!" or "! " is handled by your parser and pathspec
+        # For example, if "!" becomes an empty negation, it might negate everything or nothing.
+        # This depends on pathspec's interpretation of `PathSpec.from_lines(['!'])`
+        # Most likely, it results in no effective patterns.
+
+
+@mock.patch("pathlib.Path.open")
+def test_load_ignore_patterns_read_error(mock_open):
+    """Test load_ignore_patterns when file reading raises an OSError."""
+    mock_open.side_effect = OSError("Test read error")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root_dir = Path(tmpdir)
+        # Create the file so is_file() passes, but open() will fail via mock
+        (root_dir / ignore_handler.LLMIGNORE_FILENAME).touch()
+        spec = ignore_handler.load_ignore_patterns(root_dir)
+        assert spec is None
+        # Assert console.print was called with a warning (if possible, or check logs if using logging)
+
+
+# --- Additional Tests for is_path_ignored ---
+
+
+def test_is_path_ignored_path_not_under_root(setup_test_directory):
+    """Test is_path_ignored when path_to_check is not under root_dir."""
+    # setup_test_directory creates root_dir and an .llmignore inside it
+    root_dir_with_spec = setup_test_directory
+    ignore_spec = ignore_handler.load_ignore_patterns(root_dir_with_spec)
+
+    # Create a path completely outside the root_dir structure
+    with tempfile.TemporaryDirectory() as another_tmpdir:
+        outside_path = Path(another_tmpdir) / "some_other_file.txt"
+        outside_path.touch()
+
+        # This path should not be ignored by the spec tied to root_dir_with_spec
+        assert not ignore_handler.is_path_ignored(outside_path, root_dir_with_spec, ignore_spec)
+
+        # Test with a core system exclusion name, even if outside root for spec
+        git_imposter_dir = Path(another_tmpdir) / ".git"
+        git_imposter_dir.mkdir()
+        git_imposter_file = git_imposter_dir / "config"
+        git_imposter_file.touch()
+        assert ignore_handler.is_path_ignored(
+            git_imposter_file, root_dir_with_spec, ignore_spec
+        ), "Core system exclusion should apply even if path is outside spec root"
+        assert ignore_handler.is_path_ignored(git_imposter_dir, root_dir_with_spec, ignore_spec)
+
+
+def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
+    """Test more specific .llmignore matching scenarios."""
+    root_dir = setup_test_directory  # Uses the .llmignore from the fixture
+    spec = ignore_handler.load_ignore_patterns(root_dir)
+    assert spec is not None
+
+    # Scenario: file that does NOT match any .llmignore pattern
+    assert not ignore_handler.is_path_ignored(root_dir / "src" / "app.py", root_dir, spec)
+
+    # Scenario: Directory ignored, file within it also ignored
+    assert ignore_handler.is_path_ignored(root_dir / "build" / "output.bin", root_dir, spec)
+
+    # Scenario: Directory pattern in .llmignore (`build/`)
+    # Test matching the directory itself
+    assert ignore_handler.is_path_ignored(root_dir / "build", root_dir, spec)
+
+    # Scenario: File pattern in .llmignore (`*.log`)
+    assert ignore_handler.is_path_ignored(root_dir / "another.log", root_dir, spec)
+
+
+@pytest.mark.parametrize(
+    ("cli_pattern", "path_str_to_check", "should_ignore"),
+    [
+        # Exact name matches (already tested in test_is_path_ignored_cli_overrides)
+        ("file.py", "file.py", True),
+        # Glob on name
+        ("*.tmp", "file.tmp", True),
+        ("file*.tmp", "fileXYZ.tmp", True),
+        ("file?.tmp", "fileA.tmp", True),
+        ("file?.tmp", "fileAB.tmp", False),  # '?' matches single char
+        # Directory pattern on name (CLI) - current logic is simple Path(filename).match()
+        # which won't directly interpret "build/" as a directory pattern from CLI.
+        # The custom logic for "pattern.endswith('/')" handles some of this.
+        ("build/", "build", True),  # Assuming path_to_check is a directory named "build"
+        ("build/", "src/build", True),  # Assuming path_to_check is "src/build" and pattern is "build/"
+        # Current CLI logic might need Path(relative_path).match("build/") for this
+        # Relative path matches
+        ("src/*.py", "src/app.py", True),
+        ("src/*.js", "src/app.py", False),
+        ("docs/*", "docs/index.md", True),
+        ("build/output.*", "build/output.bin", True),
+        ("build/output.*", "build/output/log.txt", False),  # Pattern doesn't imply subdirectory
+    ],
+)
+def test_is_path_ignored_cli_pattern_coverage(cli_pattern: str, path_str_to_check: str, should_ignore: bool, setup_test_directory):
+    """Test various CLI ignore patterns to cover branches."""
+    root_dir = setup_test_directory
+    # Create the path to check. Assume it's a file for simplicity unless pattern implies dir.
+    full_path_to_check = root_dir / path_str_to_check
+    full_path_to_check.parent.mkdir(parents=True, exist_ok=True)
+    if not cli_pattern.endswith("/") and not path_str_to_check.endswith("/"):
+        full_path_to_check.touch()  # Create as file
+    else:
+        full_path_to_check.mkdir(exist_ok=True)  # Create as dir
+
+    # Test with no .llmignore spec active to isolate CLI pattern effect
+    result = ignore_handler.is_path_ignored(full_path_to_check, root_dir, None, cli_ignore_patterns=[cli_pattern])
+    assert result is should_ignore
+
+    # Test also with an .llmignore spec active but not matching this path
+    # (to ensure CLI patterns work independently if .llmignore doesn't cause ignore)
+    llmignore_content = "some_other_pattern_not_matching_anything_here.txt"
+    create_temp_llmignore(root_dir, llmignore_content)
+    spec = ignore_handler.load_ignore_patterns(root_dir)
+
+    result_with_spec = ignore_handler.is_path_ignored(full_path_to_check, root_dir, spec, cli_ignore_patterns=[cli_pattern])
+    assert result_with_spec is should_ignore
 
 
 # Note on Symlinks:
