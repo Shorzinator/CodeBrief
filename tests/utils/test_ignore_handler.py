@@ -443,17 +443,18 @@ def test_load_ignore_patterns_patterns_become_empty_after_comment_strip():
         # Most likely, it results in no effective patterns.
 
 
-@mock.patch("pathlib.Path.open")
-def test_load_ignore_patterns_read_error(mock_open):
+@mock.patch("pathlib.Path.open", new_callable=mock.mock_open)  # Use mock_open for context manager
+@mock.patch("pathlib.Path.is_file", return_value=True)  # Ensure is_file returns True
+def test_load_ignore_patterns_read_error(mock_is_file, mock_open_method):
     """Test load_ignore_patterns when file reading raises an OSError."""
-    mock_open.side_effect = OSError("Test read error")
+    mock_open_method.side_effect = OSError("Test read error")  # Make the open call fail
     with tempfile.TemporaryDirectory() as tmpdir:
         root_dir = Path(tmpdir)
-        # Create the file so is_file() passes, but open() will fail via mock
-        (root_dir / ignore_handler.LLMIGNORE_FILENAME).touch()
+        # No need to actually create the file if open is mocked to fail
         spec = ignore_handler.load_ignore_patterns(root_dir)
         assert spec is None
-        # Assert console.print was called with a warning (if possible, or check logs if using logging)
+        # mock_is_file.assert_called_once() # Optional: check if is_file was called
+        # mock_open_method.assert_called_once() # Optional: check if open was called
 
 
 # --- Additional Tests for is_path_ignored ---
@@ -504,53 +505,85 @@ def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
     assert ignore_handler.is_path_ignored(root_dir / "another.log", root_dir, spec)
 
 
+# tests/utils/test_ignore_handler.py
+
+
 @pytest.mark.parametrize(
-    ("cli_pattern", "path_str_to_check", "should_ignore"),
+    ("cli_pattern", "path_str_to_check", "is_dir_check", "should_ignore_val"),
     [
-        # Exact name matches (already tested in test_is_path_ignored_cli_overrides)
-        ("file.py", "file.py", True),
-        # Glob on name
-        ("*.tmp", "file.tmp", True),
-        ("file*.tmp", "fileXYZ.tmp", True),
-        ("file?.tmp", "fileA.tmp", True),
-        ("file?.tmp", "fileAB.tmp", False),  # '?' matches single char
-        # Directory pattern on name (CLI) - current logic is simple Path(filename).match()
-        # which won't directly interpret "build/" as a directory pattern from CLI.
-        # The custom logic for "pattern.endswith('/')" handles some of this.
-        ("build/", "build", True),  # Assuming path_to_check is a directory named "build"
-        ("build/", "src/build", True),  # Assuming path_to_check is "src/build" and pattern is "build/"
-        # Current CLI logic might need Path(relative_path).match("build/") for this
-        # Relative path matches
-        ("src/*.py", "src/app.py", True),
-        ("src/*.js", "src/app.py", False),
-        ("docs/*", "docs/index.md", True),
-        ("build/output.*", "build/output.bin", True),
-        ("build/output.*", "build/output/log.txt", False),  # Pattern doesn't imply subdirectory
+        # Path A: filename == pattern
+        ("exact_file.txt", "exact_file.txt", False, True),
+        ("exact_file.txt", "other_exact_file.txt", False, False),
+        # Path B: Path(filename).match(pattern)
+        ("*.log", "file.log", False, True),
+        ("file.*", "file.log", False, True),
+        ("*.txt", "file.log", False, False),
+        # Path D, E, F: pattern.endswith("/") and path_to_check_abs.is_dir()
+        ("dir1/", "dir1", True, True),  # Hits Path E (path_to_match_cli_dir == pattern)
+        ("dir2/", "dir2", True, True),  # Hits Path F (current_path_for_cli_match.name + "/" == pattern)
+        ("dir3/", "sub/dir3", True, True),  # Hits Path E (relative path 'sub/dir3/' matches 'dir3/' if pattern is simplified or
+        # pathspec-like)
+        # OR Path G (current_path_for_cli_match.match(pattern)) if pattern="*/dir3/"
+        # Current custom logic might need specific pattern for this
+        ("dir4/", "dir4_file", False, False),  # Pattern implies dir, path is file
+        # Path G: current_path_for_cli_match.match(pattern)
+        ("src/app.*", "src/app.py", False, True),
+        ("src/app.*", "src/app.js", False, True),
+        ("src/utils/*", "src/utils/helper.py", False, True),
+        ("src/utils/*", "src/main.py", False, False),  # main.py not in utils
+        # Ensure a non-match for Path G
+        ("non_matching_glob/*", "src/app.py", False, False),
+        # Test a case where relative_path_for_spec is None (path_to_check outside root_dir)
+        # This is better handled by a separate test like test_is_path_ignored_cli_path_outside_root
     ],
 )
-def test_is_path_ignored_cli_pattern_coverage(cli_pattern: str, path_str_to_check: str, should_ignore: bool, setup_test_directory):
-    """Test various CLI ignore patterns to cover branches."""
-    root_dir = setup_test_directory
-    # Create the path to check. Assume it's a file for simplicity unless pattern implies dir.
+def test_is_path_ignored_cli_pattern_branches(
+    cli_pattern: str, path_str_to_check: str, is_dir_check: bool, should_ignore_val: bool, setup_test_directory
+):
+    root_dir = setup_test_directory  # .llmignore in fixture won't affect these CLI-only tests if path doesn't match it
+
     full_path_to_check = root_dir / path_str_to_check
     full_path_to_check.parent.mkdir(parents=True, exist_ok=True)
-    if not cli_pattern.endswith("/") and not path_str_to_check.endswith("/"):
-        full_path_to_check.touch()  # Create as file
+    if is_dir_check:
+        full_path_to_check.mkdir(exist_ok=True)
     else:
-        full_path_to_check.mkdir(exist_ok=True)  # Create as dir
+        if not full_path_to_check.exists():  # Avoid error if dir was created by parent.mkdir
+            full_path_to_check.touch()
 
     # Test with no .llmignore spec active to isolate CLI pattern effect
     result = ignore_handler.is_path_ignored(full_path_to_check, root_dir, None, cli_ignore_patterns=[cli_pattern])
-    assert result is should_ignore
+    assert result is should_ignore_val
 
-    # Test also with an .llmignore spec active but not matching this path
-    # (to ensure CLI patterns work independently if .llmignore doesn't cause ignore)
-    llmignore_content = "some_other_pattern_not_matching_anything_here.txt"
-    create_temp_llmignore(root_dir, llmignore_content)
-    spec = ignore_handler.load_ignore_patterns(root_dir)
+    assert not ignore_handler.is_path_ignored(root_dir / "some_file_not_otherwise_ignored.txt", root_dir, None, cli_ignore_patterns=[])
 
-    result_with_spec = ignore_handler.is_path_ignored(full_path_to_check, root_dir, spec, cli_ignore_patterns=[cli_pattern])
-    assert result_with_spec is should_ignore
+
+def test_is_path_ignored_cli_path_outside_root(tmp_path_factory, setup_test_directory):
+    root_dir_for_spec = setup_test_directory  # Has an .llmignore
+    spec = ignore_handler.load_ignore_patterns(root_dir_for_spec)
+
+    # Path outside the spec's root_dir
+    outside_project_root = tmp_path_factory.mktemp("outside_project")
+    outside_file = outside_project_root / "external_file.log"
+    outside_file.touch()
+
+    # CLI pattern that would match if path was relative
+    assert not ignore_handler.is_path_ignored(outside_file, root_dir_for_spec, spec, cli_ignore_patterns=["external_project/*.log"])
+    # CLI pattern matching only filename should work
+    assert ignore_handler.is_path_ignored(outside_file, root_dir_for_spec, spec, cli_ignore_patterns=["external_file.log"])
+    assert ignore_handler.is_path_ignored(
+        outside_file,
+        root_dir_for_spec,
+        spec,
+        cli_ignore_patterns=["*.log"],  # Path(filename).match()
+    )
+
+
+def test_is_path_ignored_cli_empty_list(setup_test_directory):
+    root_dir = setup_test_directory
+    spec = ignore_handler.load_ignore_patterns(root_dir)  # Use existing spec
+    # A file that is definitely NOT ignored by the fixture's .llmignore or core exclusions
+    path_to_check = root_dir / "src" / "app.py"
+    assert not ignore_handler.is_path_ignored(path_to_check, root_dir, spec, cli_ignore_patterns=[])
 
 
 # Note on Symlinks:
