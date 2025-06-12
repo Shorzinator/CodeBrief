@@ -26,7 +26,7 @@ from . import __version__
 
 # Import specific tool modules or functions from the 'tools' sub-package.
 # The '.' indicates a relative import from the current package ('contextcraft').
-from .tools import flattener, tree_generator
+from .tools import dependency_lister, flattener, tree_generator
 
 
 # Callback function for the version option
@@ -281,6 +281,75 @@ def flatten_command(
         raise
     except Exception as e:
         console.print(f"[bold red]An unexpected error occurred during code flattening: {e}[/bold red]")
+        raise typer.Exit(code=1) from e
+
+
+@app.command(name="deps")
+def deps_command(
+    project_path: Path = typer.Argument(
+        ".",
+        help="Project directory to analyze for dependencies. Config file is read from here.",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        show_default="Current directory",
+    ),
+    output_file: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        "-o",
+        help="Output file to save the dependency list. Overrides config default. If neither is set, prints to console.",
+        writable=True,
+        resolve_path=True,
+        show_default="None (uses config or console)",
+    ),
+):
+    """
+    Lists project dependencies from various package manager files.
+
+    This command analyzes the project directory for supported dependency files
+    (pyproject.toml, requirements.txt, package.json) and extracts dependency
+    information. The output is formatted as structured Markdown, suitable for
+    inclusion in context bundles or documentation.
+
+    Supported file formats:
+    - Python: pyproject.toml (Poetry and PEP 621), requirements.txt files
+    - Node.js: package.json
+
+    Dependencies are grouped by language, file type, and dependency group
+    (main, dev, test, etc.) for clear organization.
+    """
+    # Load configuration from pyproject.toml in the project_path
+    config = config_manager.load_config(project_path)
+
+    actual_output_path: Optional[Path] = None
+    if output_file:  # CLI option takes highest precedence for output file
+        actual_output_path = output_file
+    elif config.get("default_output_filename_deps"):
+        # Construct path relative to the project_path where pyproject.toml was found
+        cfg_output_filename = config["default_output_filename_deps"]
+        if isinstance(cfg_output_filename, str):
+            actual_output_path = project_path / cfg_output_filename
+            console.print(f"[dim]Using default output file from config: {actual_output_path.resolve()}[/dim]")
+        else:
+            warnings.warn(
+                f"Config Warning: 'default_output_filename_deps' should be a string, "
+                f"got {type(cfg_output_filename)}. Outputting to console.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+    try:
+        dependency_lister.list_dependencies_logic(
+            project_path=project_path,
+            actual_output_path=actual_output_path,
+        )
+    except typer.Exit:
+        raise
+    except Exception as e:
+        console.print(f"[bold red]An unexpected error occurred during dependency listing: {e}[/bold red]")
         raise typer.Exit(code=1) from e
 
 

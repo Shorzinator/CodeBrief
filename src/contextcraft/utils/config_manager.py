@@ -28,6 +28,7 @@ DEFAULT_CONFIG_VALUES: Dict[str, Any] = {
     "default_output_filename_tree": None,
     "default_output_filename_flatten": None,
     "default_output_filename_bundle": None,
+    "default_output_filename_deps": None,
     "global_include_patterns": [],  # Default to empty list
     "global_exclude_patterns": [],  # Default to empty list
 }
