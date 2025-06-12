@@ -274,8 +274,7 @@ def flatten_command(
             output_file_path=actual_output_path,
             include_patterns=actual_include_patterns,
             exclude_patterns=actual_exclude_patterns,
-            # config_global_include_patterns=config.get("global_include_patterns", []), # For later
-            # config_global_exclude_patterns=config.get("global_exclude_patterns", [])  # For later
+            config_global_excludes=cfg_global_excludes,
         )
     except typer.Exit:
         raise
