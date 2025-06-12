@@ -436,3 +436,24 @@ def test_flatten_integration_with_config_excludes(tmp_path: Path):
     assert "# --- File: docs/index.md ---" not in content
     assert "print('ignored')" not in content  # Content from ignored.py
     assert "# Docs" not in content  # Content from docs/index.md
+
+
+# --- Test for exceptions with markup-like chars in the message ---
+
+
+class ProblematicError(Exception):
+    def __str__(self):
+        return "Error with [square brackets] and maybe a backslash \\!"
+
+
+@mock.patch("src.contextcraft.tools.flattener.flatten_code_logic", side_effect=ProblematicError())
+def test_flatten_command_handles_exception_with_markup_chars(mock_flatten_error, tmp_path: Path):
+    """Test flatten command handles exceptions with markup-like chars in the message."""
+    result = runner.invoke(app, ["flatten", str(tmp_path)])
+    assert result.exit_code == 1
+
+    # Verify the original error message is printed (now without markup parsing)
+    assert "Error with [square brackets] and maybe a backslash \\!" in result.stdout
+    # Check that no MarkupError occurred and the core message is there:
+    assert "An unexpected error occurred during code flattening:" in result.stdout
+    mock_flatten_error.assert_called_once()

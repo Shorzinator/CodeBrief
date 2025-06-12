@@ -176,7 +176,8 @@ def tree_command(
     except typer.Exit:
         raise
     except Exception as e:
-        console.print(f"[bold red]An unexpected error occurred during tree generation: {e}[/bold red]")
+        console.print("[bold red]An unexpected error occurred during tree generation: [/bold red]", end="")
+        console.print(str(e), markup=False)
         raise typer.Exit(code=1) from e
 
 
@@ -279,7 +280,8 @@ def flatten_command(
     except typer.Exit:
         raise
     except Exception as e:
-        console.print(f"[bold red]An unexpected error occurred during code flattening: {e}[/bold red]")
+        console.print("[bold red]An unexpected error occurred during code flattening: [/bold red]", end="")
+        console.print(str(e), markup=False)
         raise typer.Exit(code=1) from e
 
 
