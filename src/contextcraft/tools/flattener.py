@@ -403,7 +403,8 @@ def flatten_code_logic(
             console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
             raise typer.Exit(code=1) from e
     else:  # Printing to console
-        console.print(final_output_str)
+        # Use print() instead of console.print() to avoid Rich markup parsing of file contents
+        print(final_output_str)
         # For console output, a summary might be too verbose if the content itself is printed.
         # Consider a verbosity flag for this summary later.
         # For now, let's make it less prominent or conditional.
