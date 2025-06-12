@@ -11,6 +11,7 @@ structured context from their projects, suitable for use with Large Language Mod
 or for general project understanding.
 """
 
+import warnings
 from pathlib import Path
 from typing import List, Optional
 
@@ -18,6 +19,8 @@ import typer  # Typer is used for creating the CLI application and commands
 from rich.console import (
     Console,  # Rich is used for enhanced console output (colors, styles, tables, etc.)
 )
+
+from src.contextcraft.utils import config_manager
 
 from . import __version__
 
@@ -97,71 +100,88 @@ def hello(name: str = typer.Option("World", help="The person to greet.")):
 
 @app.command(name="tree")  # Registers 'tree_command' as the 'tree' subcommand
 def tree_command(
+    # ... (root_dir argument remains the same) ...
     root_dir: Path = typer.Argument(
-        ".",  # Default value for the argument if not provided
-        help="Root directory to generate tree for.",  # Help text for this argument
-        exists=True,  # Typer will validate that the path exists
-        file_okay=False,  # Path must not be a file
-        dir_okay=True,  # Path must be a directory
-        readable=True,  # Path must be readable
-        resolve_path=True,  # Converts the path to an absolute path
-        show_default="Current directory",  # How the default is displayed in --help
+        ".",
+        help="Root directory to generate tree for. Config file is read from here.",  # Updated help
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        resolve_path=True,
+        show_default="Current directory",
     ),
     output_file: Optional[Path] = typer.Option(
-        None,  # Default is None, meaning output to console
-        "--output",  # Long option name
-        "-o",  # Short option name
-        help="Output file to save the tree. If not provided, prints to console.",
-        writable=True,  # If path is given, Typer checks if it's writable
-        resolve_path=True,  # Converts to absolute path if given
-        show_default="Print to console",  # How default is displayed in --help
+        None,
+        "--output",
+        "-o",
+        help="Output file to save the tree. Overrides config default. If neither is set, prints to console.",  # Updated help
+        writable=True,
+        resolve_path=True,
+        show_default="None (uses config or console)",  # Updated show_default
     ),
     ignore: Optional[List[str]] = typer.Option(
-        None,  # Default is an empty list (no user-specified ignores beyond defaults)
+        None,
         "--ignore",
         "-i",
-        help=("Specific directory or file names to ignore. " "Can be used multiple times (e.g., -i node_modules -i build)."),
-        show_default="Default internal exclusion list",  # Describes the behavior if not specified
+        help=(
+            "Specific directory or file names to ignore. "
+            "Can be used multiple times (e.g., -i node_modules -i build). "
+            "Adds to .llmignore and config exclusions."
+        ),  # Updated help
+        show_default="None (uses .llmignore and config)",  # Updated show_default
     ),
 ):
     """
     Generates and displays or saves a directory tree structure.
-
-    This command traverses a directory starting from `ROOT_DIR` and
-    creates a visual representation of its structure.
-
-    By default, it excludes a predefined list of common development-related
-    directories and files (e.g., .git, __pycache__, venv).
-    Users can specify additional items to ignore by their names using the
-    --ignore option. The output can be printed to the console (default)
-    or saved to a specified --output file.
+    Uses .llmignore, pyproject.toml config, and CLI options for behavior.
     """
+    # Load configuration from pyproject.toml in the root_dir
+    # For commands operating on a root_dir, it's logical to load config from that root_dir.
+    # If root_dir is '.', pyproject.toml is searched in the current working directory.
+    config = config_manager.load_config(root_dir)  # Pass the target root_dir
+
+    actual_output_path: Optional[Path] = None
+    if output_file:  # CLI option takes highest precedence for output file
+        actual_output_path = output_file
+    elif config.get("default_output_filename_tree"):
+        # Construct path relative to the root_dir where pyproject.toml was found
+        # This ensures output files defined in config are placed relative to project root
+        cfg_output_filename = config["default_output_filename_tree"]
+        if isinstance(cfg_output_filename, str):  # Basic type check from config
+            actual_output_path = root_dir / cfg_output_filename  # Paths in config are relative to project root
+            console.print(f"[dim]Using default output file from config: {actual_output_path.resolve()}[/dim]")
+        else:
+            # This warning might also be handled within load_config if we make it stricter
+            warnings.warn(
+                f"Config Warning: 'default_output_filename_tree' should be a string, " f"got {type(cfg_output_filename)}. Outputting to console.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+    # TODO LATER: Integrate config.get("global_exclude_patterns", []) with `ignore` list.
+    # For now, `ignore` is just the CLI ignores.
+    cli_ignore_list = ignore if ignore else []
+
     try:
-        # Delegate the core logic to the tree_generator module.
-        # This keeps the main.py cleaner and focused on CLI aspects.
         tree_generator.generate_and_output_tree(
             root_dir=root_dir,
-            output_file_path=output_file,
-            ignore_list=ignore,
+            output_file_path=actual_output_path,  # Use the resolved path
+            ignore_list=cli_ignore_list,  # Pass CLI ignores
+            # config_exclude_patterns=config.get("global_exclude_patterns", []) # For later integration
         )
     except typer.Exit:
-        # If Typer itself raises an Exit (e.g., due to failed path validation
-        # in the argument processing), let it propagate to exit cleanly.
         raise
     except Exception as e:
-        # Catch any other unexpected errors from the tree generation logic.
         console.print(f"[bold red]An unexpected error occurred during tree generation: {e}[/bold red]")
-        # For debugging, you might want to uncomment the following lines to print the full traceback:
-        # import traceback
-        # console.print(f"[red]{traceback.format_exc()}[/red]")
-        raise typer.Exit(code=1) from e  # FIX: Added 'from e'
+        raise typer.Exit(code=1) from e
 
 
 @app.command(name="flatten")
 def flatten_command(
     root_dir: Path = typer.Argument(
         ".",
-        help="Root directory to flatten files from. All paths are resolved relative to this directory.",
+        help="Root directory to flatten files from. Config file is read from here.",
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -173,10 +193,10 @@ def flatten_command(
         None,
         "--output",
         "-o",
-        help="Output file to save the flattened content. If not specified, content is printed to the console.",
+        help="Output file to save the flattened content. Overrides config default. If neither, prints to console.",
         writable=True,  # Typer checks if the path (if given) is writable
         resolve_path=True,  # Converts to an absolute path if provided
-        show_default="Print to console",
+        show_default="None (uses config or console)",
     ),
     include: Optional[List[str]] = typer.Option(
         None,
@@ -188,7 +208,7 @@ def flatten_command(
             "Use multiple times for multiple criteria (e.g., -inc '*.py' -inc '*.md'). "
             "If not provided, a default list of common code/text file types is used."
         ),
-        show_default="Default common code/text extensions/filenames",
+        show_default="None (uses config or tool defaults)",
     ),
     exclude: Optional[List[str]] = typer.Option(
         None,
@@ -199,7 +219,7 @@ def flatten_command(
             "or exact filenames. Exclusions apply after general default exclusions (like .git, venv) "
             "and take precedence over include patterns. Use multiple times for multiple criteria."
         ),
-        show_default="None (beyond default internal exclusions like .git, venv)",
+        show_default="None (uses .llmignore and config)",
     ),
 ):
     """
@@ -217,24 +237,43 @@ def flatten_command(
     This is useful for creating a single context bundle for LLMs, archiving
     key project files, or performing global searches/reviews.
     """
+    config = config_manager.load_config(root_dir)
+
+    actual_output_path: Optional[Path] = None
+    if output_file:
+        actual_output_path = output_file
+    elif config.get("default_output_filename_flatten"):
+        cfg_output_filename = config["default_output_filename_flatten"]
+        if isinstance(cfg_output_filename, str):
+            actual_output_path = root_dir / cfg_output_filename
+            console.print(f"[dim]Using default output file from config: {actual_output_path.resolve()}[/dim]")
+        else:
+            warnings.warn(
+                f"Config Warning: 'default_output_filename_flatten' should be a string, " f"got {type(cfg_output_filename)}. Outputting to console.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+    # TODO LATER: Logic for include_patterns precedence: CLI > Config > Tool Default
+    actual_include_patterns = include  # For now, just CLI or None
+
+    # TODO LATER: Logic for exclude_patterns precedence: Merge CLI + Config + .llmignore handled by ignore_handler
+    actual_exclude_patterns = exclude  # For now, just CLI or None
+
     try:
-        # Delegate the core flattening logic to the flattener module.
         flattener.flatten_code_logic(
             root_dir_path=root_dir,
-            output_file_path=output_file,
-            include_patterns=include,
-            exclude_patterns=exclude,
+            output_file_path=actual_output_path,
+            include_patterns=actual_include_patterns,
+            exclude_patterns=actual_exclude_patterns,
+            # config_global_include_patterns=config.get("global_include_patterns", []), # For later
+            # config_global_exclude_patterns=config.get("global_exclude_patterns", [])  # For later
         )
     except typer.Exit:
-        # Allow Typer's own Exit exceptions (e.g., from failed path validation) to pass through.
         raise
     except Exception as e:
-        # Catch any other unexpected errors from the flattening logic.
         console.print(f"[bold red]An unexpected error occurred during code flattening: {e}[/bold red]")
-        # For detailed debugging, one might uncomment the following lines:
-        # import traceback
-        # console.print(f"[red]{traceback.format_exc()}[/red]")
-        raise typer.Exit(code=1) from e  # FIX: Added 'from e'
+        raise typer.Exit(code=1) from e
 
 
 # This block ensures that the Typer app runs when the script is executed directly
