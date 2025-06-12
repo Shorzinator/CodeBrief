@@ -351,13 +351,16 @@ mypy>=1.0.0
         assert all(d.group == "dev" for d in deps)
         assert len(deps) == 3
 
-    @pytest.mark.parametrize(("filename", "expected_group"), [
-        ("requirements.txt", "main"),
-        ("requirements-dev.txt", "dev"),
-        ("requirements-test.txt", "test"),
-        ("requirements-prod.txt", "production"),
-        ("requirements-production.txt", "production"),
-    ])
+    @pytest.mark.parametrize(
+        ("filename", "expected_group"),
+        [
+            ("requirements.txt", "main"),
+            ("requirements-dev.txt", "dev"),
+            ("requirements-test.txt", "test"),
+            ("requirements-prod.txt", "production"),
+            ("requirements-production.txt", "production"),
+        ],
+    )
     def test_group_determination_from_filename(self, tmp_path, filename, expected_group):
         """Test group determination from various filenames."""
         requirements_content = "requests>=2.31.0\n"
@@ -400,14 +403,8 @@ class TestPackageJsonParser:
         package_data = {
             "name": "test-project",
             "version": "1.0.0",
-            "dependencies": {
-                "express": "^4.18.0",
-                "lodash": "^4.17.21"
-            },
-            "devDependencies": {
-                "jest": "^29.0.0",
-                "eslint": "^8.0.0"
-            }
+            "dependencies": {"express": "^4.18.0", "lodash": "^4.17.21"},
+            "devDependencies": {"jest": "^29.0.0", "eslint": "^8.0.0"},
         }
 
         package_file = tmp_path / "package.json"
@@ -436,18 +433,10 @@ class TestPackageJsonParser:
         package_data = {
             "name": "test-project",
             "version": "1.0.0",
-            "dependencies": {
-                "express": "^4.18.0"
-            },
-            "devDependencies": {
-                "jest": "^29.0.0"
-            },
-            "peerDependencies": {
-                "react": "^18.0.0"
-            },
-            "optionalDependencies": {
-                "fsevents": "^2.3.0"
-            }
+            "dependencies": {"express": "^4.18.0"},
+            "devDependencies": {"jest": "^29.0.0"},
+            "peerDependencies": {"react": "^18.0.0"},
+            "optionalDependencies": {"fsevents": "^2.3.0"},
         }
 
         package_file = tmp_path / "package.json"
@@ -478,10 +467,7 @@ class TestPackageJsonParser:
 
     def test_empty_dependencies(self, tmp_path):
         """Test parsing package.json with no dependencies."""
-        package_data = {
-            "name": "test-project",
-            "version": "1.0.0"
-        }
+        package_data = {"name": "test-project", "version": "1.0.0"}
 
         package_file = tmp_path / "package.json"
         package_file.write_text(json.dumps(package_data, indent=2))
@@ -515,8 +501,7 @@ class TestDiscoveryFunctions:
         assert len(discovered_files) >= 5
 
         filenames = {f.name for f in discovered_files}
-        expected_files = {"pyproject.toml", "requirements.txt", "requirements-dev.txt",
-                         "package.json", "base.txt", "test.in"}
+        expected_files = {"pyproject.toml", "requirements.txt", "requirements-dev.txt", "package.json", "base.txt", "test.in"}
         assert expected_files.issubset(filenames)
 
     def test_discover_no_files(self, tmp_path):
@@ -528,12 +513,15 @@ class TestDiscoveryFunctions:
         discovered_files = discover_dependency_files(tmp_path)
         assert discovered_files == []
 
-    @pytest.mark.parametrize(("filename", "parser_class"), [
-        ("pyproject.toml", PyProjectTomlParser),
-        ("requirements.txt", RequirementsTxtParser),
-        ("requirements-dev.txt", RequirementsTxtParser),
-        ("package.json", PackageJsonParser),
-    ])
+    @pytest.mark.parametrize(
+        ("filename", "parser_class"),
+        [
+            ("pyproject.toml", PyProjectTomlParser),
+            ("requirements.txt", RequirementsTxtParser),
+            ("requirements-dev.txt", RequirementsTxtParser),
+            ("package.json", PackageJsonParser),
+        ],
+    )
     def test_create_parser(self, tmp_path, filename, parser_class):
         """Test creating appropriate parser for different files."""
         file_path = tmp_path / filename
@@ -567,11 +555,7 @@ class TestMarkdownFormatting:
             DependencyInfo("pytest", "^7.0.0", group="dev"),
         ]
 
-        dependency_data = {
-            "Python": {
-                "Poetry (pyproject.toml)": deps
-            }
-        }
+        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
@@ -590,14 +574,7 @@ class TestMarkdownFormatting:
         python_deps = [DependencyInfo("requests", "^2.31.0", group="main")]
         nodejs_deps = [DependencyInfo("express", "^4.18.0", group="main")]
 
-        dependency_data = {
-            "Python": {
-                "Poetry (pyproject.toml)": python_deps
-            },
-            "Node.js": {
-                "npm/yarn (package.json)": nodejs_deps
-            }
-        }
+        dependency_data = {"Python": {"Poetry (pyproject.toml)": python_deps}, "Node.js": {"npm/yarn (package.json)": nodejs_deps}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
@@ -608,15 +585,9 @@ class TestMarkdownFormatting:
 
     def test_format_dependencies_with_extras(self):
         """Test formatting dependencies with extras."""
-        deps = [
-            DependencyInfo("django", "^4.0.0", extras=["redis", "postgres"], group="main")
-        ]
+        deps = [DependencyInfo("django", "^4.0.0", extras=["redis", "postgres"], group="main")]
 
-        dependency_data = {
-            "Python": {
-                "Poetry (pyproject.toml)": deps
-            }
-        }
+        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
@@ -631,11 +602,7 @@ class TestMarkdownFormatting:
             DependencyInfo("click", "^8.0.0", group="main"),
         ]
 
-        dependency_data = {
-            "Python": {
-                "Poetry (pyproject.toml)": deps
-            }
-        }
+        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
@@ -705,13 +672,7 @@ requests = "^2.31.0"
     def test_list_dependencies_to_console(self, tmp_path, capsys):
         """Test listing dependencies to console."""
         # Create a simple package.json
-        package_data = {
-            "name": "test-project",
-            "version": "1.0.0",
-            "dependencies": {
-                "express": "^4.18.0"
-            }
-        }
+        package_data = {"name": "test-project", "version": "1.0.0", "dependencies": {"express": "^4.18.0"}}
 
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
@@ -736,13 +697,7 @@ requests = "^2.31.0"
         (tmp_path / "pyproject.toml").write_text(pyproject_content)
 
         # Create package.json
-        package_data = {
-            "name": "test-project",
-            "version": "1.0.0",
-            "dependencies": {
-                "express": "^4.18.0"
-            }
-        }
+        package_data = {"name": "test-project", "version": "1.0.0", "dependencies": {"express": "^4.18.0"}}
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
         # Create requirements.txt

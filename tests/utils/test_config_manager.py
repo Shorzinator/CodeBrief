@@ -20,6 +20,7 @@ EXPECTED_DEFAULTS = {
     "default_output_filename_tree": None,
     "default_output_filename_flatten": None,
     "default_output_filename_bundle": None,
+    "default_output_filename_deps": None,
     "global_include_patterns": [],
     "global_exclude_patterns": [],
 }
@@ -82,7 +83,11 @@ def test_load_config_all_values_present_and_correct_type():
         create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
 
         config = config_manager.load_config(project_root)
-        assert config == config_data
+
+        # Expected config should include defaults for unspecified keys
+        expected_config = EXPECTED_DEFAULTS.copy()
+        expected_config.update(config_data)
+        assert config == expected_config
 
 
 def test_load_config_some_values_missing():

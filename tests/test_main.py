@@ -135,7 +135,9 @@ def test_flatten_command_success(mock_flatten_logic, tmp_path: Path):
     """Test flatten command successful execution (mocking actual flattening)."""
     result = runner.invoke(app, ["flatten", str(tmp_path)])
     assert result.exit_code == 0
-    mock_flatten_logic.assert_called_once_with(root_dir_path=tmp_path.resolve(), output_file_path=None, include_patterns=[], exclude_patterns=[])
+    mock_flatten_logic.assert_called_once_with(
+        root_dir_path=tmp_path.resolve(), output_file_path=None, include_patterns=[], exclude_patterns=[], config_global_excludes=[]
+    )
 
 
 @mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
@@ -147,7 +149,11 @@ def test_flatten_command_with_options(mock_flatten_logic, tmp_path: Path):
     )
     assert result.exit_code == 0
     mock_flatten_logic.assert_called_once_with(
-        root_dir_path=tmp_path.resolve(), output_file_path=output_f.resolve(), include_patterns=["*.py", "*.md"], exclude_patterns=["temp/*"]
+        root_dir_path=tmp_path.resolve(),
+        output_file_path=output_f.resolve(),
+        include_patterns=["*.py", "*.md"],
+        exclude_patterns=["temp/*"],
+        config_global_excludes=[],
     )
 
 
@@ -308,8 +314,7 @@ def test_tree_uses_config_global_excludes(mock_generate_tree, tmp_path: Path):
     config_data = {"global_exclude_patterns": ["*.log", "build/"]}
     create_pyproject_with_config(tmp_path, config_data)
 
-    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
-        result = runner.invoke(app, ["tree", str(isolated_dir)])
+    result = runner.invoke(app, ["tree", str(tmp_path)])
 
     assert result.exit_code == 0
     mock_generate_tree.assert_called_once()
@@ -326,8 +331,7 @@ def test_tree_cli_ignore_augments_config_global_excludes(mock_generate_tree, tmp
     create_pyproject_with_config(tmp_path, config_data)
 
     cli_ignore_val = "temp/"
-    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
-        result = runner.invoke(app, ["tree", str(isolated_dir), "--ignore", cli_ignore_val])
+    result = runner.invoke(app, ["tree", str(tmp_path), "--ignore", cli_ignore_val])
 
     assert result.exit_code == 0
     mock_generate_tree.assert_called_once()
@@ -345,8 +349,7 @@ def test_flatten_uses_config_global_excludes(mock_flatten_logic, tmp_path: Path)
     config_data = {"global_exclude_patterns": ["__pycache__/", "*.tmp"]}
     create_pyproject_with_config(tmp_path, config_data)
 
-    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
-        result = runner.invoke(app, ["flatten", str(isolated_dir)])
+    result = runner.invoke(app, ["flatten", str(tmp_path)])
 
     assert result.exit_code == 0
     mock_flatten_logic.assert_called_once()
@@ -362,8 +365,7 @@ def test_flatten_cli_exclude_augments_config_global_excludes(mock_flatten_logic,
     create_pyproject_with_config(tmp_path, config_data)
 
     cli_exclude_val = "*.css"
-    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
-        result = runner.invoke(app, ["flatten", str(isolated_dir), "--exclude", cli_exclude_val])
+    result = runner.invoke(app, ["flatten", str(tmp_path), "--exclude", cli_exclude_val])
 
     assert result.exit_code == 0
     mock_flatten_logic.assert_called_once()
@@ -429,6 +431,8 @@ def test_flatten_integration_with_config_excludes(tmp_path: Path):
     assert "# --- File: utils.py ---" in content
     assert "print('utils')" in content
 
-    assert "ignored.py" not in content
-    assert "docs/index.md" not in content  # Check full path or unique content
-    assert "# Docs" not in content
+    # Check that the actual ignored files are not included (check for file headers)
+    assert "# --- File: ignored.py ---" not in content
+    assert "# --- File: docs/index.md ---" not in content
+    assert "print('ignored')" not in content  # Content from ignored.py
+    assert "# Docs" not in content  # Content from docs/index.md

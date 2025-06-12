@@ -274,8 +274,7 @@ def flatten_command(
             output_file_path=actual_output_path,
             include_patterns=actual_include_patterns,
             exclude_patterns=actual_exclude_patterns,
-            # config_global_include_patterns=config.get("global_include_patterns", []), # For later
-            # config_global_exclude_patterns=config.get("global_exclude_patterns", [])  # For later
+            config_global_excludes=cfg_global_excludes,
         )
     except typer.Exit:
         raise
@@ -335,8 +334,7 @@ def deps_command(
             console.print(f"[dim]Using default output file from config: {actual_output_path.resolve()}[/dim]")
         else:
             warnings.warn(
-                f"Config Warning: 'default_output_filename_deps' should be a string, "
-                f"got {type(cfg_output_filename)}. Outputting to console.",
+                f"Config Warning: 'default_output_filename_deps' should be a string, " f"got {type(cfg_output_filename)}. Outputting to console.",
                 UserWarning,
                 stacklevel=2,
             )

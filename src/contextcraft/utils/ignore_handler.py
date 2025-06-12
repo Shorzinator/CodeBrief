@@ -152,6 +152,8 @@ def is_path_ignored(
             if relative_path_for_spec:
                 rel_path_str = relative_path_for_spec.as_posix()
                 current_path_obj_for_match = Path(rel_path_str)
+
+                # For directory patterns ending with "/", check if this is a directory
                 if pattern.endswith("/") and path_to_check_abs.is_dir():
                     path_to_match_as_dir = rel_path_str
                     if not path_to_match_as_dir.endswith("/"):
@@ -160,6 +162,17 @@ def is_path_ignored(
                         return True
                     if current_path_obj_for_match.name + "/" == pattern:
                         return True
+
+                # For directory patterns ending with "/", also check if any parent directory matches
+                if pattern.endswith("/"):
+                    # Check if any parent directory of the file matches the pattern
+                    for parent in current_path_obj_for_match.parents:
+                        parent_str = parent.as_posix()
+                        if parent_str + "/" == pattern:
+                            return True
+                        if parent.name + "/" == pattern:
+                            return True
+
                 if current_path_obj_for_match.match(pattern):
                     return True
 
@@ -175,6 +188,8 @@ def is_path_ignored(
             if relative_path_for_spec:
                 rel_path_str_cli = relative_path_for_spec.as_posix()
                 current_path_for_cli_match = Path(rel_path_str_cli)
+
+                # For directory patterns ending with "/", check if this is a directory
                 if pattern.endswith("/") and path_to_check_abs.is_dir():
                     path_to_match_cli_dir = rel_path_str_cli
                     if not path_to_match_cli_dir.endswith("/"):
@@ -183,6 +198,17 @@ def is_path_ignored(
                         return True
                     if current_path_for_cli_match.name + "/" == pattern:
                         return True
+
+                # For directory patterns ending with "/", also check if any parent directory matches
+                if pattern.endswith("/"):
+                    # Check if any parent directory of the file matches the pattern
+                    for parent in current_path_for_cli_match.parents:
+                        parent_str = parent.as_posix()
+                        if parent_str + "/" == pattern:
+                            return True
+                        if parent.name + "/" == pattern:
+                            return True
+
                 if current_path_for_cli_match.match(pattern):
                     return True
 

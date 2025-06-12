@@ -48,13 +48,7 @@ class DependencyInfo:
         group: Dependency group (e.g., 'dev', 'test', 'main')
     """
 
-    def __init__(
-        self,
-        name: str,
-        version: Optional[str] = None,
-        extras: Optional[List[str]] = None,
-        group: str = "main"
-    ):
+    def __init__(self, name: str, version: Optional[str] = None, extras: Optional[List[str]] = None, group: str = "main"):
         self.name = name
         self.version = version
         self.extras = extras or []
@@ -188,17 +182,17 @@ class PyProjectTomlParser(PackageManagerParser):
 
         # Extract extras
         extras = []
-        extras_match = re.search(r'\[([^\]]+)\]', req_string)
+        extras_match = re.search(r"\[([^\]]+)\]", req_string)
         if extras_match:
-            extras = [e.strip() for e in extras_match.group(1).split(',')]
-            req_string = req_string.replace(extras_match.group(0), '')
+            extras = [e.strip() for e in extras_match.group(1).split(",")]
+            req_string = req_string.replace(extras_match.group(0), "")
 
         # Extract version constraint
-        version_match = re.search(r'([<>=!~]+.+)', req_string)
+        version_match = re.search(r"([<>=!~]+.+)", req_string)
         version = version_match.group(1) if version_match else None
 
         # Extract package name
-        name = re.sub(r'[<>=!~].*', '', req_string).strip()
+        name = re.sub(r"[<>=!~].*", "", req_string).strip()
 
         return name, version, extras
 
@@ -250,16 +244,16 @@ class RequirementsTxtParser(PackageManagerParser):
                     line = line.strip()
 
                     # Skip empty lines and comments
-                    if not line or line.startswith('#'):
+                    if not line or line.startswith("#"):
                         continue
 
                     # Skip -r, -f, --find-links, etc. (requirement file options)
-                    if line.startswith('-'):
+                    if line.startswith("-"):
                         continue
 
                     # Remove inline comments
-                    if '#' in line:
-                        line = line.split('#')[0].strip()
+                    if "#" in line:
+                        line = line.split("#")[0].strip()
 
                     if line:
                         try:
@@ -281,14 +275,14 @@ class RequirementsTxtParser(PackageManagerParser):
         """Determine dependency group from filename."""
         filename = self.file_path.name.lower()
 
-        if 'dev' in filename:
-            return 'dev'
-        elif 'test' in filename:
-            return 'test'
-        elif 'prod' in filename or 'production' in filename:
-            return 'production'
+        if "dev" in filename:
+            return "dev"
+        elif "test" in filename:
+            return "test"
+        elif "prod" in filename or "production" in filename:
+            return "production"
         else:
-            return 'main'
+            return "main"
 
     def _parse_requirement_string(self, req_string: str) -> Tuple[str, Optional[str], List[str]]:
         """Parse a requirement string like 'package[extra1,extra2]>=1.0'."""
@@ -296,17 +290,17 @@ class RequirementsTxtParser(PackageManagerParser):
 
         # Extract extras
         extras = []
-        extras_match = re.search(r'\[([^\]]+)\]', req_string)
+        extras_match = re.search(r"\[([^\]]+)\]", req_string)
         if extras_match:
-            extras = [e.strip() for e in extras_match.group(1).split(',')]
-            req_string = req_string.replace(extras_match.group(0), '')
+            extras = [e.strip() for e in extras_match.group(1).split(",")]
+            req_string = req_string.replace(extras_match.group(0), "")
 
         # Extract version constraint
-        version_match = re.search(r'([<>=!~]+.+)', req_string)
+        version_match = re.search(r"([<>=!~]+.+)", req_string)
         version = version_match.group(1) if version_match else None
 
         # Extract package name
-        name = re.sub(r'[<>=!~].*', '', req_string).strip()
+        name = re.sub(r"[<>=!~].*", "", req_string).strip()
 
         return name, version, extras
 
@@ -381,11 +375,11 @@ def discover_dependency_files(project_path: Path) -> List[Path]:
         "requirements-test.txt",
         "requirements-prod.txt",
         "requirements/*.txt",
-        "requirements/*.in"
+        "requirements/*.in",
     ]
 
     for pattern in requirements_patterns:
-        if '*' in pattern:
+        if "*" in pattern:
             # Handle glob patterns
             for path in project_path.glob(pattern):
                 if path.is_file():
@@ -417,7 +411,7 @@ def create_parser(file_path: Path) -> Optional[PackageManagerParser]:
 
     if filename == "pyproject.toml":
         return PyProjectTomlParser(file_path)
-    elif filename.endswith(('.txt', '.in')) and 'requirements' in filename:
+    elif filename.endswith((".txt", ".in")) and "requirements" in filename:
         return RequirementsTxtParser(file_path)
     elif filename == "package.json":
         return PackageJsonParser(file_path)
@@ -425,9 +419,7 @@ def create_parser(file_path: Path) -> Optional[PackageManagerParser]:
     return None
 
 
-def format_dependencies_as_markdown(
-    dependency_data: Dict[str, Dict[str, List[DependencyInfo]]]
-) -> str:
+def format_dependencies_as_markdown(dependency_data: Dict[str, Dict[str, List[DependencyInfo]]]) -> str:
     """
     Format dependency data as structured Markdown.
 
@@ -461,7 +453,7 @@ def format_dependencies_as_markdown(
 
             for group, group_deps in grouped_deps.items():
                 if len(grouped_deps) > 1:  # Only show group header if there are multiple groups
-                    group_title = group.replace('_', ' ').title()
+                    group_title = group.replace("_", " ").title()
                     markdown_lines.append(f"#### {group_title} Dependencies\n")
 
                 # Sort dependencies alphabetically
@@ -480,10 +472,7 @@ def format_dependencies_as_markdown(
     return "\n".join(markdown_lines)
 
 
-def list_dependencies_logic(
-    project_path: Path,
-    actual_output_path: Optional[Path]
-) -> None:
+def list_dependencies_logic(project_path: Path, actual_output_path: Optional[Path]) -> None:
     """
     Main logic function for listing project dependencies.
 
