@@ -1,0 +1,5 @@
+proj/
+├── src/
+│   └── main.py
+├── file.py
+└── pyproject.toml

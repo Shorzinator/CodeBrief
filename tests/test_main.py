@@ -297,3 +297,138 @@ def test_tree_command_no_output_options_prints_to_console(mock_generate_tree, tm
     assert kwargs.get("output_file_path") is None  # Crucial: should be None for console output
     # We can't easily assert console output here because it's the mocked function's job.
     # We trust generate_and_output_tree to print to console if output_file_path is None.
+
+
+# --- Tests for config global_exclude_patterns ---
+
+
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_tree_uses_config_global_excludes(mock_generate_tree, tmp_path: Path):
+    """Test `tree` command applies global_exclude_patterns from config."""
+    config_data = {"global_exclude_patterns": ["*.log", "build/"]}
+    create_pyproject_with_config(tmp_path, config_data)
+
+    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
+        result = runner.invoke(app, ["tree", str(isolated_dir)])
+
+    assert result.exit_code == 0
+    mock_generate_tree.assert_called_once()
+    args, kwargs = mock_generate_tree.call_args
+    # ignore_list is for CLI --ignore, config_global_excludes is separate
+    assert kwargs.get("ignore_list") == []
+    assert kwargs.get("config_global_excludes") == ["*.log", "build/"]
+
+
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_tree_cli_ignore_augments_config_global_excludes(mock_generate_tree, tmp_path: Path):
+    """Test `tree` CLI --ignore adds to config's global_exclude_patterns."""
+    config_data = {"global_exclude_patterns": ["*.log"]}
+    create_pyproject_with_config(tmp_path, config_data)
+
+    cli_ignore_val = "temp/"
+    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
+        result = runner.invoke(app, ["tree", str(isolated_dir), "--ignore", cli_ignore_val])
+
+    assert result.exit_code == 0
+    mock_generate_tree.assert_called_once()
+    args, kwargs = mock_generate_tree.call_args
+    assert kwargs.get("ignore_list") == [cli_ignore_val]  # CLI ignores
+    assert kwargs.get("config_global_excludes") == ["*.log"]  # Config excludes
+
+    # Note: The actual merging/precedence of these lists happens inside ignore_handler.is_path_ignored.
+    # Here, we are just verifying that main.py passes them correctly to the tool function.
+
+
+@mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
+def test_flatten_uses_config_global_excludes(mock_flatten_logic, tmp_path: Path):
+    """Test `flatten` command applies global_exclude_patterns from config."""
+    config_data = {"global_exclude_patterns": ["__pycache__/", "*.tmp"]}
+    create_pyproject_with_config(tmp_path, config_data)
+
+    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
+        result = runner.invoke(app, ["flatten", str(isolated_dir)])
+
+    assert result.exit_code == 0
+    mock_flatten_logic.assert_called_once()
+    args, kwargs = mock_flatten_logic.call_args
+    assert kwargs.get("exclude_patterns") == []  # CLI --exclude
+    assert kwargs.get("config_global_excludes") == ["__pycache__/", "*.tmp"]
+
+
+@mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
+def test_flatten_cli_exclude_augments_config_global_excludes(mock_flatten_logic, tmp_path: Path):
+    """Test `flatten` CLI --exclude adds to config's global_exclude_patterns."""
+    config_data = {"global_exclude_patterns": ["node_modules/"]}
+    create_pyproject_with_config(tmp_path, config_data)
+
+    cli_exclude_val = "*.css"
+    with runner.isolated_filesystem(temp_dir=tmp_path) as isolated_dir:
+        result = runner.invoke(app, ["flatten", str(isolated_dir), "--exclude", cli_exclude_val])
+
+    assert result.exit_code == 0
+    mock_flatten_logic.assert_called_once()
+    args, kwargs = mock_flatten_logic.call_args
+    assert kwargs.get("exclude_patterns") == [cli_exclude_val]  # CLI excludes
+    assert kwargs.get("config_global_excludes") == ["node_modules/"]
+
+
+# --- More comprehensive integration tests (without mocking tool logic) ---
+# These will test the actual output when config excludes are active.
+
+
+def test_tree_integration_with_config_excludes(tmp_path: Path, snapshot):
+    """Actual tree output test with config global_exclude_patterns."""
+    project_dir = tmp_path / "proj"
+    project_dir.mkdir()
+
+    create_pyproject_with_config(project_dir, {"global_exclude_patterns": ["*.log", "temp/"]})
+
+    (project_dir / "file.py").touch()
+    (project_dir / "data.log").touch()  # Should be excluded by config
+    (project_dir / "temp").mkdir()
+    (project_dir / "temp" / "file_in_temp.txt").touch()  # Should be excluded by config
+    (project_dir / "src").mkdir()
+    (project_dir / "src" / "main.py").touch()
+
+    output_file = project_dir / "tree_with_config_excludes.txt"
+
+    # Run tree command targeting the project_dir where pyproject.toml is
+    result = runner.invoke(app, ["tree", str(project_dir), "--output", str(output_file)])
+    assert result.exit_code == 0
+
+    assert output_file.exists()
+    content = output_file.read_text()
+    snapshot.assert_match(content, "tree_with_config_excludes_output.txt")
+    # Expected snapshot: file.py, src/main.py. Excludes .log and temp/
+
+
+def test_flatten_integration_with_config_excludes(tmp_path: Path):
+    """Actual flatten output test with config global_exclude_patterns."""
+    project_dir = tmp_path / "proj"
+    project_dir.mkdir()
+
+    create_pyproject_with_config(project_dir, {"global_exclude_patterns": ["ignored.py", "docs/"]})
+
+    (project_dir / "app.py").write_text("print('app')")
+    (project_dir / "ignored.py").write_text("print('ignored')")  # Excluded by config
+    (project_dir / "docs").mkdir()
+    (project_dir / "docs" / "index.md").write_text("# Docs")  # Excluded by config
+    (project_dir / "utils.py").write_text("print('utils')")
+
+    output_file = project_dir / "flatten_with_config_excludes.txt"
+
+    # Run flatten; rely on default include patterns (which should include .py)
+    result = runner.invoke(app, ["flatten", str(project_dir), "--output", str(output_file)])
+    assert result.exit_code == 0
+
+    assert output_file.exists()
+    content = output_file.read_text()
+
+    assert "# --- File: app.py ---" in content
+    assert "print('app')" in content
+    assert "# --- File: utils.py ---" in content
+    assert "print('utils')" in content
+
+    assert "ignored.py" not in content
+    assert "docs/index.md" not in content  # Check full path or unique content
+    assert "# Docs" not in content
