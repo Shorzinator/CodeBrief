@@ -27,6 +27,7 @@ import os  # Used for os.walk to traverse directory structures.
 from pathlib import Path  # Core library for object-oriented path manipulation.
 from typing import List, Optional, Set  # Type hints for clarity and static analysis.
 
+import pathspec  # For type hinting the llmignore_spec.
 import typer  # For typer.Exit for controlled exits from logic functions.
 from rich.console import Console  # For styled and rich console output.
 
@@ -229,18 +230,25 @@ def _file_matches_include_criteria(
 
 def _directory_has_unignored_files(
     dir_path: Path,
-    root_dir: Path,
-    llmignore_spec,
-    cli_ignores,
+    root_dir: Path,  # This is the main project root for relative path context for ignore_handler
+    llmignore_spec: Optional[pathspec.PathSpec],  # Use Optional[pathspec.PathSpec] for typing
+    cli_ignores: Optional[List[str]],
+    config_global_excludes: Optional[List[str]],
 ) -> bool:
     """
     Recursively checks if a directory contains any files that are NOT ignored by the ignore logic.
     Returns True if at least one un-ignored file is found.
     """
-    for current_root, dirs, files in os.walk(dir_path):
-        for file in files:
-            file_path = Path(current_root) / file
-            if not ignore_handler.is_path_ignored(file_path, root_dir, llmignore_spec, cli_ignores):
+    for current_root, _, files in os.walk(dir_path):  # Intentionally not pruning dirs here
+        for file_name in files:  # Renamed for clarity
+            file_path = Path(current_root) / file_name
+            if not ignore_handler.is_path_ignored(
+                file_path,
+                root_dir,  # Pass the main project root
+                llmignore_spec,
+                cli_ignores,
+                config_exclude_patterns=config_global_excludes,  # <--- FIXED PARAMETER NAME
+            ):
                 return True
     return False
 
@@ -249,7 +257,8 @@ def flatten_code_logic(
     root_dir_path: Path,
     output_file_path: Optional[Path] = None,
     include_patterns: Optional[List[str]] = None,  # CLI --include
-    exclude_patterns: Optional[List[str]] = None,  # CLI --exclude (acts as additional ignores)
+    exclude_patterns: Optional[List[str]] = None,  # This is CLI --exclude
+    config_global_excludes: Optional[List[str]] = None,
 ) -> None:
     """
     Main logic function for flattening files within a directory into a single text output.
@@ -266,28 +275,24 @@ def flatten_code_logic(
         raise typer.Exit(code=1)
 
     llmignore_spec = ignore_handler.load_ignore_patterns(root_dir_path)
-    if llmignore_spec and output_file_path:  # Only print if outputting to file, to reduce console noise
-        # (Consider making console messages like this conditional on a verbosity flag later)
-        llmignore_file_path = root_dir_path / ignore_handler.LLMIGNORE_FILENAME
-        if llmignore_file_path.exists():  # Check if it actually exists, load_ignore_patterns can return None if empty
-            console.print(f"[dim]Using .llmignore patterns from '{llmignore_file_path}'[/dim]")
-        elif output_file_path:  # Only print this if not using llmignore and outputting to file
-            console.print(f"[dim]No .llmignore file found or it's empty in '{root_dir_path}'. Using default general exclusions.[/dim]")
-    elif not llmignore_spec and output_file_path:  # No llmignore, outputting to file
-        console.print(f"[dim]No .llmignore file found or it's empty in '{root_dir_path}'. Using default general exclusions.[/dim]")
+    # Simplified console messages for brevity
+    if llmignore_spec and output_file_path and (root_dir_path / ignore_handler.LLMIGNORE_FILENAME).exists():
+        console.print(f"[dim]Using .llmignore patterns from '{root_dir_path / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
+    elif not llmignore_spec and output_file_path:
+        console.print(f"[dim]No .llmignore file in '{root_dir_path}' or it's empty. Using fallback exclusions if applicable.[/dim]")
 
-    effective_cli_ignores = list(exclude_patterns) if exclude_patterns else []
+    effective_cli_only_ignores = list(exclude_patterns) if exclude_patterns else []
     if output_file_path:
         abs_output_file = output_file_path.resolve()
         abs_root_dir = root_dir_path.resolve()
-        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in effective_cli_ignores:
-            effective_cli_ignores.append(abs_output_file.name)
+        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in effective_cli_only_ignores:
+            effective_cli_only_ignores.append(abs_output_file.name)
 
     flattened_content_parts: List[str] = []
     files_processed_count = 0
     files_skipped_binary_count = 0
 
-    if output_file_path:  # Only print if outputting to file
+    if output_file_path:
         console.print(f"[dim]Starting flattening process in '{root_dir_path.resolve()}'...[/dim]")
 
     # We need to keep 'dirs' in the loop because we modify it in-place to control os.walk's traversal.
@@ -296,52 +301,54 @@ def flatten_code_logic(
     for current_subdir_str, dirs, files in os.walk(root_dir_path, topdown=True):
         current_subdir_path = Path(current_subdir_str)
 
-        # Directory pruning logic
         dirs_to_prune_indices = []
         for i, dir_name in enumerate(dirs):
             dir_path_abs = current_subdir_path / dir_name
 
-            # Primary prune via ignore_handler (checks CORE, .llmignore, CLI excludes)
-            if ignore_handler.is_path_ignored(
+            is_dir_ignored_by_main_rules = ignore_handler.is_path_ignored(
                 path_to_check=dir_path_abs,
                 root_dir=root_dir_path,
                 ignore_spec=llmignore_spec,
-                cli_ignore_patterns=effective_cli_ignores,
-            ):
-                # Only prune if the directory and all its descendants are ignored
-                if not _directory_has_unignored_files(dir_path_abs, root_dir_path, llmignore_spec, effective_cli_ignores):
-                    dirs_to_prune_indices.append(i)
-                continue  # Move to next directory in list `dirs`
+                cli_ignore_patterns=effective_cli_only_ignores,  # Pass CLI-specific
+                config_exclude_patterns=config_global_excludes,  # <--- PASS Config-specific
+            )
 
-            # Fallback: if no .llmignore, apply general default name-based exclusions for walk
-            if not llmignore_spec:
+            if is_dir_ignored_by_main_rules:
+                # Your existing logic for _directory_has_unignored_files applies here
+                if not _directory_has_unignored_files(
+                    dir_path_abs,
+                    root_dir_path,
+                    llmignore_spec,
+                    effective_cli_only_ignores,
+                    config_global_excludes,  # <--- PASS Config-specific here too
+                ):
+                    dirs_to_prune_indices.append(i)
+                # If it has unignored files, it's not pruned by this rule, loop continues to next dir.
+            elif not llmignore_spec and not config_global_excludes:  # Fallback for dir pruning
                 should_prune_by_fallback_dir = False
                 for fallback_pattern in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
-                    # Check if dir_name itself or a pattern matches it from fallback
                     if dir_name == fallback_pattern or Path(dir_name).match(fallback_pattern):
                         should_prune_by_fallback_dir = True
                         break
                 if should_prune_by_fallback_dir:
                     dirs_to_prune_indices.append(i)
 
-        # Prune directories by iterating from the end to keep indices valid
         for i in sorted(dirs_to_prune_indices, reverse=True):
             del dirs[i]
 
         for file_name in sorted(files):
             file_path = current_subdir_path / file_name
 
-            # 1. Check if the file is ignored by .llmignore, CLI excludes, or core system rules
             if ignore_handler.is_path_ignored(
                 path_to_check=file_path,
                 root_dir=root_dir_path,
                 ignore_spec=llmignore_spec,
-                cli_ignore_patterns=effective_cli_ignores,
+                cli_ignore_patterns=effective_cli_only_ignores,  # Pass CLI-specific
+                config_exclude_patterns=config_global_excludes,  # <--- PASS Config-specific
             ):
                 continue
 
-            # 2. Fallback exclusion for files if no .llmignore was active
-            if not llmignore_spec:
+            if not llmignore_spec and not config_global_excludes:  # Fallback for file skipping
                 should_skip_by_fallback_file = False
                 for fallback_pattern in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
                     if file_name == fallback_pattern or Path(file_name).match(fallback_pattern):
@@ -350,7 +357,6 @@ def flatten_code_logic(
                 if should_skip_by_fallback_file:
                     continue
 
-            # 3. If not ignored by any exclusion rule, check if it meets include criteria
             if not _file_matches_include_criteria(file_path, include_patterns):
                 continue
 

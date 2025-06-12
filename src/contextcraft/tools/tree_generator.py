@@ -1,4 +1,5 @@
 # src/contextcraft/tools/tree_generator.py
+
 """
 Directory Tree Generation Utilities.
 
@@ -15,7 +16,7 @@ Core functionalities:
 """
 
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 import pathspec  # For type hinting the llmignore_spec
 import typer
@@ -92,25 +93,28 @@ def _should_show_path(
     root_dir_for_ignores: Path,
     llmignore_spec: Optional[pathspec.PathSpec],
     cli_ignores: Optional[List[str]],
+    config_global_excludes: Optional[List[str]],  # <--- NEW PARAMETER
     tool_specific_fallback_exclusions: Set[str],
 ) -> bool:
     """
     Determine if a path should be shown in the tree, considering all ignore sources.
     """
-    # First, check against primary ignore mechanisms: CORE, .llmignore, CLI
-    is_ignored_by_primary = ignore_handler.is_path_ignored(
-        path_to_check=path, root_dir=root_dir_for_ignores, ignore_spec=llmignore_spec, cli_ignore_patterns=cli_ignores
+    is_ignored_by_main_rules = ignore_handler.is_path_ignored(
+        path_to_check=path,
+        root_dir=root_dir_for_ignores,
+        ignore_spec=llmignore_spec,
+        cli_ignore_patterns=cli_ignores,  # Passed to ignore_handler
+        config_exclude_patterns=config_global_excludes,
     )
 
-    if is_ignored_by_primary:
-        return False  # Path is definitely ignored by a primary rule
+    if is_ignored_by_main_rules:
+        return False
 
-    # If not ignored by primary rules and no .llmignore was active, check fallback
-    if llmignore_spec is None and _should_skip_this_item_name_fallback(path.name, tool_specific_fallback_exclusions):
-        return False  # Ignored by tool-specific fallback
+    # Fallback applies if no .llmignore was found AND no global config excludes were defined
+    # (as config excludes also represent a form of explicit project-level ignore rules)
+    if llmignore_spec is None and not config_global_excludes and _should_skip_this_item_name_fallback(path.name, tool_specific_fallback_exclusions):
+        return False
 
-    # If not ignored by primary rules, and either .llmignore was present (so fallback not used)
-    # or not matched by fallback, then show the path.
     return True
 
 
@@ -119,9 +123,10 @@ def _generate_tree_lines_recursive(
     root_dir_for_ignores: Path,
     llmignore_spec: Optional[pathspec.PathSpec],
     cli_ignores: Optional[List[str]],
+    config_global_excludes: Optional[List[str]],  # <--- NEW
     tool_specific_fallback_exclusions: Set[str],
     parent_prefix: str = "",
-    is_root_call_for_display: bool = True,  # Is this the initial dir whose name we print?
+    is_root_call_for_display: bool = True,
 ) -> List[str]:
     lines: List[str] = []
 
@@ -138,51 +143,56 @@ def _generate_tree_lines_recursive(
         return lines
 
     displayable_children: List[Path] = []
-    child_to_displayed_lines: dict = {}
-    for child_path in all_children_sorted:
-        # Check if the path itself should be shown
-        is_displayed = _should_show_path(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions)
+    child_to_processing_results: Dict[Path, Dict[str, Any]] = {}  # Renamed for clarity
 
-        # Always recurse into directories to check for unignored children
-        generated_child_lines = []
+    for child_path in all_children_sorted:
+        is_child_itself_displayable_by_rule = _should_show_path(
+            child_path,
+            root_dir_for_ignores,
+            llmignore_spec,
+            cli_ignores,
+            config_global_excludes,  # <--- PASS config_global_excludes
+            tool_specific_fallback_exclusions,
+        )
+
+        generated_grandchild_lines = []
         if child_path.is_dir():
-            generated_child_lines = _generate_tree_lines_recursive(
+            generated_grandchild_lines = _generate_tree_lines_recursive(
                 current_dir=child_path,
                 root_dir_for_ignores=root_dir_for_ignores,
                 llmignore_spec=llmignore_spec,
                 cli_ignores=cli_ignores,
+                config_global_excludes=config_global_excludes,  # <--- PASS config_global_excludes
                 tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
-                parent_prefix="",
+                parent_prefix="",  # Reset for children, their prefix is added in the next loop
                 is_root_call_for_display=False,
             )
 
-        # A directory should be shown if either:
-        # 1. It's not ignored itself, or
-        # 2. It has unignored children (even if the dir itself is ignored)
-        should_display = is_displayed or (child_path.is_dir() and generated_child_lines)
-        child_to_displayed_lines[child_path] = (should_display, generated_child_lines)
-        if should_display:
+        should_render_this_entry = is_child_itself_displayable_by_rule or (child_path.is_dir() and generated_grandchild_lines)
+
+        child_to_processing_results[child_path] = {"should_render": should_render_this_entry, "grandchild_lines": generated_grandchild_lines}
+        if should_render_this_entry:
             displayable_children.append(child_path)
 
-    num_displayable = len(displayable_children)
-    displayed_count = 0
+    num_displayable_entries = len(displayable_children)
+    rendered_entry_count = 0
 
-    for child_path in all_children_sorted:
-        is_child_displayed, generated_child_lines = child_to_displayed_lines[child_path]
-        if is_child_displayed:
-            displayed_count += 1
-            connector = "└── " if displayed_count == num_displayable else "├── "
-            line_prefix = parent_prefix + connector
-            lines.append(f"{line_prefix}{child_path.name}{'/' if child_path.is_dir() else ''}")
-            if child_path.is_dir() and generated_child_lines:
-                child_prefix = "    " if connector == "└── " else "│   "
-                for child_line in generated_child_lines:
-                    lines.append(parent_prefix + child_prefix + child_line)
+    for child_path in displayable_children:  # Iterate only over those that will be displayed
+        processing_result = child_to_processing_results[child_path]
+        # is_child_displayed was already confirmed (it's in displayable_children)
+        generated_grandchild_lines = processing_result["grandchild_lines"]
 
+        rendered_entry_count += 1
+        connector = "└── " if rendered_entry_count == num_displayable_entries else "├── "
+        line_prefix_for_child = parent_prefix + connector
+
+        lines.append(f"{line_prefix_for_child}{child_path.name}{'/' if child_path.is_dir() else ''}")
+
+        if child_path.is_dir() and generated_grandchild_lines:
+            child_contents_prefix_extension = "    " if connector == "└── " else "│   "
+            for grandchild_line in generated_grandchild_lines:
+                lines.append(parent_prefix + child_contents_prefix_extension + grandchild_line)
     return lines
-
-
-# src/contextcraft/tools/tree_generator.py
 
 
 def _add_nodes_to_rich_tree_recursive(
@@ -191,74 +201,72 @@ def _add_nodes_to_rich_tree_recursive(
     root_dir_for_ignores: Path,
     llmignore_spec: Optional[pathspec.PathSpec],
     cli_ignores: Optional[List[str]],
+    config_global_excludes: Optional[List[str]],
     tool_specific_fallback_exclusions: Set[str],
 ):
     try:
         all_children_sorted = sorted(
-            current_path_obj.iterdir(),  # Removed unnecessary list() call
+            current_path_obj.iterdir(),
             key=lambda x: (x.is_file(), x.name.lower()),
         )
     except PermissionError:
-        rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")  # Keep this simple for now
+        rich_tree_node.add("[dim italic](Permission Denied)[/dim italic]")
         return
     except FileNotFoundError:
         rich_tree_node.add(f"[dim italic](Directory {current_path_obj.name} not found)[/dim italic]")
         return
 
     for child_path in all_children_sorted:
-        # Directly decide if this child should be shown
-        if _should_show_path(child_path, root_dir_for_ignores, llmignore_spec, cli_ignores, tool_specific_fallback_exclusions):
-            # If it should be shown, add it and recurse if it's a directory
+        if _should_show_path(  # Use the unified helper
+            child_path,
+            root_dir_for_ignores,
+            llmignore_spec,
+            cli_ignores,
+            config_global_excludes,  # <--- PASS config_global_excludes
+            tool_specific_fallback_exclusions,
+        ):
             if child_path.is_dir():
-                # Using your updated label style for icons, removing manual connectors
                 branch_label = f"📁 {child_path.name}"
                 branch = rich_tree_node.add(branch_label, guide_style="blue")
-                _add_nodes_to_rich_tree_recursive(  # Recurse on the new branch
+                _add_nodes_to_rich_tree_recursive(
                     rich_tree_node=branch,
                     current_path_obj=child_path,
                     root_dir_for_ignores=root_dir_for_ignores,
                     llmignore_spec=llmignore_spec,
                     cli_ignores=cli_ignores,
+                    config_global_excludes=config_global_excludes,  # <--- PASS config_global_excludes
                     tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
                 )
-            else:  # It's a file
+            else:
                 file_label = f"📄 {child_path.name}"
                 rich_tree_node.add(file_label)
-        # If _should_show_path is False for child_path, we do nothing with it for Rich output.
-        # This means if `build/` itself is ignored by _should_show_path, it won't be added,
-        # and `!build/important.md` won't make `build/` appear.
-        # This is the simpler logic I mentioned earlier. Let's see if this makes `artifact.bin` disappear.
 
 
 def generate_and_output_tree(
     root_dir: Path,
     output_file_path: Optional[Path] = None,
-    ignore_list: Optional[List[str]] = None,  # This is from CLI --ignore
+    ignore_list: Optional[List[str]] = None,
+    config_global_excludes: Optional[List[str]] = None,  # <--- NEW PARAMETER
 ):
-    """
-    Main logic function for generating and outputting the directory tree.
-    Integrates .llmignore handling.
-    """
     if not root_dir.is_dir():
         console.print(f"[bold red]Error: Root directory '{root_dir}' not found or is not a directory.[/bold red]")
         raise typer.Exit(code=1)
 
-    # Load .llmignore patterns from the specified root_dir
     llmignore_spec = ignore_handler.load_ignore_patterns(root_dir)
-    if output_file_path:
+    # Simplified console message logic for brevity, can be restored from your version
+    if llmignore_spec and output_file_path and (root_dir / ignore_handler.LLMIGNORE_FILENAME).exists():
         console.print(f"[dim]Using .llmignore patterns from '{root_dir / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
+    elif not llmignore_spec and output_file_path:
+        console.print("[dim]No .llmignore file, or it's empty. Using fallback exclusions if applicable.[/dim]")
 
-    # Prepare the final set of CLI ignores, including the output file if necessary
     effective_cli_ignores = list(ignore_list) if ignore_list else []
     if output_file_path:
         abs_output_file = output_file_path.resolve()
         if abs_output_file.is_relative_to(root_dir.resolve()) and abs_output_file.name not in effective_cli_ignores:
-            # Add output file name to CLI ignores for this run to prevent it from appearing in its own tree
             effective_cli_ignores.append(abs_output_file.name)
-            console.print(f"[dim]Output file '{abs_output_file.name}' will be dynamically ignored for this run.[/dim]")
+            # Re-add this console print if desired
+            # console.print(f"[dim]Output file '{abs_output_file.name}' will be dynamically ignored for this run.[/dim]")
 
-    # Use the tool-specific fallback exclusions
-    # These are less critical if .llmignore is comprehensive.
     current_tool_specific_exclusions = DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy()
 
     if output_file_path:
@@ -267,6 +275,7 @@ def generate_and_output_tree(
             root_dir_for_ignores=root_dir,
             llmignore_spec=llmignore_spec,
             cli_ignores=effective_cli_ignores,
+            config_global_excludes=config_global_excludes,  # <--- PASS
             tool_specific_fallback_exclusions=current_tool_specific_exclusions,
             parent_prefix="",
             is_root_call_for_display=True,
@@ -280,7 +289,7 @@ def generate_and_output_tree(
             console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
             raise typer.Exit(code=1) from e
     else:
-        rich_tree_root_label = f":file_folder: [link file://{root_dir.resolve()}]{root_dir.name}"
+        rich_tree_root_label = f"📁 [link file://{root_dir.resolve()}]{root_dir.name}"  # Updated icon
         rich_tree_root = RichTree(
             rich_tree_root_label,
             guide_style="bold bright_blue",
@@ -291,6 +300,7 @@ def generate_and_output_tree(
             root_dir_for_ignores=root_dir,
             llmignore_spec=llmignore_spec,
             cli_ignores=effective_cli_ignores,
+            config_global_excludes=config_global_excludes,  # <--- PASS
             tool_specific_fallback_exclusions=current_tool_specific_exclusions,
         )
         console.print(rich_tree_root)

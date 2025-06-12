@@ -107,71 +107,83 @@ def is_path_ignored(
     root_dir: Path,
     ignore_spec: Optional[pathspec.PathSpec],
     cli_ignore_patterns: Optional[List[str]] = None,
+    config_exclude_patterns: Optional[List[str]] = None,
 ) -> bool:
     path_to_check_abs = path_to_check.resolve()
     root_dir_abs = root_dir.resolve()
 
-    # 1. Check against core system exclusions
+    # 1. Check against core system exclusions (HIGHEST PRECEDENCE)
     for i, part_name in enumerate(path_to_check_abs.parts):
         if part_name in CORE_SYSTEM_EXCLUSIONS:
             excluded_base = Path(*path_to_check_abs.parts[: i + 1])
             if path_to_check_abs == excluded_base or path_to_check_abs.is_relative_to(excluded_base):
+                # console.print(f"[dim]Ignoring '{path_to_check_abs}' due to CORE system exclusion '{part_name}'[/dim]")
                 return True
 
     relative_path_for_spec: Optional[Path] = None
-    with suppress(ValueError):
+    with suppress(ValueError):  # path_to_check_abs might not be under root_dir_abs
         relative_path_for_spec = path_to_check_abs.relative_to(root_dir_abs)
 
-    # 2. Check against .llmignore patterns
+    # 2. Check against .llmignore patterns (SECOND PRECEDENCE)
     if ignore_spec and relative_path_for_spec is not None:
-        # Path string without trailing slash for patterns like "name" (matching file or dir)
         path_str_name_only = relative_path_for_spec.as_posix()
-
-        # Path string with trailing slash for patterns like "name/" (matching dir explicitly)
         path_str_as_dir = path_str_name_only
         if path_to_check_abs.is_dir():
-            if str(relative_path_for_spec) == ".":  # Root directory itself
-                path_str_as_dir = "./"  # Note: pathspec matches "./" against "/" pattern.
+            if str(relative_path_for_spec) == ".":
+                path_str_as_dir = "./"
             elif not path_str_as_dir.endswith("/"):
                 path_str_as_dir += "/"
 
-        # A. Check if a directory-specific pattern (e.g., "build/") matches the directory.
-        #    For this, we use the path_str_as_dir (e.g., "build/").
         if path_to_check_abs.is_dir() and ignore_spec.match_file(path_str_as_dir):
+            # console.print(f"[dim]Ignoring '{path_to_check_abs}' (as dir) due to .llmignore matching '{path_str_as_dir}'[/dim]")
             return True
-
-        # B. Check if a name pattern (e.g., "some_name" which can be file or dir)
-        #    matches the path (file or directory name).
-        #    For this, we use path_str_name_only (e.g., "build" or "file.txt").
-        #    This also handles files correctly.
         if ignore_spec.match_file(path_str_name_only):
+            # console.print(f"[dim]Ignoring '{path_to_check_abs}' (as path) due to .llmignore matching '{path_str_name_only}'[/dim]")
             return True
 
-    # 3. Check against CLI-provided ignore patterns
+    # 3. Check against config_exclude_patterns (THIRD PRECEDENCE)
+    if config_exclude_patterns:
+        filename = path_to_check_abs.name
+        for pattern in config_exclude_patterns:
+            if filename == pattern:
+                return True
+            if Path(filename).match(pattern):
+                return True
+            if relative_path_for_spec:
+                rel_path_str = relative_path_for_spec.as_posix()
+                current_path_obj_for_match = Path(rel_path_str)
+                if pattern.endswith("/") and path_to_check_abs.is_dir():
+                    path_to_match_as_dir = rel_path_str
+                    if not path_to_match_as_dir.endswith("/"):
+                        path_to_match_as_dir += "/"
+                    if path_to_match_as_dir == pattern:
+                        return True
+                    if current_path_obj_for_match.name + "/" == pattern:
+                        return True
+                if current_path_obj_for_match.match(pattern):
+                    return True
+
+    # 4. Check against CLI-provided ignore patterns (FOURTH PRECEDENCE)
+    # This block is your existing CLI ignore logic, now at a lower precedence.
     if cli_ignore_patterns:
         filename = path_to_check_abs.name
         for pattern in cli_ignore_patterns:
             if filename == pattern:
                 return True
             if Path(filename).match(pattern):
-                return True  # Simple glob on name
+                return True
             if relative_path_for_spec:
-                # More complex CLI patterns might need pathspec-like handling too
-                # For now, keep it simpler.
                 rel_path_str_cli = relative_path_for_spec.as_posix()
-                current_path_for_cli_match = Path(rel_path_str_cli)  # Path object for .match()
-
+                current_path_for_cli_match = Path(rel_path_str_cli)
                 if pattern.endswith("/") and path_to_check_abs.is_dir():
-                    # Ensure rel_path_str_cli for dir also ends with / for comparison
                     path_to_match_cli_dir = rel_path_str_cli
                     if not path_to_match_cli_dir.endswith("/"):
                         path_to_match_cli_dir += "/"
                     if path_to_match_cli_dir == pattern:
                         return True
-                    # Match "build/" pattern against directory name "build"
                     if current_path_for_cli_match.name + "/" == pattern:
                         return True
-
                 if current_path_for_cli_match.match(pattern):
                     return True
+
     return False

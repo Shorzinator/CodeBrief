@@ -65,6 +65,7 @@ def test_tree_command_success(mock_generate_tree, tmp_path: Path):
         root_dir=tmp_path.resolve(),  # Typer resolves path by default
         output_file_path=None,
         ignore_list=[],
+        config_global_excludes=[],
     )
 
 
@@ -74,7 +75,9 @@ def test_tree_command_with_output_file(mock_generate_tree, tmp_path: Path):
     output_file = tmp_path / "tree_output.txt"
     result = runner.invoke(app, ["tree", str(tmp_path), "--output", str(output_file)])
     assert result.exit_code == 0
-    mock_generate_tree.assert_called_once_with(root_dir=tmp_path.resolve(), output_file_path=output_file.resolve(), ignore_list=[])
+    mock_generate_tree.assert_called_once_with(
+        root_dir=tmp_path.resolve(), output_file_path=output_file.resolve(), ignore_list=[], config_global_excludes=[]
+    )
 
 
 @mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
@@ -82,7 +85,9 @@ def test_tree_command_with_ignore_flags(mock_generate_tree, tmp_path: Path):
     """Test tree command with ignore flags."""
     result = runner.invoke(app, ["tree", str(tmp_path), "--ignore", "venv", "--ignore", "*.pyc"])
     assert result.exit_code == 0
-    mock_generate_tree.assert_called_once_with(root_dir=tmp_path.resolve(), output_file_path=None, ignore_list=["venv", "*.pyc"])
+    mock_generate_tree.assert_called_once_with(
+        root_dir=tmp_path.resolve(), output_file_path=None, ignore_list=["venv", "*.pyc"], config_global_excludes=[]
+    )
 
 
 @mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree", side_effect=Exception("Tree generation failed!"))

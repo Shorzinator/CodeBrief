@@ -159,16 +159,19 @@ def tree_command(
                 stacklevel=2,
             )
 
-    # TODO LATER: Integrate config.get("global_exclude_patterns", []) with `ignore` list.
-    # For now, `ignore` is just the CLI ignores.
     cli_ignore_list = ignore if ignore else []
+
+    cfg_global_excludes = config.get("global_exclude_patterns", [])
+    if not isinstance(cfg_global_excludes, list):
+        warnings.warn("Config Warning: 'global_exclude_patterns' should be a list. Using empty list.", UserWarning, stacklevel=2)
+        cfg_global_excludes = []
 
     try:
         tree_generator.generate_and_output_tree(
             root_dir=root_dir,
             output_file_path=actual_output_path,  # Use the resolved path
             ignore_list=cli_ignore_list,  # Pass CLI ignores
-            # config_exclude_patterns=config.get("global_exclude_patterns", []) # For later integration
+            config_global_excludes=cfg_global_excludes,
         )
     except typer.Exit:
         raise
@@ -259,6 +262,11 @@ def flatten_command(
 
     # TODO LATER: Logic for exclude_patterns precedence: Merge CLI + Config + .llmignore handled by ignore_handler
     actual_exclude_patterns = exclude  # For now, just CLI or None
+
+    cfg_global_excludes = config.get("global_exclude_patterns", [])
+    if not isinstance(cfg_global_excludes, list):
+        warnings.warn("Config Warning: 'global_exclude_patterns' should be a list. Using empty list.", UserWarning, stacklevel=2)
+        cfg_global_excludes = []
 
     try:
         flattener.flatten_code_logic(
