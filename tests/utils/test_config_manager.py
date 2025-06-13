@@ -9,6 +9,7 @@ import warnings
 from pathlib import Path
 from typing import Any
 
+import pytest
 import toml
 
 from src.contextcraft.utils import config_manager
@@ -196,7 +197,7 @@ def test_load_config_unknown_option_is_ignored():
 
 
 @mock.patch("pathlib.Path.open")  # Use a more specific mock target from unittest.mock
-def test_load_config_parsing_error_issues_warning(mock_open_method, capsys):
+def test_load_config_parsing_error_issues_warning(mock_open_method):
     """Test warning and default usage when pyproject.toml parsing fails."""
     # Mock Path.open to simulate a read error or malformed content scenario indirectly
     # A more direct way is to write malformed TOML if the parser raises specific errors
@@ -207,11 +208,8 @@ def test_load_config_parsing_error_issues_warning(mock_open_method, capsys):
         # Create a dummy pyproject.toml so Path.is_file() passes, but open() fails
         (project_root / "pyproject.toml").touch()
 
-        config = config_manager.load_config(project_root)
-
-        captured = capsys.readouterr()  # To check console output from Rich
-        assert "Warning: Could not load or parse configuration" in captured.out
-        assert "Simulated TOML parsing error" in captured.out
+        with pytest.warns(UserWarning, match="Could not parse config"):
+            config = config_manager.load_config(project_root)
 
         # Should return all defaults
         assert config == EXPECTED_DEFAULTS
