@@ -39,7 +39,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.ruff.lint]
-# Add any specific lint rule configurations here if needed
+select = ["E", "W", "F", "I", "B", "C4", "N", "UP", "S", "D"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/contextcraft/main.py" = ["E501"]
@@ -53,9 +53,9 @@ ignore_missing_imports = true
 explicit_package_bases = true
 mypy_path = ["src"]  # Changed to a list format
 namespace_packages = true  # Added to help with package discovery
-# Optional, but can be more explicit for what to check:
-files = ["contextcraft", "tests"] # Check these specific packages/dirs
-# packages = ["contextcraft"] # Check this specific package (when src is on path)
+strict = true
+exclude = ["tests/"]
+packages = ["src.contextcraft"]
 
 # Configuration for Pytest (optional, many things are auto-discovered)
 [tool.pytest.ini_options]
@@ -80,6 +80,7 @@ show_missing = true
 # Refer to Bandit documentation for available test IDs:
 # https://bandit.readthedocs.io/en/latest/plugins/index.html
 skips = ["B101"]  # Skip assert_used since we use asserts in tests
+exclude_dirs = ["tests"]
 # tests = [] # To run only specific tests
 # Example: Set confidence level to MEDIUM or HIGH to reduce noise from LOW findings.
 # severity = ["MEDIUM", "HIGH"]
