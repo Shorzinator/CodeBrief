@@ -2,98 +2,234 @@
 # This comment indicates the path of the file relative to the project root.
 
 # MkDocs configuration for the ContextCraft project documentation.
+# yaml-language-server: $schema=https://json.schemastore.org/mkdocs-material.json
 
 
 # Project information
 site_name: ContextCraft
-site_url: "" # Replace with your GitHub Pages URL or custom domain later
-site_author: Your Name # Replace with your name/org
-site_description: "A CLI toolkit to generate comprehensive project context for LLMs."
+site_url: "https://Shorzinator.github.io/ContextCraft" # Replace with your GitHub Pages URL or custom domain
+site_author: ContextCraft Team
+site_description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
 
 # Repository
-repo_url: https://github.com/YOUR_USERNAME/ContextCraft # Replace with your repo URL
-repo_name: YOUR_USERNAME/ContextCraft # Replace
-edit_uri: "" # Optional: "edit/main/docs/" if your docs folder is 'docs/'
+repo_url: https://github.com/Shorzinator/ContextCraft # Replace with your repo URL
+repo_name: Shorzinator/ContextCraft # Replace
+edit_uri: edit/main/docs/
 
 # Copyright
-# copyright: Copyright © 2023 Your Name # Uncomment and update year/name
+copyright: Copyright © 2024 ContextCraft Team
 
 # Theme Configuration
 theme:
   name: material
-  # language: en # Default language
+  language: en
   features:
-    - navigation.tabs # Use tabs for top-level navigation sections
-    - navigation.sections # Group pages into sections in the sidebar
-    - navigation.top # Back-to-top button
-    - search.suggest # Search suggestions
-    - search.highlight # Highlight search terms
+    - announce.dismiss # Dismissible announcement bar
+    - content.action.edit # Edit button
+    - content.action.view # View source button
     - content.code.annotate # Code annotation feature
     - content.code.copy # Copy button for code blocks
+    - content.code.select # Select code blocks
+    - content.tabs.link # Link content tabs
+    - content.tooltips # Tooltips
+    - header.autohide # Auto-hide header on scroll
+    - navigation.expand # Expand navigation by default
+    - navigation.footer # Footer navigation
+    - navigation.indexes # Navigation index pages
+    - navigation.instant # Instant loading
+    - navigation.instant.prefetch # Prefetch pages
+    - navigation.instant.progress # Loading progress indicator
+    - navigation.prune # Prune navigation
+    - navigation.sections # Group pages into sections
+    - navigation.tabs # Use tabs for top-level navigation
+    - navigation.tabs.sticky # Sticky navigation tabs
+    - navigation.top # Back-to-top button
+    - navigation.tracking # Track navigation in URL
+    - search.highlight # Highlight search terms
+    - search.share # Share search results
+    - search.suggest # Search suggestions
+    - toc.follow # Follow table of contents
+    - toc.integrate # Integrate table of contents into navigation
   palette:
-    # Palette toggle for light/dark mode
+    # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: grey
+      accent: blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+    # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: black
+      accent: blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   font:
-    text: Roboto
+    text: Inter
     code: Roboto Mono
   icon:
-    repo: fontawesome/brands/github # GitHub icon for the repo link
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+    admonition:
+      note: fontawesome/solid/note-sticky
+      abstract: fontawesome/solid/book
+      info: fontawesome/solid/circle-info
+      tip: fontawesome/solid/bullhorn
+      success: fontawesome/solid/check
+      question: fontawesome/solid/circle-question
+      warning: fontawesome/solid/triangle-exclamation
+      failure: fontawesome/solid/bomb
+      danger: fontawesome/solid/skull
+      bug: fontawesome/solid/robot
+      example: fontawesome/solid/flask
+      quote: fontawesome/solid/quote-left
+  logo: assets/logo.png # Add logo if available
+  favicon: assets/favicon.ico # Add favicon if available
 
 # Extensions
 markdown_extensions:
-  - admonition # For admonition blocks (note, warning, etc.)
-  - pymdownx.details # For collapsible sections
-  - pymdownx.superfences # For nested code blocks and more
-  - pymdownx.highlight: # Code highlighting
+  - abbr # Abbreviations
+  - admonition # Admonition blocks
+  - attr_list # Attribute lists
+  - def_list # Definition lists
+  - footnotes # Footnotes
+  - md_in_html # Markdown in HTML
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret # Superscript and underline
+  - pymdownx.details # Collapsible sections
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - toc: # Table of contents
-      permalink: true # Add permalinks to headings
+  - pymdownx.keys # Keyboard keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: Shorzinator
+      repo: ContextCraft
+  - pymdownx.mark # Highlight text
+  - pymdownx.smartsymbols # Smart symbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde # Strikethrough
 
+# Plugins
 plugins:
-  - search # Built-in search plugin
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - mkdocstrings:
-      default_handler: python # Default handler for docstrings
+      default_handler: python
       handlers:
         python:
           options:
-            # --- Docstring style ---
-            docstring_style: google # Or numpy, sphinx. Google is common.
-            # --- Member options ---
-            show_root_heading: true # Show a heading for the root object
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            show_submodules: true
+            show_source: true
+            show_root_heading: true
             show_root_toc_entry: true
-            show_object_full_path: false # Show full path or just the name
-            show_category_heading: false # Don't group methods by "Methods", "Attributes"
-            show_if_no_docstring: false # Hide members with no docstrings
-            # --- Heading levels ---
-            heading_level: 2 # Start headings for objects at level 2
-            # --- Other options ---
-            # members_order: source # Order members as they appear in source
-            # show_source: true # Show a "View Source" link (requires repo_url and edit_uri)
+            show_object_full_path: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            heading_level: 2
+            members_order: source
+            group_by_category: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
 
-# Navigation structure (nav)
-# This defines the order and hierarchy of your documentation pages.
+# Customization
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Shorzinator/ContextCraft
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/contextcraft/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/Shorzinator
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+
+# Navigation structure
 nav:
   - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Configuration: getting-started/configuration.md
   - User Guide:
-    - Installation: user-guide/installation.md
+    - CLI Commands: user-guide/cli-commands.md
     - CLI Usage: user-guide/cli-usage.md
+    - Configuration: user-guide/configuration.md
+    - Dependency Analysis: user-guide/dependency-analysis.md
+  - Tutorials:
+    - Basic Usage: tutorials/basic-usage.md
+    - Advanced Workflows: tutorials/advanced-workflows.md
+    - LLM Integration: tutorials/llm-integration.md
+    - CI/CD Integration: tutorials/cicd-integration.md
   - API Reference:
-    # We will populate this with references to our modules/functions
     - Main CLI: reference/main.md
     - Tree Generator: reference/tree_generator.md
     - Flattener: reference/flattener.md
-  # - Contributing: contributing.md
-  # - Changelog: changelog.md
+    - Dependency Lister: reference/tools/dependency_lister.md
+  - Examples:
+    - Python Projects: examples/python-projects.md
+  - Development:
+    - Contributing: development/contributing.md
+  - Help:
+    - FAQ: help/faq.md
+    - Troubleshooting: help/troubleshooting.md
+    - Support: help/support.md
+
+# Custom CSS and JavaScript
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 # Where your Markdown documentation files are located
 docs_dir: docs
+
+# Where the documentation site will be built
+site_dir: site
+
+# Development server settings
+dev_addr: 127.0.0.1:8000
+
+# Build settings
+strict: false

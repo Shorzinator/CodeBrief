@@ -11,6 +11,5 @@ __pycache__/
 *.pyd
 .coverage
 .venv
-docs
 /site/
 coverage.xml
