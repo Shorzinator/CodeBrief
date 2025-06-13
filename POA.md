@@ -156,6 +156,17 @@ To provide developers with a simple, extensible, and portable Python CLI toolkit
 
 ---
 
+**⚠️ KNOWN ISSUES & TECHNICAL DEBT**
+
+1. **MyPy Type Checking (Status: 🔧 TEMPORARILY DISABLED)**
+   - **Issue:** Module path conflicts causing "Source file found twice under different module names" error
+   - **Impact:** Type checking temporarily disabled in CI/CD, pre-commit hooks, and development workflow
+   - **Priority:** Medium - affects code quality but doesn't block functionality
+   - **Action Required:** Investigate and resolve module path configuration in `pyproject.toml` and project structure
+   - **Tracking:** All mypy configurations commented out with TODO markers for easy restoration
+
+---
+
 **Phase 3: Advanced Features & Innovation (Status: 🚀 NEW AMBITIOUS PHASE)**
 
 1.  **AI-Powered Context Optimization (Status: 💡 CONCEPT)**
