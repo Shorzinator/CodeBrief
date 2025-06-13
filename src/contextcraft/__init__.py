@@ -1,6 +1,5 @@
 # src/contextcraft/__init__.py
-"""
-ContextCraft: A CLI toolkit for generating comprehensive project context for LLMs.
+"""ContextCraft: A CLI toolkit for generating comprehensive project context for LLMs.
 """
 import importlib.metadata
 

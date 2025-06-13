@@ -1,6 +1,5 @@
 # tests/utils/test_ignore_handler.py
-"""
-Unit tests for the src.contextcraft.utils.ignore_handler module.
+"""Unit tests for the src.contextcraft.utils.ignore_handler module.
 """
 
 import tempfile
@@ -14,9 +13,7 @@ from src.contextcraft.utils import ignore_handler
 
 # Helper function to create a temporary .llmignore file
 def create_temp_llmignore(temp_dir_path: Path, content: str) -> Path:
-    """
-    Create a temporary .llmignore file in the specified directory with the given content.
-    """
+    """Create a temporary .llmignore file in the specified directory with the given content."""
     llmignore_file = temp_dir_path / ignore_handler.LLMIGNORE_FILENAME
     llmignore_file.write_text(content, encoding="utf-8")
     return llmignore_file
@@ -54,7 +51,9 @@ def test_load_ignore_patterns_comments_and_blank_lines_only():
         root_dir = Path(tmpdir)
         create_temp_llmignore(root_dir, content)
         spec = ignore_handler.load_ignore_patterns(root_dir)
-        assert spec is None  # pathspec itself might return an empty spec, lets checksits behavior
+        assert (
+            spec is None
+        )  # pathspec itself might return an empty spec, lets checksits behavior
 
 
 def test_load_ignore_patterns_valid_patterns():
@@ -77,8 +76,7 @@ def test_load_ignore_patterns_valid_patterns():
 
 @pytest.fixture()
 def setup_test_directory():
-    """
-    Sets up a temporary directory with a predefined structure and .llmignore file.
+    """Sets up a temporary directory with a predefined structure and .llmignore file.
     Returns the root Path object of this temporary directory.
     """
     with tempfile.TemporaryDirectory(prefix="contextcraft_test_") as tmpdir_name:
@@ -109,7 +107,9 @@ def setup_test_directory():
 
         (root_dir / "build").mkdir()
         (root_dir / "build" / "output.bin").touch()  # Should be ignored (in build/)
-        (root_dir / "build" / "important_file.txt").touch()  # Should be included by negation
+        (
+            root_dir / "build" / "important_file.txt"
+        ).touch()  # Should be included by negation
 
         (root_dir / "src").mkdir()
         (root_dir / "src" / "app.py").touch()
@@ -125,7 +125,9 @@ def setup_test_directory():
 
         (root_dir / "docs").mkdir()
         (root_dir / "docs" / "index.md").touch()  # Should be ignored by docs/
-        (root_dir / "docs" / "README.md").touch()  # Should be included by !docs/README.md
+        (
+            root_dir / "docs" / "README.md"
+        ).touch()  # Should be included by !docs/README.md
 
         yield root_dir  # Provide the root_dir to the test
 
@@ -133,7 +135,9 @@ def setup_test_directory():
 def test_is_path_ignored_core_system_exclusions(setup_test_directory):
     """Test that core system exclusions like .git are always ignored."""
     root_dir = setup_test_directory
-    ignore_spec = ignore_handler.load_ignore_patterns(root_dir)  # Load spec for other tests
+    ignore_spec = ignore_handler.load_ignore_patterns(
+        root_dir
+    )  # Load spec for other tests
 
     git_dir = root_dir / ".git"
     git_config_file = root_dir / ".git" / "config"
@@ -148,28 +152,54 @@ def test_is_path_ignored_llmignore_patterns(setup_test_directory):
     ignore_spec = ignore_handler.load_ignore_patterns(root_dir)
 
     # Ignored by *.log
-    assert ignore_handler.is_path_ignored(root_dir / "another.log", root_dir, ignore_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "another.log", root_dir, ignore_spec
+    )
     # Ignored by temp_file.txt
-    assert ignore_handler.is_path_ignored(root_dir / "temp_file.txt", root_dir, ignore_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "temp_file.txt", root_dir, ignore_spec
+    )
     # Ignored by build/
-    assert ignore_handler.is_path_ignored(root_dir / "build" / "output.bin", root_dir, ignore_spec)
-    assert ignore_handler.is_path_ignored(root_dir / "build", root_dir, ignore_spec)  # The directory itself
+    assert ignore_handler.is_path_ignored(
+        root_dir / "build" / "output.bin", root_dir, ignore_spec
+    )
+    assert ignore_handler.is_path_ignored(
+        root_dir / "build", root_dir, ignore_spec
+    )  # The directory itself
     # Ignored by **/__pycache__/
-    assert ignore_handler.is_path_ignored(root_dir / "src" / "__pycache__" / "cachefile.pyc", root_dir, ignore_spec)
-    assert ignore_handler.is_path_ignored(root_dir / "src" / "__pycache__", root_dir, ignore_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "src" / "__pycache__" / "cachefile.pyc", root_dir, ignore_spec
+    )
+    assert ignore_handler.is_path_ignored(
+        root_dir / "src" / "__pycache__", root_dir, ignore_spec
+    )
     # Ignored by secrets/*.key
-    assert ignore_handler.is_path_ignored(root_dir / "secrets" / "api.key", root_dir, ignore_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "secrets" / "api.key", root_dir, ignore_spec
+    )
     # Ignored by docs/
-    assert ignore_handler.is_path_ignored(root_dir / "docs" / "index.md", root_dir, ignore_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "docs" / "index.md", root_dir, ignore_spec
+    )
 
     # Not ignored (included or not matching ignore patterns)
-    assert not ignore_handler.is_path_ignored(root_dir / "file.py", root_dir, ignore_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "src" / "app.py", root_dir, ignore_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "secrets" / "other.txt", root_dir, ignore_spec)
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "file.py", root_dir, ignore_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "src" / "app.py", root_dir, ignore_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "secrets" / "other.txt", root_dir, ignore_spec
+    )
 
     # Test negations
-    assert not ignore_handler.is_path_ignored(root_dir / "build" / "important_file.txt", root_dir, ignore_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "docs" / "README.md", root_dir, ignore_spec)
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "build" / "important_file.txt", root_dir, ignore_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "docs" / "README.md", root_dir, ignore_spec
+    )
 
 
 def test_is_path_ignored_cli_overrides(setup_test_directory):
@@ -179,19 +209,36 @@ def test_is_path_ignored_cli_overrides(setup_test_directory):
 
     # File normally included, but ignored by CLI
     cli_ignores_1 = ["file.py"]
-    assert ignore_handler.is_path_ignored(root_dir / "file.py", root_dir, ignore_spec, cli_ignore_patterns=cli_ignores_1)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "file.py", root_dir, ignore_spec, cli_ignore_patterns=cli_ignores_1
+    )
 
     # File normally included, but ignored by CLI glob
     cli_ignores_2 = ["src/*"]  # This should match app.py in src
-    assert ignore_handler.is_path_ignored(root_dir / "src" / "app.py", root_dir, ignore_spec, cli_ignore_patterns=cli_ignores_2)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "src" / "app.py",
+        root_dir,
+        ignore_spec,
+        cli_ignore_patterns=cli_ignores_2,
+    )
 
     # File normally ignored by .llmignore, CLI ignore is redundant but path remains ignored
     cli_ignores_3 = ["another.log"]
-    assert ignore_handler.is_path_ignored(root_dir / "another.log", root_dir, ignore_spec, cli_ignore_patterns=cli_ignores_3)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "another.log",
+        root_dir,
+        ignore_spec,
+        cli_ignore_patterns=cli_ignores_3,
+    )
 
     # Directory normally ignored by .llmignore (build/), CLI pattern for something else
     cli_ignores_4 = ["*.tmp"]
-    assert ignore_handler.is_path_ignored(root_dir / "build" / "output.bin", root_dir, ignore_spec, cli_ignore_patterns=cli_ignores_4)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "build" / "output.bin",
+        root_dir,
+        ignore_spec,
+        cli_ignore_patterns=cli_ignores_4,
+    )
 
 
 def test_is_path_ignored_no_llmignore_file(setup_test_directory):
@@ -200,9 +247,15 @@ def test_is_path_ignored_no_llmignore_file(setup_test_directory):
     # Simulate no .llmignore by passing None as ignore_spec
 
     cli_ignores = ["file.py"]
-    assert ignore_handler.is_path_ignored(root_dir / "file.py", root_dir, None, cli_ignore_patterns=cli_ignores)
-    assert not ignore_handler.is_path_ignored(root_dir / "another.log", root_dir, None, cli_ignore_patterns=cli_ignores)
-    assert not ignore_handler.is_path_ignored(root_dir / "src" / "app.py", root_dir, None, cli_ignore_patterns=cli_ignores)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "file.py", root_dir, None, cli_ignore_patterns=cli_ignores
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "another.log", root_dir, None, cli_ignore_patterns=cli_ignores
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "src" / "app.py", root_dir, None, cli_ignore_patterns=cli_ignores
+    )
 
 
 def test_is_path_ignored_patterns_with_leading_trailing_spaces(setup_test_directory):
@@ -214,7 +267,9 @@ def test_is_path_ignored_patterns_with_leading_trailing_spaces(setup_test_direct
     spaced_dir/
       !  spaced_dir/important.txt
     """
-    create_temp_llmignore(root_dir, llmignore_content_spaces)  # Overwrites fixture's .llmignore
+    create_temp_llmignore(
+        root_dir, llmignore_content_spaces
+    )  # Overwrites fixture's .llmignore
 
     ignore_spec_spaces = ignore_handler.load_ignore_patterns(root_dir)
     assert ignore_spec_spaces is not None
@@ -224,10 +279,16 @@ def test_is_path_ignored_patterns_with_leading_trailing_spaces(setup_test_direct
     (root_dir / "spaced_dir" / "somefile.txt").touch()
 
     print("\nDEBUG FOR SPACED TEST:")
-    print(f"Patterns in spec: {[p.pattern for p in ignore_spec_spaces.patterns]}")  # See the actual patterns
-    path_str_to_test = (root_dir / "spaced_dir" / "important.txt").relative_to(root_dir).as_posix()
+    print(
+        f"Patterns in spec: {[p.pattern for p in ignore_spec_spaces.patterns]}"
+    )  # See the actual patterns
+    path_str_to_test = (
+        (root_dir / "spaced_dir" / "important.txt").relative_to(root_dir).as_posix()
+    )
     print(f"Path string for match_file: '{path_str_to_test}'")
-    print(f"ignore_spec_spaces.match_file result: {ignore_spec_spaces.match_file(path_str_to_test)}")
+    print(
+        f"ignore_spec_spaces.match_file result: {ignore_spec_spaces.match_file(path_str_to_test)}"
+    )
 
     assert ignore_handler.is_path_ignored(
         root_dir / "test.spacedlog", root_dir, ignore_spec_spaces
@@ -244,8 +305,7 @@ def test_is_path_ignored_patterns_with_leading_trailing_spaces(setup_test_direct
 
 
 def test_is_path_ignored_directory_vs_file_patterns(setup_test_directory):
-    """
-    Test differentiation between patterns matching directories (ending with /)
+    """Test differentiation between patterns matching directories (ending with /)
     and patterns that can match either files or directories (no trailing /).
     """
     root_dir = setup_test_directory
@@ -263,7 +323,9 @@ def test_is_path_ignored_directory_vs_file_patterns(setup_test_directory):
     # For 'is_a_dir/' pattern
     (root_dir / "is_a_dir").mkdir()
     (root_dir / "is_a_dir" / "child_in_is_a_dir.txt").touch()
-    (root_dir / "is_a_dir_file_variant").touch()  # A file that starts with "is_a_dir" but isn't the dir
+    (
+        root_dir / "is_a_dir_file_variant"
+    ).touch()  # A file that starts with "is_a_dir" but isn't the dir
 
     # For 'is_a_file' pattern (testing against a file)
     (root_dir / "is_a_file").touch()
@@ -277,12 +339,18 @@ def test_is_path_ignored_directory_vs_file_patterns(setup_test_directory):
     (root_dir / "not_ignored_dir").mkdir()
 
     print("\nDEBUG FOR test_is_path_ignored_directory_vs_file_patterns:")
-    print(f"Patterns in spec: {[p.pattern for p in current_spec.patterns if p]}")  # Filter out None if any
+    print(
+        f"Patterns in spec: {[p.pattern for p in current_spec.patterns if p]}"
+    )  # Filter out None if any
 
     # --- Test 'is_a_dir/' pattern (directory-specific pattern) ---
     path_is_a_dir_dir = root_dir / "is_a_dir"
-    print(f"Testing dir specific pattern ('is_a_dir/') against dir: {path_is_a_dir_dir}, IsDir: {path_is_a_dir_dir.is_dir()}")
-    assert ignore_handler.is_path_ignored(path_is_a_dir_dir, root_dir, current_spec), "Directory 'is_a_dir' should be ignored by pattern 'is_a_dir/'."
+    print(
+        f"Testing dir specific pattern ('is_a_dir/') against dir: {path_is_a_dir_dir}, IsDir: {path_is_a_dir_dir.is_dir()}"
+    )
+    assert ignore_handler.is_path_ignored(
+        path_is_a_dir_dir, root_dir, current_spec
+    ), "Directory 'is_a_dir' should be ignored by pattern 'is_a_dir/'."
     assert ignore_handler.is_path_ignored(
         root_dir / "is_a_dir" / "child_in_is_a_dir.txt", root_dir, current_spec
     ), "File inside 'is_a_dir' should be ignored due to pattern 'is_a_dir/'."
@@ -293,18 +361,26 @@ def test_is_path_ignored_directory_vs_file_patterns(setup_test_directory):
     # --- Test 'is_a_file' pattern (file OR directory pattern) ---
     # Test against a file named 'is_a_file'
     path_is_a_file_file = root_dir / "is_a_file"
-    print(f"Testing file/dir pattern ('is_a_file') against file: {path_is_a_file_file}, IsDir: {path_is_a_file_file.is_dir()}")
-    assert ignore_handler.is_path_ignored(path_is_a_file_file, root_dir, current_spec), "File 'is_a_file' should be ignored by pattern 'is_a_file'."
+    print(
+        f"Testing file/dir pattern ('is_a_file') against file: {path_is_a_file_file}, IsDir: {path_is_a_file_file.is_dir()}"
+    )
+    assert ignore_handler.is_path_ignored(
+        path_is_a_file_file, root_dir, current_spec
+    ), "File 'is_a_file' should be ignored by pattern 'is_a_file'."
 
     # Test against a directory named 'is_a_file_as_dir' (note: name mismatch with pattern 'is_a_file')
     # This directory should NOT be ignored by the pattern "is_a_file" because the names differ.
     path_is_a_file_as_dir_dir = root_dir / "is_a_file_as_dir"
-    print(f"Testing file/dir pattern ('is_a_file') against dir: {path_is_a_file_as_dir_dir}, IsDir: {path_is_a_file_as_dir_dir.is_dir()}")
+    print(
+        f"Testing file/dir pattern ('is_a_file') against dir: {path_is_a_file_as_dir_dir}, IsDir: {path_is_a_file_as_dir_dir.is_dir()}"
+    )
     assert not ignore_handler.is_path_ignored(
         path_is_a_file_as_dir_dir, root_dir, current_spec
     ), "Directory 'is_a_file_as_dir' should NOT be ignored by pattern 'is_a_file' (name mismatch)."
     assert not ignore_handler.is_path_ignored(
-        root_dir / "is_a_file_as_dir" / "child_in_is_a_file_as_dir.txt", root_dir, current_spec
+        root_dir / "is_a_file_as_dir" / "child_in_is_a_file_as_dir.txt",
+        root_dir,
+        current_spec,
     ), "File in 'is_a_file_as_dir' should NOT be ignored by pattern 'is_a_file' (name mismatch)."
 
     # --- Test control paths (should not be ignored) ---
@@ -351,20 +427,36 @@ def test_is_path_ignored_complex_glob_patterns(setup_test_directory):
     (root_dir / "src" / "data.csv").touch()  # Should also be matched by **/data.csv
 
     # Test 'file?.txt'
-    assert ignore_handler.is_path_ignored(root_dir / "fileA.txt", root_dir, current_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "fileLong.txt", root_dir, current_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "fileA.txt", root_dir, current_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "fileLong.txt", root_dir, current_spec
+    )
 
     # Test 'image[0-9].png'
-    assert ignore_handler.is_path_ignored(root_dir / "image1.png", root_dir, current_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "image10.png", root_dir, current_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "image1.png", root_dir, current_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "image10.png", root_dir, current_spec
+    )
 
     # Test 'settings/**/config.json'
-    assert ignore_handler.is_path_ignored(root_dir / "settings" / "user" / "config.json", root_dir, current_spec)
-    assert not ignore_handler.is_path_ignored(root_dir / "settings" / "another_config.json", root_dir, current_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "settings" / "user" / "config.json", root_dir, current_spec
+    )
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "settings" / "another_config.json", root_dir, current_spec
+    )
 
     # Test '**/data.csv'
-    assert ignore_handler.is_path_ignored(root_dir / "project_data" / "data.csv", root_dir, current_spec)
-    assert ignore_handler.is_path_ignored(root_dir / "src" / "data.csv", root_dir, current_spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "project_data" / "data.csv", root_dir, current_spec
+    )
+    assert ignore_handler.is_path_ignored(
+        root_dir / "src" / "data.csv", root_dir, current_spec
+    )
 
 
 def test_is_path_ignored_anchored_patterns(setup_test_directory):
@@ -384,18 +476,28 @@ def test_is_path_ignored_anchored_patterns(setup_test_directory):
 
     (root_dir / "root_file.txt").touch()
     (root_dir / "sub").mkdir()
-    (root_dir / "sub" / "root_file.txt").touch()  # This is the one matched by 'sub/root_file.txt'
-    (root_dir / "sub" / "another_root_file.txt").touch()  # Not matched by '/root_file.txt'
+    (
+        root_dir / "sub" / "root_file.txt"
+    ).touch()  # This is the one matched by 'sub/root_file.txt'
+    (
+        root_dir / "sub" / "another_root_file.txt"
+    ).touch()  # Not matched by '/root_file.txt'
 
     (root_dir / "anywhere.txt").touch()
     (root_dir / "sub" / "anywhere.txt").touch()
 
     print(f"Patterns in spec: {[p.pattern for p in current_spec.patterns]}")
-    print(f"Direct pathspec match for 'root_file.txt': {current_spec.match_file('root_file.txt')}")
-    assert ignore_handler.is_path_ignored(root_dir / "root_file.txt", root_dir, current_spec), "Root-anchored pattern should match file in root."
+    print(
+        f"Direct pathspec match for 'root_file.txt': {current_spec.match_file('root_file.txt')}"
+    )
+    assert ignore_handler.is_path_ignored(
+        root_dir / "root_file.txt", root_dir, current_spec
+    ), "Root-anchored pattern should match file in root."
 
     # Test '/root_file.txt'
-    assert ignore_handler.is_path_ignored(root_dir / "root_file.txt", root_dir, current_spec), "Root-anchored pattern should match file in root."
+    assert ignore_handler.is_path_ignored(
+        root_dir / "root_file.txt", root_dir, current_spec
+    ), "Root-anchored pattern should match file in root."
     assert not ignore_handler.is_path_ignored(
         root_dir / "sub" / "another_root_file.txt", root_dir, current_spec
     ), "File in subdir should not match root-anchored pattern '/root_file.txt' (different name)."
@@ -407,7 +509,9 @@ def test_is_path_ignored_anchored_patterns(setup_test_directory):
     ), "Pattern 'sub/root_file.txt' should match specific nested file."
 
     # Test 'anywhere.txt'
-    assert ignore_handler.is_path_ignored(root_dir / "anywhere.txt", root_dir, current_spec), "Unanchored pattern should match file in root."
+    assert ignore_handler.is_path_ignored(
+        root_dir / "anywhere.txt", root_dir, current_spec
+    ), "Unanchored pattern should match file in root."
     assert ignore_handler.is_path_ignored(
         root_dir / "sub" / "anywhere.txt", root_dir, current_spec
     ), "Unanchored pattern should match file in subdirectory."
@@ -443,7 +547,9 @@ def test_load_ignore_patterns_patterns_become_empty_after_comment_strip():
         # Most likely, it results in no effective patterns.
 
 
-@mock.patch("pathlib.Path.open", new_callable=mock.mock_open)  # Use mock_open for context manager
+@mock.patch(
+    "pathlib.Path.open", new_callable=mock.mock_open
+)  # Use mock_open for context manager
 @mock.patch("pathlib.Path.is_file", return_value=True)  # Ensure is_file returns True
 def test_load_ignore_patterns_read_error(mock_is_file, mock_open_method):
     """Test load_ignore_patterns when file reading raises an OSError."""
@@ -472,7 +578,9 @@ def test_is_path_ignored_path_not_under_root(setup_test_directory):
         outside_path.touch()
 
         # This path should not be ignored by the spec tied to root_dir_with_spec
-        assert not ignore_handler.is_path_ignored(outside_path, root_dir_with_spec, ignore_spec)
+        assert not ignore_handler.is_path_ignored(
+            outside_path, root_dir_with_spec, ignore_spec
+        )
 
         # Test with a core system exclusion name, even if outside root for spec
         git_imposter_dir = Path(another_tmpdir) / ".git"
@@ -482,7 +590,9 @@ def test_is_path_ignored_path_not_under_root(setup_test_directory):
         assert ignore_handler.is_path_ignored(
             git_imposter_file, root_dir_with_spec, ignore_spec
         ), "Core system exclusion should apply even if path is outside spec root"
-        assert ignore_handler.is_path_ignored(git_imposter_dir, root_dir_with_spec, ignore_spec)
+        assert ignore_handler.is_path_ignored(
+            git_imposter_dir, root_dir_with_spec, ignore_spec
+        )
 
 
 def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
@@ -492,10 +602,14 @@ def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
     assert spec is not None
 
     # Scenario: file that does NOT match any .llmignore pattern
-    assert not ignore_handler.is_path_ignored(root_dir / "src" / "app.py", root_dir, spec)
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "src" / "app.py", root_dir, spec
+    )
 
     # Scenario: Directory ignored, file within it also ignored
-    assert ignore_handler.is_path_ignored(root_dir / "build" / "output.bin", root_dir, spec)
+    assert ignore_handler.is_path_ignored(
+        root_dir / "build" / "output.bin", root_dir, spec
+    )
 
     # Scenario: Directory pattern in .llmignore (`build/`)
     # Test matching the directory itself
@@ -520,8 +634,18 @@ def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
         ("*.txt", "file.log", False, False),
         # Path D, E, F: pattern.endswith("/") and path_to_check_abs.is_dir()
         ("dir1/", "dir1", True, True),  # Hits Path E (path_to_match_cli_dir == pattern)
-        ("dir2/", "dir2", True, True),  # Hits Path F (current_path_for_cli_match.name + "/" == pattern)
-        ("dir3/", "sub/dir3", True, True),  # Hits Path E (relative path 'sub/dir3/' matches 'dir3/' if pattern is simplified or
+        (
+            "dir2/",
+            "dir2",
+            True,
+            True,
+        ),  # Hits Path F (current_path_for_cli_match.name + "/" == pattern)
+        (
+            "dir3/",
+            "sub/dir3",
+            True,
+            True,
+        ),  # Hits Path E (relative path 'sub/dir3/' matches 'dir3/' if pattern is simplified or
         # pathspec-like)
         # OR Path G (current_path_for_cli_match.match(pattern)) if pattern="*/dir3/"
         # Current custom logic might need specific pattern for this
@@ -538,7 +662,11 @@ def test_is_path_ignored_various_llmignore_matches(setup_test_directory):
     ],
 )
 def test_is_path_ignored_cli_pattern_branches(
-    cli_pattern: str, path_str_to_check: str, is_dir_check: bool, should_ignore_val: bool, setup_test_directory
+    cli_pattern: str,
+    path_str_to_check: str,
+    is_dir_check: bool,
+    should_ignore_val: bool,
+    setup_test_directory,
 ):
     root_dir = setup_test_directory  # .llmignore in fixture won't affect these CLI-only tests if path doesn't match it
 
@@ -547,14 +675,23 @@ def test_is_path_ignored_cli_pattern_branches(
     if is_dir_check:
         full_path_to_check.mkdir(exist_ok=True)
     else:
-        if not full_path_to_check.exists():  # Avoid error if dir was created by parent.mkdir
+        if (
+            not full_path_to_check.exists()
+        ):  # Avoid error if dir was created by parent.mkdir
             full_path_to_check.touch()
 
     # Test with no .llmignore spec active to isolate CLI pattern effect
-    result = ignore_handler.is_path_ignored(full_path_to_check, root_dir, None, cli_ignore_patterns=[cli_pattern])
+    result = ignore_handler.is_path_ignored(
+        full_path_to_check, root_dir, None, cli_ignore_patterns=[cli_pattern]
+    )
     assert result is should_ignore_val
 
-    assert not ignore_handler.is_path_ignored(root_dir / "some_file_not_otherwise_ignored.txt", root_dir, None, cli_ignore_patterns=[])
+    assert not ignore_handler.is_path_ignored(
+        root_dir / "some_file_not_otherwise_ignored.txt",
+        root_dir,
+        None,
+        cli_ignore_patterns=[],
+    )
 
 
 def test_is_path_ignored_cli_path_outside_root(tmp_path_factory, setup_test_directory):
@@ -567,9 +704,16 @@ def test_is_path_ignored_cli_path_outside_root(tmp_path_factory, setup_test_dire
     outside_file.touch()
 
     # CLI pattern that would match if path was relative
-    assert not ignore_handler.is_path_ignored(outside_file, root_dir_for_spec, spec, cli_ignore_patterns=["external_project/*.log"])
+    assert not ignore_handler.is_path_ignored(
+        outside_file,
+        root_dir_for_spec,
+        spec,
+        cli_ignore_patterns=["external_project/*.log"],
+    )
     # CLI pattern matching only filename should work
-    assert ignore_handler.is_path_ignored(outside_file, root_dir_for_spec, spec, cli_ignore_patterns=["external_file.log"])
+    assert ignore_handler.is_path_ignored(
+        outside_file, root_dir_for_spec, spec, cli_ignore_patterns=["external_file.log"]
+    )
     assert ignore_handler.is_path_ignored(
         outside_file,
         root_dir_for_spec,
@@ -583,7 +727,9 @@ def test_is_path_ignored_cli_empty_list(setup_test_directory):
     spec = ignore_handler.load_ignore_patterns(root_dir)  # Use existing spec
     # A file that is definitely NOT ignored by the fixture's .llmignore or core exclusions
     path_to_check = root_dir / "src" / "app.py"
-    assert not ignore_handler.is_path_ignored(path_to_check, root_dir, spec, cli_ignore_patterns=[])
+    assert not ignore_handler.is_path_ignored(
+        path_to_check, root_dir, spec, cli_ignore_patterns=[]
+    )
 
 
 # Note on Symlinks:

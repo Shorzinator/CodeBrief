@@ -1,6 +1,6 @@
 # tests/tools/test_tree_generator.py
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 from unittest import mock
 
 import pytest
@@ -13,7 +13,7 @@ from src.contextcraft.utils import ignore_handler  # For .llmignore
 @pytest.fixture()
 def create_project_structure_for_tree(tmp_path: Path):
     # Same as the one in test_flattener, or slightly adapted if needed
-    def _create_files(structure: Dict[str, Optional[str]]):
+    def _create_files(structure: dict[str, Optional[str]]):
         for rel_path_str, content in structure.items():
             full_path = tmp_path / rel_path_str
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -29,11 +29,18 @@ def create_project_structure_for_tree(tmp_path: Path):
 def test_tree_output_to_file_basic(create_project_structure_for_tree, snapshot):
     """Test basic tree generation to a file and compare with snapshot."""
     project_root = create_project_structure_for_tree(
-        {"file1.txt": "content1", "dir1/file2.txt": "content2", "dir1/subdir/file3.txt": "content3", "empty_dir": None}
+        {
+            "file1.txt": "content1",
+            "dir1/file2.txt": "content2",
+            "dir1/subdir/file3.txt": "content3",
+            "empty_dir": None,
+        }
     )
     output_file = project_root / "tree_output.txt"
 
-    tree_generator.generate_and_output_tree(root_dir=project_root, output_file_path=output_file)
+    tree_generator.generate_and_output_tree(
+        root_dir=project_root, output_file_path=output_file
+    )
 
     assert output_file.exists()
     generated_tree_content = output_file.read_text()
@@ -57,7 +64,9 @@ def test_tree_with_llmignore(create_project_structure_for_tree, snapshot):
     )
     output_file = project_root / "tree_output_ignored.txt"
 
-    tree_generator.generate_and_output_tree(root_dir=project_root, output_file_path=output_file)
+    tree_generator.generate_and_output_tree(
+        root_dir=project_root, output_file_path=output_file
+    )
 
     assert output_file.exists()
     generated_tree_content = output_file.read_text()
@@ -92,7 +101,9 @@ def test_tree_console_output_basic(create_project_structure_for_tree, capsys):
     assert "┣━━" in stdout or "┗━━" in stdout  # Tree connectors
 
 
-def test_tree_console_with_llmignore_negation(create_project_structure_for_tree, capsys):
+def test_tree_console_with_llmignore_negation(
+    create_project_structure_for_tree, capsys
+):
     """Test console tree with .llmignore including negation."""
     project_root = create_project_structure_for_tree(
         {
@@ -113,16 +124,22 @@ def test_tree_console_with_llmignore_negation(create_project_structure_for_tree,
     print("\nDEBUG CONSOLE OUTPUT (llmignore_negation):\n", stdout)
 
     assert "app.py" in stdout
-    assert "build" not in stdout  # build/ itself is ignored by .llmignore and simpler Rich logic won't show it
+    assert (
+        "build" not in stdout
+    )  # build/ itself is ignored by .llmignore and simpler Rich logic won't show it
     assert "important.md" not in stdout  # Consequently, important.md isn't shown either
     assert "artifact.bin" not in stdout
     assert ".llmignore" in stdout  # Assuming .llmignore is not ignored by itself
 
 
 @mock.patch("pathlib.Path.iterdir", autospec=True)
-def test_tree_permission_error_file_output(mock_iterdir, create_project_structure_for_tree, snapshot):
+def test_tree_permission_error_file_output(
+    mock_iterdir, create_project_structure_for_tree, snapshot
+):
     """Test tree generation handles PermissionError when writing to file."""
-    project_root = create_project_structure_for_tree({"allowed_dir/file.txt": "", "denied_dir/secret.txt": ""})
+    project_root = create_project_structure_for_tree(
+        {"allowed_dir/file.txt": "", "denied_dir/secret.txt": ""}
+    )
 
     # Make iterdir on 'denied_dir' raise PermissionError
     def iterdir_side_effect(self, *args, **kwargs):
@@ -136,12 +153,16 @@ def test_tree_permission_error_file_output(mock_iterdir, create_project_structur
     mock_iterdir.side_effect = iterdir_side_effect
 
     output_file = project_root / "tree_permission_error.txt"
-    tree_generator.generate_and_output_tree(root_dir=project_root, output_file_path=output_file)
+    tree_generator.generate_and_output_tree(
+        root_dir=project_root, output_file_path=output_file
+    )
     snapshot.assert_match(output_file.read_text(), "tree_permission_error.txt")
 
 
 @mock.patch("pathlib.Path.iterdir", autospec=True)
-def test_tree_permission_error_console_output(mock_iterdir, create_project_structure_for_tree, capsys):
+def test_tree_permission_error_console_output(
+    mock_iterdir, create_project_structure_for_tree, capsys
+):
     """Test tree generation handles PermissionError for console output."""
     project_root = create_project_structure_for_tree(
         {
@@ -180,7 +201,9 @@ def test_tree_permission_error_console_output(mock_iterdir, create_project_struc
     captured = capsys.readouterr()
     stdout = captured.out
 
-    print(f"\nDEBUG STDOUT for permission error console test:\n{stdout}")  # Add this to see actual output
+    print(
+        f"\nDEBUG STDOUT for permission error console test:\n{stdout}"
+    )  # Add this to see actual output
 
     # Assertions need to be robust to Rich's output.
     # The Rich output for a denied directory looks like:
@@ -212,8 +235,12 @@ def test_tree_permission_error_console_output(mock_iterdir, create_project_struc
     denied_dir_index = stdout.find("denied_dir")
     assert denied_dir_index != -1, "The 'denied_dir' should be listed in the output."
 
-    permission_denied_message_index = stdout.find("(Permission Denied)", denied_dir_index)
-    assert permission_denied_message_index > denied_dir_index, "'(Permission Denied)' message should appear after 'denied_dir'."
+    permission_denied_message_index = stdout.find(
+        "(Permission Denied)", denied_dir_index
+    )
+    assert (
+        permission_denied_message_index > denied_dir_index
+    ), "'(Permission Denied)' message should appear after 'denied_dir'."
 
     # Ensure the (Permission Denied) message is "under" denied_dir visually.
     # This often means more leading spaces or specific tree connectors.
@@ -225,13 +252,19 @@ def test_tree_permission_error_console_output(mock_iterdir, create_project_struc
     assert "secret.txt" not in stdout  # File inside denied_dir should not be listed
 
 
-def test_tree_fallback_exclusions_no_llmignore(create_project_structure_for_tree, snapshot, monkeypatch):
+def test_tree_fallback_exclusions_no_llmignore(
+    create_project_structure_for_tree, snapshot, monkeypatch
+):
     """Test fallback exclusions when no .llmignore file is present."""
     # Temporarily modify DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC for a predictable test
     monkeypatch.setattr(
         tree_generator,
         "DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC",
-        {"__pycache__", "*.log", "explicitly_ignored.txt"},  # These are names/simple globs
+        {
+            "__pycache__",
+            "*.log",
+            "explicitly_ignored.txt",
+        },  # These are names/simple globs
     )
 
     project_root = create_project_structure_for_tree(

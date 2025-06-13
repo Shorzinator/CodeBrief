@@ -1,6 +1,5 @@
 # src/contextcraft/tools/flattener.py
-"""
-Code Flattening Utilities.
+"""Code Flattening Utilities.
 
 This module provides functions to "flatten" a directory structure by concatenating
 the content of specified files into a single text output. It's designed to help
@@ -25,7 +24,7 @@ Core functionalities:
 
 import os  # Used for os.walk to traverse directory structures.
 from pathlib import Path  # Core library for object-oriented path manipulation.
-from typing import List, Optional, Set  # Type hints for clarity and static analysis.
+from typing import Optional  # Type hints for clarity and static analysis.
 
 import pathspec  # For type hinting the llmignore_spec.
 import typer  # For typer.Exit for controlled exits from logic functions.
@@ -42,7 +41,7 @@ console = Console()
 # This list aims to cover common development artifacts, version control systems,
 # virtual environments, and OS-specific metadata files.
 # This will be augmented by .llmignore patterns in the future.
-DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK: Set[str] = {
+DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK: set[str] = {
     # Version Control
     ".git",
     ".hg",
@@ -86,7 +85,7 @@ DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK: Set[str] = {
 # Default file extensions to include if no specific include patterns are given by the user.
 # This list prioritizes common source code, markup, configuration, and text files.
 # The patterns are typically suffixes (e.g., ".py") but can be full filenames too.
-DEFAULT_INCLUDE_PATTERNS: List[str] = [
+DEFAULT_INCLUDE_PATTERNS: list[str] = [
     # Python
     ".py",
     ".pyw",
@@ -186,27 +185,33 @@ DEFAULT_INCLUDE_PATTERNS: List[str] = [
 
 def _file_matches_include_criteria(
     file_path: Path,
-    cli_include_patterns: Optional[List[str]],
+    cli_include_patterns: Optional[list[str]],
 ) -> bool:
-    """
-    Determines if a file should be included based *only* on --include CLI patterns
+    """Determines if a file should be included based *only* on --include CLI patterns
     or `DEFAULT_INCLUDE_PATTERNS` if no CLI patterns are given.
     This function assumes all exclusion/ignore checks have already been performed.
 
     Args:
+    ----
         file_path: The `pathlib.Path` object for the file being considered.
         cli_include_patterns: A list of user-provided glob patterns, extensions, or filenames
                               from the --include CLI option.
 
     Returns:
+    -------
         True if the file matches the inclusion criteria, False otherwise.
+
     """
     file_name = file_path.name
     file_suffix_lower = file_path.suffix.lower()
 
-    active_patterns = cli_include_patterns if cli_include_patterns else DEFAULT_INCLUDE_PATTERNS
+    active_patterns = (
+        cli_include_patterns if cli_include_patterns else DEFAULT_INCLUDE_PATTERNS
+    )
 
-    if not active_patterns:  # Should ideally not happen if DEFAULT_INCLUDE_PATTERNS is populated
+    if (
+        not active_patterns
+    ):  # Should ideally not happen if DEFAULT_INCLUDE_PATTERNS is populated
         return True  # Default to include if no include rules are active at all
 
     for pattern in active_patterns:
@@ -217,7 +222,9 @@ def _file_matches_include_criteria(
             if file_suffix_lower == pattern[1:].lower():
                 return True
         # For non-extension patterns, treat as exact filename or simple filename glob
-        elif Path(file_name).match(pattern):  # Handles exact name and simple globs like "file*.txt", "Makefile"
+        elif Path(file_name).match(
+            pattern
+        ):  # Handles exact name and simple globs like "file*.txt", "Makefile"
             return True
         # Note: Complex path-based include globs (e.g., "src/**/*.py") are not explicitly handled
         # by this helper. If needed, the main loop would have to pass relative_path_to_root
@@ -231,15 +238,18 @@ def _file_matches_include_criteria(
 def _directory_has_unignored_files(
     dir_path: Path,
     root_dir: Path,  # This is the main project root for relative path context for ignore_handler
-    llmignore_spec: Optional[pathspec.PathSpec],  # Use Optional[pathspec.PathSpec] for typing
-    cli_ignores: Optional[List[str]],
-    config_global_excludes: Optional[List[str]],
+    llmignore_spec: Optional[
+        pathspec.PathSpec
+    ],  # Use Optional[pathspec.PathSpec] for typing
+    cli_ignores: Optional[list[str]],
+    config_global_excludes: Optional[list[str]],
 ) -> bool:
-    """
-    Recursively checks if a directory contains any files that are NOT ignored by the ignore logic.
+    """Recursively checks if a directory contains any files that are NOT ignored by the ignore logic.
     Returns True if at least one un-ignored file is found.
     """
-    for current_root, _, files in os.walk(dir_path):  # Intentionally not pruning dirs here
+    for current_root, _, files in os.walk(
+        dir_path
+    ):  # Intentionally not pruning dirs here
         for file_name in files:  # Renamed for clarity
             file_path = Path(current_root) / file_name
             if not ignore_handler.is_path_ignored(
@@ -256,44 +266,60 @@ def _directory_has_unignored_files(
 def flatten_code_logic(
     root_dir_path: Path,
     output_file_path: Optional[Path] = None,
-    include_patterns: Optional[List[str]] = None,  # CLI --include
-    exclude_patterns: Optional[List[str]] = None,  # This is CLI --exclude
-    config_global_excludes: Optional[List[str]] = None,
+    include_patterns: Optional[list[str]] = None,  # CLI --include
+    exclude_patterns: Optional[list[str]] = None,  # This is CLI --exclude
+    config_global_excludes: Optional[list[str]] = None,
 ) -> None:
-    """
-    Main logic function for flattening files within a directory into a single text output.
+    """Main logic function for flattening files within a directory into a single text output.
     Integrates .llmignore handling and fallback default exclusions.
 
     Args:
+    ----
         root_dir_path: The root directory from which to start flattening.
         output_file_path: Optional path to save the flattened content. If None, prints to console.
         include_patterns: List of patterns from CLI --include.
         exclude_patterns: List of patterns from CLI --exclude, treated as additional ignore patterns.
+
     """
     if not root_dir_path.is_dir():
-        console.print(f"[bold red]Error: Root directory '{root_dir_path}' not found or is not a directory.[/bold red]")
+        console.print(
+            f"[bold red]Error: Root directory '{root_dir_path}' not found or is not a directory.[/bold red]"
+        )
         raise typer.Exit(code=1)
 
     llmignore_spec = ignore_handler.load_ignore_patterns(root_dir_path)
     # Simplified console messages for brevity
-    if llmignore_spec and output_file_path and (root_dir_path / ignore_handler.LLMIGNORE_FILENAME).exists():
-        console.print(f"[dim]Using .llmignore patterns from '{root_dir_path / ignore_handler.LLMIGNORE_FILENAME}'[/dim]")
+    if (
+        llmignore_spec
+        and output_file_path
+        and (root_dir_path / ignore_handler.LLMIGNORE_FILENAME).exists()
+    ):
+        console.print(
+            f"[dim]Using .llmignore patterns from '{root_dir_path / ignore_handler.LLMIGNORE_FILENAME}'[/dim]"
+        )
     elif not llmignore_spec and output_file_path:
-        console.print(f"[dim]No .llmignore file in '{root_dir_path}' or it's empty. Using fallback exclusions if applicable.[/dim]")
+        console.print(
+            f"[dim]No .llmignore file in '{root_dir_path}' or it's empty. Using fallback exclusions if applicable.[/dim]"
+        )
 
     effective_cli_only_ignores = list(exclude_patterns) if exclude_patterns else []
     if output_file_path:
         abs_output_file = output_file_path.resolve()
         abs_root_dir = root_dir_path.resolve()
-        if abs_output_file.is_relative_to(abs_root_dir) and abs_output_file.name not in effective_cli_only_ignores:
+        if (
+            abs_output_file.is_relative_to(abs_root_dir)
+            and abs_output_file.name not in effective_cli_only_ignores
+        ):
             effective_cli_only_ignores.append(abs_output_file.name)
 
-    flattened_content_parts: List[str] = []
+    flattened_content_parts: list[str] = []
     files_processed_count = 0
     files_skipped_binary_count = 0
 
     if output_file_path:
-        console.print(f"[dim]Starting flattening process in '{root_dir_path.resolve()}'...[/dim]")
+        console.print(
+            f"[dim]Starting flattening process in '{root_dir_path.resolve()}'...[/dim]"
+        )
 
     # We need to keep 'dirs' in the loop because we modify it in-place to control os.walk's traversal.
     # The modification happens in the directory pruning logic below.
@@ -324,10 +350,16 @@ def flatten_code_logic(
                 ):
                     dirs_to_prune_indices.append(i)
                 # If it has unignored files, it's not pruned by this rule, loop continues to next dir.
-            elif not llmignore_spec and not config_global_excludes:  # Fallback for dir pruning
+            elif (
+                not llmignore_spec and not config_global_excludes
+            ):  # Fallback for dir pruning
                 should_prune_by_fallback_dir = False
-                for fallback_pattern in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
-                    if dir_name == fallback_pattern or Path(dir_name).match(fallback_pattern):
+                for (
+                    fallback_pattern
+                ) in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
+                    if dir_name == fallback_pattern or Path(dir_name).match(
+                        fallback_pattern
+                    ):
                         should_prune_by_fallback_dir = True
                         break
                 if should_prune_by_fallback_dir:
@@ -348,10 +380,16 @@ def flatten_code_logic(
             ):
                 continue
 
-            if not llmignore_spec and not config_global_excludes:  # Fallback for file skipping
+            if (
+                not llmignore_spec and not config_global_excludes
+            ):  # Fallback for file skipping
                 should_skip_by_fallback_file = False
-                for fallback_pattern in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
-                    if file_name == fallback_pattern or Path(file_name).match(fallback_pattern):
+                for (
+                    fallback_pattern
+                ) in DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK:
+                    if file_name == fallback_pattern or Path(file_name).match(
+                        fallback_pattern
+                    ):
                         should_skip_by_fallback_file = True
                         break
                 if should_skip_by_fallback_file:
@@ -370,24 +408,34 @@ def flatten_code_logic(
                 with file_path.open(mode="rb") as binfile:
                     start_bytes = binfile.read(1024)
                 if b"\x00" in start_bytes:
-                    warning_msg = f"Skipped binary or non-UTF-8 file: {relative_path_str}"
+                    warning_msg = (
+                        f"Skipped binary or non-UTF-8 file: {relative_path_str}"
+                    )
                     # Only print console warning if outputting to file, to avoid cluttering console output mode
                     if output_file_path:
-                        console.print(f"[yellow]Warning: Skipping binary or non-UTF-8 file: {file_path.as_posix()}[/yellow]")
+                        console.print(
+                            f"[yellow]Warning: Skipping binary or non-UTF-8 file: {file_path.as_posix()}[/yellow]"
+                        )
                     flattened_content_parts.append(f"\n\n# --- {warning_msg} ---")
                     files_skipped_binary_count += 1
                     continue
 
-                with file_path.open(mode="r", encoding="utf-8", errors="ignore") as infile:
+                with file_path.open(
+                    mode="r", encoding="utf-8", errors="ignore"
+                ) as infile:
                     content = infile.read()
-                flattened_content_parts.append(f"\n\n# --- File: {relative_path_str} ---")
+                flattened_content_parts.append(
+                    f"\n\n# --- File: {relative_path_str} ---"
+                )
                 flattened_content_parts.append(content)
                 files_processed_count += 1
             except Exception as e:
                 error_msg = f"Error reading file {file_path.as_posix()}: {e}"
                 if output_file_path:  # Only print console error if outputting to file
                     console.print(f"[red]{error_msg}[/red]")
-                flattened_content_parts.append(f"# --- {error_msg} ---")  # Always record error in output
+                flattened_content_parts.append(
+                    f"# --- {error_msg} ---"
+                )  # Always record error in output
 
     final_output_str = "\n".join(flattened_content_parts).strip()
 
@@ -396,11 +444,18 @@ def flatten_code_logic(
             output_file_path.parent.mkdir(parents=True, exist_ok=True)
             with output_file_path.open(mode="w", encoding="utf-8") as outfile:
                 outfile.write(final_output_str)
-            console.print(f"[green]Successfully flattened {files_processed_count} file(s) " f"to '{output_file_path.resolve()}'[/green]")
+            console.print(
+                f"[green]Successfully flattened {files_processed_count} file(s) "
+                f"to '{output_file_path.resolve()}'[/green]"
+            )
             if files_skipped_binary_count > 0:
-                console.print(f"[yellow]Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s).[/yellow]")
+                console.print(
+                    f"[yellow]Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s).[/yellow]"
+                )
         except OSError as e:
-            console.print(f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]")
+            console.print(
+                f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]"
+            )
             raise typer.Exit(code=1) from e
     else:  # Printing to console
         # Use print() instead of console.print() to avoid Rich markup parsing of file contents
@@ -408,8 +463,11 @@ def flatten_code_logic(
         # For console output, a summary might be too verbose if the content itself is printed.
         # Consider a verbosity flag for this summary later.
         # For now, let's make it less prominent or conditional.
-        if files_processed_count > 0 or files_skipped_binary_count > 0:  # Only print summary if something happened
+        if (
+            files_processed_count > 0 or files_skipped_binary_count > 0
+        ):  # Only print summary if something happened
             summary_message = (
-                f"\n--- Flattened {files_processed_count} file(s). " f"Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s). ---"
+                f"\n--- Flattened {files_processed_count} file(s). "
+                f"Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s). ---"
             )
             console.print(f"[blue]{summary_message}[/blue]")

@@ -1,6 +1,5 @@
 # tests/tools/test_dependency_lister.py
-"""
-Unit tests for the dependency_lister module.
+"""Unit tests for the dependency_lister module.
 
 Tests cover parsing functionality for various package manager files,
 error handling, and output formatting.
@@ -36,7 +35,9 @@ class TestDependencyInfo:
 
     def test_dependency_with_extras(self):
         """Test dependency with extras."""
-        dep = DependencyInfo(name="django", version=">=4.0", extras=["redis", "postgres"], group="main")
+        dep = DependencyInfo(
+            name="django", version=">=4.0", extras=["redis", "postgres"], group="main"
+        )
         assert dep.name == "django"
         assert dep.version == ">=4.0"
         assert dep.extras == ["redis", "postgres"]
@@ -49,7 +50,9 @@ class TestDependencyInfo:
         assert str(dep1) == "requests ^2.31.0"
 
         # Dependency with extras
-        dep2 = DependencyInfo(name="django", version=">=4.0", extras=["redis", "postgres"])
+        dep2 = DependencyInfo(
+            name="django", version=">=4.0", extras=["redis", "postgres"]
+        )
         assert str(dep2) == "django[redis,postgres] >=4.0"
 
         # Dependency without version
@@ -58,7 +61,9 @@ class TestDependencyInfo:
 
     def test_dependency_repr(self):
         """Test repr of dependency."""
-        dep = DependencyInfo(name="requests", version="^2.31.0", extras=["security"], group="dev")
+        dep = DependencyInfo(
+            name="requests", version="^2.31.0", extras=["security"], group="dev"
+        )
         expected = "DependencyInfo(name='requests', version='^2.31.0', extras=['security'], group='dev')"
         assert repr(dep) == expected
 
@@ -361,7 +366,9 @@ mypy>=1.0.0
             ("requirements-production.txt", "production"),
         ],
     )
-    def test_group_determination_from_filename(self, tmp_path, filename, expected_group):
+    def test_group_determination_from_filename(
+        self, tmp_path, filename, expected_group
+    ):
         """Test group determination from various filenames."""
         requirements_content = "requests>=2.31.0\n"
         requirements_file = tmp_path / filename
@@ -501,7 +508,14 @@ class TestDiscoveryFunctions:
         assert len(discovered_files) >= 5
 
         filenames = {f.name for f in discovered_files}
-        expected_files = {"pyproject.toml", "requirements.txt", "requirements-dev.txt", "package.json", "base.txt", "test.in"}
+        expected_files = {
+            "pyproject.toml",
+            "requirements.txt",
+            "requirements-dev.txt",
+            "package.json",
+            "base.txt",
+            "test.in",
+        }
         assert expected_files.issubset(filenames)
 
     def test_discover_no_files(self, tmp_path):
@@ -574,7 +588,10 @@ class TestMarkdownFormatting:
         python_deps = [DependencyInfo("requests", "^2.31.0", group="main")]
         nodejs_deps = [DependencyInfo("express", "^4.18.0", group="main")]
 
-        dependency_data = {"Python": {"Poetry (pyproject.toml)": python_deps}, "Node.js": {"npm/yarn (package.json)": nodejs_deps}}
+        dependency_data = {
+            "Python": {"Poetry (pyproject.toml)": python_deps},
+            "Node.js": {"npm/yarn (package.json)": nodejs_deps},
+        }
 
         result = format_dependencies_as_markdown(dependency_data)
 
@@ -585,7 +602,11 @@ class TestMarkdownFormatting:
 
     def test_format_dependencies_with_extras(self):
         """Test formatting dependencies with extras."""
-        deps = [DependencyInfo("django", "^4.0.0", extras=["redis", "postgres"], group="main")]
+        deps = [
+            DependencyInfo(
+                "django", "^4.0.0", extras=["redis", "postgres"], group="main"
+            )
+        ]
 
         dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
 
@@ -672,7 +693,11 @@ requests = "^2.31.0"
     def test_list_dependencies_to_console(self, tmp_path, capsys):
         """Test listing dependencies to console."""
         # Create a simple package.json
-        package_data = {"name": "test-project", "version": "1.0.0", "dependencies": {"express": "^4.18.0"}}
+        package_data = {
+            "name": "test-project",
+            "version": "1.0.0",
+            "dependencies": {"express": "^4.18.0"},
+        }
 
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
@@ -697,7 +722,11 @@ requests = "^2.31.0"
         (tmp_path / "pyproject.toml").write_text(pyproject_content)
 
         # Create package.json
-        package_data = {"name": "test-project", "version": "1.0.0", "dependencies": {"express": "^4.18.0"}}
+        package_data = {
+            "name": "test-project",
+            "version": "1.0.0",
+            "dependencies": {"express": "^4.18.0"},
+        }
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
         # Create requirements.txt

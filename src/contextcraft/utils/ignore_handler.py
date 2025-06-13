@@ -1,13 +1,12 @@
 # src/contextcraft/utils/ignore_handler.py
-"""
-Handles parsing of .llmignore files and mathcing paths against ignore patterns.
+"""Handles parsing of .llmignore files and mathcing paths against ignore patterns.
 
 This module uses the pathspec library to provide functionality similar
 """
 
 from contextlib import suppress
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import Optional
 
 import pathspec
 from rich.console import Console
@@ -19,24 +18,25 @@ LLMIGNORE_FILENAME = ".llmignore"
 # These are always excluded, regardless of .llmignore or CLI options,
 # primarily for security and tool stability.
 
-CORE_SYSTEM_EXCLUSIONS: Set[str] = {
+CORE_SYSTEM_EXCLUSIONS: set[str] = {
     ".git",
     # ".env",
 }
 
 
 def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
-    """
-    Loads ignore patterns from an .llmignore file in the given root directory
+    """Loads ignore patterns from an .llmignore file in the given root directory
 
     Args:
+    ----
         root_dir: The root directory to search for the .llmignore file
 
     Returns:
+    -------
         A pathspec.PathSpec object if .llmignore is found and parsed,
         otherwise None. Returns None if .llmignore is not found or is empty.
-    """
 
+    """
     llmignore_file = root_dir / LLMIGNORE_FILENAME
 
     if llmignore_file.is_file():
@@ -69,7 +69,9 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
                     # This might fail if "#" is a valid character in a filename and not escaped.
                     # Git's behavior is nuanced here. For now, let's be pragmatic.
                     parts = current_line.split("#", 1)
-                    pattern_part = parts[0].strip()  # Pattern is before the first #, then strip
+                    pattern_part = parts[
+                        0
+                    ].strip()  # Pattern is before the first #, then strip
 
                     # If pattern_part becomes empty after removing comment, skip
                     if not pattern_part:
@@ -89,7 +91,9 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
                 return None
 
             # console.print(f"[dim]PATTERNS TO PATHSPEC: {processed_lines}[/dim]") # DEBUG
-            spec = pathspec.PathSpec.from_lines(pathspec.patterns.GitWildMatchPattern, processed_lines)
+            spec = pathspec.PathSpec.from_lines(
+                pathspec.patterns.GitWildMatchPattern, processed_lines
+            )
 
             if not spec.patterns:
                 # console.print(f"[dim].llmignore file at {llmignore_file} resulted in no patterns in spec.[/dim]")
@@ -97,7 +101,9 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
             return spec
 
         except Exception as e:
-            console.print(f"[yellow]Warning: Could not read or parse {llmignore_file}: {e}[/yellow]")
+            console.print(
+                f"[yellow]Warning: Could not read or parse {llmignore_file}: {e}[/yellow]"
+            )
             return None
     return None
 
@@ -106,8 +112,8 @@ def is_path_ignored(
     path_to_check: Path,
     root_dir: Path,
     ignore_spec: Optional[pathspec.PathSpec],
-    cli_ignore_patterns: Optional[List[str]] = None,
-    config_exclude_patterns: Optional[List[str]] = None,
+    cli_ignore_patterns: Optional[list[str]] = None,
+    config_exclude_patterns: Optional[list[str]] = None,
 ) -> bool:
     path_to_check_abs = path_to_check.resolve()
     root_dir_abs = root_dir.resolve()
@@ -116,7 +122,9 @@ def is_path_ignored(
     for i, part_name in enumerate(path_to_check_abs.parts):
         if part_name in CORE_SYSTEM_EXCLUSIONS:
             excluded_base = Path(*path_to_check_abs.parts[: i + 1])
-            if path_to_check_abs == excluded_base or path_to_check_abs.is_relative_to(excluded_base):
+            if path_to_check_abs == excluded_base or path_to_check_abs.is_relative_to(
+                excluded_base
+            ):
                 # console.print(f"[dim]Ignoring '{path_to_check_abs}' due to CORE system exclusion '{part_name}'[/dim]")
                 return True
 

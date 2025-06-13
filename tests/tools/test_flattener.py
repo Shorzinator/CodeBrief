@@ -1,10 +1,9 @@
 # tests/tools/test_flattener.py
-"""
-Tests for the src.contextcraft.tools.flattener module.
+"""Tests for the src.contextcraft.tools.flattener module.
 Focuses on the flatten_code_logic function and its interactions.
 """
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import pytest
 
@@ -14,7 +13,7 @@ from src.contextcraft.utils import ignore_handler
 
 @pytest.fixture()
 def create_project_structure(tmp_path: Path):
-    def _create_files(structure: Dict[str, Optional[str]]):
+    def _create_files(structure: dict[str, Optional[str]]):
         for rel_path_str, content in structure.items():
             full_path = tmp_path / rel_path_str
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,9 +56,19 @@ def test_file_matches_include_criteria(file_name, cli_include_patterns, expected
 
 # Tests for flatten_code_logic
 def test_flatten_basic(create_project_structure):
-    project_root = create_project_structure({"file1.py": "print('File 1')", "src/file2.js": "// File 2", "nodocs.txt": "No docs here"})
+    project_root = create_project_structure(
+        {
+            "file1.py": "print('File 1')",
+            "src/file2.js": "// File 2",
+            "nodocs.txt": "No docs here",
+        }
+    )
     output_file = project_root / "output_flat.txt"
-    flattener.flatten_code_logic(root_dir_path=project_root, output_file_path=output_file, include_patterns=["*.py", "*.js"])
+    flattener.flatten_code_logic(
+        root_dir_path=project_root,
+        output_file_path=output_file,
+        include_patterns=["*.py", "*.js"],
+    )
     content = output_file.read_text()
     assert "# --- File: file1.py ---" in content
     assert "print('File 1')" in content
@@ -101,18 +110,31 @@ def test_flatten_binary_file_skip(create_project_structure, capsys):
     binary_file_path.write_bytes(b"\x00\x01\xFF\xFE")
 
     output_file = project_root / "output_flat.txt"
-    flattener.flatten_code_logic(root_dir_path=project_root, output_file_path=output_file, include_patterns=["*.txt", "*.bin"])
+    flattener.flatten_code_logic(
+        root_dir_path=project_root,
+        output_file_path=output_file,
+        include_patterns=["*.txt", "*.bin"],
+    )
 
     content = output_file.read_text()
     captured = capsys.readouterr()
 
     assert "# --- File: text_file.txt ---" in content
-    assert f"# --- Skipped binary or non-UTF-8 file: {Path('binary_file.bin').as_posix()} ---" in content
+    assert (
+        f"# --- Skipped binary or non-UTF-8 file: {Path('binary_file.bin').as_posix()} ---"
+        in content
+    )
     assert "Warning: Skipping binary or non-UTF-8 file" in captured.out
 
 
 def test_flatten_with_cli_exclude(create_project_structure):
-    project_root = create_project_structure({"main.py": "main content", "utils.py": "utils content", "tests/test_main.py": "test content"})
+    project_root = create_project_structure(
+        {
+            "main.py": "main content",
+            "utils.py": "utils content",
+            "tests/test_main.py": "test content",
+        }
+    )
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
         root_dir_path=project_root,
@@ -150,10 +172,16 @@ def test_flatten_interaction_llmignore_and_cli_exclude(create_project_structure)
     assert "temp_data/file.txt" not in content  # Excluded by .llmignore
 
 
-def test_flatten_default_general_exclusions_when_no_llmignore(create_project_structure, monkeypatch):
+def test_flatten_default_general_exclusions_when_no_llmignore(
+    create_project_structure, monkeypatch
+):
     """Test that DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK is used when no .llmignore."""
     # Ensure DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK has some testable items
-    monkeypatch.setattr(flattener, "DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK", {"__pycache__", "*.log"})
+    monkeypatch.setattr(
+        flattener,
+        "DEFAULT_EXCLUDED_ITEMS_GENERAL_FOR_WALK_FALLBACK",
+        {"__pycache__", "*.log"},
+    )
 
     project_root = create_project_structure(
         {
@@ -180,7 +208,11 @@ def test_flatten_output_file_exclusion(create_project_structure):
     project_root = create_project_structure({"file1.txt": "content1"})
     output_file = project_root / "output_flat.txt"  # Output file inside root_dir
 
-    flattener.flatten_code_logic(root_dir_path=project_root, output_file_path=output_file, include_patterns=["*.txt"])
+    flattener.flatten_code_logic(
+        root_dir_path=project_root,
+        output_file_path=output_file,
+        include_patterns=["*.txt"],
+    )
     content = output_file.read_text()
     assert "# --- File: file1.txt ---" in content
     assert "output_flat.txt" not in content  # Ensure it didn't try to read itself
@@ -188,7 +220,9 @@ def test_flatten_output_file_exclusion(create_project_structure):
 
 def test_flatten_to_console_output(create_project_structure, capsys):
     """Test flattening content to console when output_file_path is None."""
-    project_root = create_project_structure({"file_a.txt": "Content of A", "file_b.txt": "Content of B"})
+    project_root = create_project_structure(
+        {"file_a.txt": "Content of A", "file_b.txt": "Content of B"}
+    )
     flattener.flatten_code_logic(
         root_dir_path=project_root,
         output_file_path=None,  # Output to console

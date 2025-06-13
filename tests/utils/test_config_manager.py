@@ -1,14 +1,13 @@
 # tests/utils/test_config_manager.py
 
-"""
-Unit tests for the src.contextcraft.config_manager module.
+"""Unit tests for the src.contextcraft.config_manager module.
 """
 
 import tempfile
 import unittest.mock as mock
 import warnings
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import toml
 
@@ -26,7 +25,7 @@ EXPECTED_DEFAULTS = {
 }
 
 
-def create_pyproject_toml(tmp_path: Path, content: Dict[str, Any]) -> Path:
+def create_pyproject_toml(tmp_path: Path, content: dict[str, Any]) -> Path:
     """Helper to create a pyproject.toml file with specified content using the 'toml' package."""
     pyproject_file = tmp_path / "pyproject.toml"
 
@@ -34,10 +33,16 @@ def create_pyproject_toml(tmp_path: Path, content: Dict[str, Any]) -> Path:
     # This assumes 'toml' is a development dependency.
     try:
         pyproject_file.write_text(toml.dumps(content), encoding="utf-8")
-    except NameError as err:  # Should not happen if toml is imported correctly at module level
-        raise RuntimeError("The 'toml' package is required for writing TOML in tests but not found.") from err
+    except (
+        NameError
+    ) as err:  # Should not happen if toml is imported correctly at module level
+        raise RuntimeError(
+            "The 'toml' package is required for writing TOML in tests but not found."
+        ) from err
     except Exception as err:
-        raise RuntimeError(f"Failed to write TOML content using 'toml' package: {err}") from err
+        raise RuntimeError(
+            f"Failed to write TOML content using 'toml' package: {err}"
+        ) from err
 
     return pyproject_file
 
@@ -64,7 +69,9 @@ def test_load_config_empty_section():
     """Test loading config when [tool.contextcraft] section is empty."""
     with tempfile.TemporaryDirectory() as tmpdir:
         project_root = Path(tmpdir)
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: {}}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: {}}}
+        )
         config = config_manager.load_config(project_root)
         assert config == EXPECTED_DEFAULTS
 
@@ -80,7 +87,9 @@ def test_load_config_all_values_present_and_correct_type():
             "global_include_patterns": ["*.py", ".md"],
             "global_exclude_patterns": ["*.log", "build/"],
         }
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}}
+        )
 
         config = config_manager.load_config(project_root)
 
@@ -98,7 +107,9 @@ def test_load_config_some_values_missing():
             "default_output_filename_flatten": "custom_flat.txt",
             "global_include_patterns": ["*.js"],
         }
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}}
+        )
 
         config = config_manager.load_config(project_root)
 
@@ -113,10 +124,14 @@ def test_load_config_incorrect_type_for_list_option_issues_warning():
         project_root = Path(tmpdir)
         # global_include_patterns should be a list, but providing a string
         config_data = {"global_include_patterns": "*.py"}
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}}
+        )
 
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")  # Cause all warnings to always be triggered.
+            warnings.simplefilter(
+                "always"
+            )  # Cause all warnings to always be triggered.
             config = config_manager.load_config(project_root)
 
             assert len(w) == 1
@@ -124,7 +139,10 @@ def test_load_config_incorrect_type_for_list_option_issues_warning():
             assert "Expected list for 'global_include_patterns'" in str(w[-1].message)
 
         # Should use default for the mistyped key
-        assert config["global_include_patterns"] == EXPECTED_DEFAULTS["global_include_patterns"]  # which is []
+        assert (
+            config["global_include_patterns"]
+            == EXPECTED_DEFAULTS["global_include_patterns"]
+        )  # which is []
 
 
 def test_load_config_incorrect_type_for_string_option_issues_warning():
@@ -133,7 +151,9 @@ def test_load_config_incorrect_type_for_string_option_issues_warning():
         project_root = Path(tmpdir)
         # default_output_filename_tree should be string or None, providing int
         config_data = {"default_output_filename_tree": 123}
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}}
+        )
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -143,10 +163,15 @@ def test_load_config_incorrect_type_for_string_option_issues_warning():
             assert issubclass(w[-1].category, UserWarning)
             assert "Expected string or None for 'default_output_filename_tree'" in str(
                 w[-1].message
-            ) or "Expected str for 'default_output_filename_tree'" in str(w[-1].message)  # Older logic output
+            ) or "Expected str for 'default_output_filename_tree'" in str(
+                w[-1].message
+            )  # Older logic output
 
         # Should use default for the mistyped key
-        assert config["default_output_filename_tree"] == EXPECTED_DEFAULTS["default_output_filename_tree"]  # which is None
+        assert (
+            config["default_output_filename_tree"]
+            == EXPECTED_DEFAULTS["default_output_filename_tree"]
+        )  # which is None
 
 
 def test_load_config_unknown_option_is_ignored():
@@ -157,7 +182,9 @@ def test_load_config_unknown_option_is_ignored():
             "default_output_filename_tree": "tree.txt",
             "unknown_option": "some_value",  # This should be ignored
         }
-        create_pyproject_toml(project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}})
+        create_pyproject_toml(
+            project_root, {"tool": {config_manager.CONFIG_SECTION_NAME: config_data}}
+        )
 
         config = config_manager.load_config(project_root)
 
