@@ -264,7 +264,7 @@ def _directory_has_unignored_files(
 
 
 def flatten_code_logic(
-    root_dir_path: Path,
+    root_dir: Path,
     output_file_path: Optional[Path] = None,
     include_patterns: Optional[list[str]] = None,  # CLI --include
     exclude_patterns: Optional[list[str]] = None,  # This is CLI --exclude
@@ -275,37 +275,37 @@ def flatten_code_logic(
 
     Args:
     ----
-        root_dir_path: The root directory from which to start flattening.
+        root_dir: The root directory from which to start flattening.
         output_file_path: Optional path to save the flattened content. If None, prints to console.
         include_patterns: List of patterns from CLI --include.
         exclude_patterns: List of patterns from CLI --exclude, treated as additional ignore patterns.
 
     """
-    if not root_dir_path.is_dir():
+    if not root_dir.is_dir():
         console.print(
-            f"[bold red]Error: Root directory '{root_dir_path}' not found or is not a directory.[/bold red]"
+            f"[bold red]Error: Root directory '{root_dir}' not found or is not a directory.[/bold red]"
         )
         raise typer.Exit(code=1)
 
-    llmignore_spec = ignore_handler.load_ignore_patterns(root_dir_path)
+    llmignore_spec = ignore_handler.load_ignore_patterns(root_dir)
     # Simplified console messages for brevity
     if (
         llmignore_spec
         and output_file_path
-        and (root_dir_path / ignore_handler.LLMIGNORE_FILENAME).exists()
+        and (root_dir / ignore_handler.LLMIGNORE_FILENAME).exists()
     ):
         console.print(
-            f"[dim]Using .llmignore patterns from '{root_dir_path / ignore_handler.LLMIGNORE_FILENAME}'[/dim]"
+            f"[dim]Using .llmignore patterns from '{root_dir / ignore_handler.LLMIGNORE_FILENAME}'[/dim]"
         )
     elif not llmignore_spec and output_file_path:
         console.print(
-            f"[dim]No .llmignore file in '{root_dir_path}' or it's empty. Using fallback exclusions if applicable.[/dim]"
+            f"[dim]No .llmignore file in '{root_dir}' or it's empty. Using fallback exclusions if applicable.[/dim]"
         )
 
     effective_cli_only_ignores = list(exclude_patterns) if exclude_patterns else []
     if output_file_path:
         abs_output_file = output_file_path.resolve()
-        abs_root_dir = root_dir_path.resolve()
+        abs_root_dir = root_dir.resolve()
         if (
             abs_output_file.is_relative_to(abs_root_dir)
             and abs_output_file.name not in effective_cli_only_ignores
@@ -318,13 +318,13 @@ def flatten_code_logic(
 
     if output_file_path:
         console.print(
-            f"[dim]Starting flattening process in '{root_dir_path.resolve()}'...[/dim]"
+            f"[dim]Starting flattening process in '{root_dir.resolve()}'...[/dim]"
         )
 
     # We need to keep 'dirs' in the loop because we modify it in-place to control os.walk's traversal.
     # The modification happens in the directory pruning logic below.
     # - dirs is modified in-place to control os.walk traversal
-    for current_subdir_str, dirs, files in os.walk(root_dir_path, topdown=True):
+    for current_subdir_str, dirs, files in os.walk(root_dir, topdown=True):
         current_subdir_path = Path(current_subdir_str)
 
         dirs_to_prune_indices = []
@@ -333,7 +333,7 @@ def flatten_code_logic(
 
             is_dir_ignored_by_main_rules = ignore_handler.is_path_ignored(
                 path_to_check=dir_path_abs,
-                root_dir=root_dir_path,
+                root_dir=root_dir,
                 ignore_spec=llmignore_spec,
                 cli_ignore_patterns=effective_cli_only_ignores,  # Pass CLI-specific
                 config_exclude_patterns=config_global_excludes,  # <--- PASS Config-specific
@@ -343,7 +343,7 @@ def flatten_code_logic(
                 # Your existing logic for _directory_has_unignored_files applies here
                 if not _directory_has_unignored_files(
                     dir_path_abs,
-                    root_dir_path,
+                    root_dir,
                     llmignore_spec,
                     effective_cli_only_ignores,
                     config_global_excludes,  # <--- PASS Config-specific here too
@@ -373,7 +373,7 @@ def flatten_code_logic(
 
             if ignore_handler.is_path_ignored(
                 path_to_check=file_path,
-                root_dir=root_dir_path,
+                root_dir=root_dir,
                 ignore_spec=llmignore_spec,
                 cli_ignore_patterns=effective_cli_only_ignores,  # Pass CLI-specific
                 config_exclude_patterns=config_global_excludes,  # <--- PASS Config-specific
@@ -400,7 +400,7 @@ def flatten_code_logic(
 
             # --- File Processing Logic (binary check, read, append) ---
             try:
-                relative_path_str = str(file_path.relative_to(root_dir_path).as_posix())
+                relative_path_str = str(file_path.relative_to(root_dir).as_posix())
             except ValueError:
                 relative_path_str = str(file_path.as_posix())
 

@@ -65,7 +65,7 @@ def test_flatten_basic(create_project_structure):
     )
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.py", "*.js"],
     )
@@ -90,7 +90,7 @@ def test_flatten_with_llmignore(create_project_structure):
     )
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.py"],  # Only include .py files
     )
@@ -111,7 +111,7 @@ def test_flatten_binary_file_skip(create_project_structure, capsys):
 
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.txt", "*.bin"],
     )
@@ -137,7 +137,7 @@ def test_flatten_with_cli_exclude(create_project_structure):
     )
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.py"],
         exclude_patterns=["tests/*"],  # CLI exclude
@@ -160,7 +160,7 @@ def test_flatten_interaction_llmignore_and_cli_exclude(create_project_structure)
     )
     output_file = project_root / "output_flat.txt"
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.py", "*.ini"],  # Include .py and .ini
         exclude_patterns=["config.ini"],  # CLI exclude for config.ini
@@ -193,7 +193,7 @@ def test_flatten_default_general_exclusions_when_no_llmignore(
     output_file = project_root / "output_flat.txt"
     # No .llmignore file is created for this test
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.py", "*.log", "*.pyc"],  # Try to include them
     )
@@ -209,7 +209,7 @@ def test_flatten_output_file_exclusion(create_project_structure):
     output_file = project_root / "output_flat.txt"  # Output file inside root_dir
 
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=output_file,
         include_patterns=["*.txt"],
     )
@@ -224,7 +224,7 @@ def test_flatten_to_console_output(create_project_structure, capsys):
         {"file_a.txt": "Content of A", "file_b.txt": "Content of B"}
     )
     flattener.flatten_code_logic(
-        root_dir_path=project_root,
+        root_dir=project_root,
         output_file_path=None,  # Output to console
         include_patterns=["file_a.txt", "file_b.txt"],
     )
