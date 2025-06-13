@@ -303,6 +303,8 @@ class RequirementsTxtParser(PackageManagerParser):
             return "dev"
         if "test" in name:
             return "test"
+        if "prod" in name or "production" in name:
+            return "production"
         return "main"
 
     def _parse_requirement_string(

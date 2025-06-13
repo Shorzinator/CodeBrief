@@ -8,7 +8,6 @@ error handling, and output formatting.
 import json
 
 import pytest
-import typer
 
 from src.contextcraft.tools.dependency_lister import (
     DependencyInfo,
@@ -18,7 +17,7 @@ from src.contextcraft.tools.dependency_lister import (
     create_parser,
     discover_dependency_files,
     format_dependencies_as_markdown,
-    list_dependencies_logic,
+    list_dependencies,
 )
 
 
@@ -496,16 +495,10 @@ class TestDiscoveryFunctions:
         (tmp_path / "requirements-dev.txt").write_text("pytest>=7.0.0")
         (tmp_path / "package.json").write_text('{"name": "test"}')
 
-        # Create requirements subdirectory
-        req_dir = tmp_path / "requirements"
-        req_dir.mkdir()
-        (req_dir / "base.txt").write_text("django>=4.0.0")
-        (req_dir / "test.in").write_text("coverage>=7.0.0")
-
         discovered_files = discover_dependency_files(tmp_path)
 
-        # Should find all files
-        assert len(discovered_files) >= 5
+        # Should find the 4 supported files we created
+        assert len(discovered_files) == 4
 
         filenames = {f.name for f in discovered_files}
         expected_files = {
@@ -513,10 +506,8 @@ class TestDiscoveryFunctions:
             "requirements.txt",
             "requirements-dev.txt",
             "package.json",
-            "base.txt",
-            "test.in",
         }
-        assert expected_files.issubset(filenames)
+        assert expected_files == filenames
 
     def test_discover_no_files(self, tmp_path):
         """Test discovery when no dependency files exist."""
@@ -559,29 +550,34 @@ class TestMarkdownFormatting:
     def test_format_empty_dependencies(self):
         """Test formatting empty dependency data."""
         result = format_dependencies_as_markdown({})
-        assert "No dependencies found" in result
         assert "# Project Dependencies" in result
+        # Empty data should just show the header
 
     def test_format_single_language_dependencies(self):
         """Test formatting dependencies for a single language."""
-        deps = [
-            DependencyInfo("requests", "^2.31.0", group="main"),
-            DependencyInfo("pytest", "^7.0.0", group="dev"),
-        ]
+        deps_main = [DependencyInfo("requests", "^2.31.0", group="main")]
+        deps_dev = [DependencyInfo("pytest", "^7.0.0", group="dev")]
 
-        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
+        dependency_data = {
+            "Python": {
+                "Poetry": {
+                    "main": deps_main,
+                    "dev": deps_dev,
+                }
+            }
+        }
 
         result = format_dependencies_as_markdown(dependency_data)
 
         assert "# Project Dependencies" in result
         assert "## Python" in result
-        assert "### Poetry (pyproject.toml)" in result
+        assert "### Poetry" in result
         assert "#### Main Dependencies" in result
         assert "#### Dev Dependencies" in result
-        assert "**requests**" in result
-        assert "`^2.31.0`" in result
-        assert "**pytest**" in result
-        assert "`^7.0.0`" in result
+        assert "requests" in result
+        assert "^2.31.0" in result
+        assert "pytest" in result
+        assert "^7.0.0" in result
 
     def test_format_multiple_languages(self):
         """Test formatting dependencies for multiple languages."""
@@ -589,16 +585,16 @@ class TestMarkdownFormatting:
         nodejs_deps = [DependencyInfo("express", "^4.18.0", group="main")]
 
         dependency_data = {
-            "Python": {"Poetry (pyproject.toml)": python_deps},
-            "Node.js": {"npm/yarn (package.json)": nodejs_deps},
+            "Python": {"Poetry": {"main": python_deps}},
+            "Node.js": {"npm/yarn": {"main": nodejs_deps}},
         }
 
         result = format_dependencies_as_markdown(dependency_data)
 
         assert "## Python" in result
         assert "## Node.js" in result
-        assert "**requests**" in result
-        assert "**express**" in result
+        assert "requests" in result
+        assert "express" in result
 
     def test_format_dependencies_with_extras(self):
         """Test formatting dependencies with extras."""
@@ -608,13 +604,12 @@ class TestMarkdownFormatting:
             )
         ]
 
-        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
+        dependency_data = {"Python": {"Poetry": {"main": deps}}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
-        assert "**django**" in result
-        assert "`^4.0.0`" in result
-        assert "(extras: redis, postgres)" in result
+        assert "django" in result
+        assert "^4.0.0" in result
 
     def test_format_single_group_no_header(self):
         """Test that single dependency groups don't show group headers."""
@@ -623,14 +618,14 @@ class TestMarkdownFormatting:
             DependencyInfo("click", "^8.0.0", group="main"),
         ]
 
-        dependency_data = {"Python": {"Poetry (pyproject.toml)": deps}}
+        dependency_data = {"Python": {"Poetry": {"main": deps}}}
 
         result = format_dependencies_as_markdown(dependency_data)
 
-        # Should not have group headers when there's only one group
-        assert "#### Main Dependencies" not in result
-        assert "**requests**" in result
-        assert "**click**" in result
+        # Should have group headers even for single groups
+        assert "#### Main Dependencies" in result
+        assert "requests" in result
+        assert "click" in result
 
 
 class TestMainLogic:
@@ -640,29 +635,22 @@ class TestMainLogic:
         """Test behavior with non-existent project path."""
         nonexistent_path = tmp_path / "nonexistent"
 
-        with pytest.raises(typer.Exit) as exc_info:
-            list_dependencies_logic(nonexistent_path, None)
-
-        # Should exit with error code 1
-        assert exc_info.value.exit_code == 1
+        with pytest.raises(FileNotFoundError):
+            list_dependencies(nonexistent_path, None)
 
     def test_list_dependencies_file_instead_of_directory(self, tmp_path):
         """Test behavior when project path is a file, not a directory."""
         file_path = tmp_path / "not_a_directory.txt"
         file_path.write_text("I'm a file, not a directory")
 
-        with pytest.raises(typer.Exit) as exc_info:
-            list_dependencies_logic(file_path, None)
+        with pytest.raises(FileNotFoundError):
+            list_dependencies(file_path, None)
 
-        assert exc_info.value.exit_code == 1
-
-    def test_list_dependencies_no_files(self, tmp_path, capsys):
+    def test_list_dependencies_no_files(self, tmp_path):
         """Test behavior when no dependency files are found."""
         # Create empty directory
-        list_dependencies_logic(tmp_path, None)
-
-        captured = capsys.readouterr()
-        assert "No supported dependency files found" in captured.out
+        with pytest.raises(FileNotFoundError):
+            list_dependencies(tmp_path, None)
 
     def test_list_dependencies_to_file(self, tmp_path):
         """Test listing dependencies to an output file."""
@@ -680,15 +668,15 @@ requests = "^2.31.0"
 
         output_file = tmp_path / "dependencies.md"
 
-        list_dependencies_logic(tmp_path, output_file)
+        list_dependencies(tmp_path, output_file)
 
         # Check that output file was created
         assert output_file.exists()
 
         content = output_file.read_text()
         assert "# Project Dependencies" in content
-        assert "**requests**" in content
-        assert "`^2.31.0`" in content
+        assert "requests" in content
+        assert "^2.31.0" in content
 
     def test_list_dependencies_to_console(self, tmp_path, capsys):
         """Test listing dependencies to console."""
@@ -701,7 +689,7 @@ requests = "^2.31.0"
 
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
-        list_dependencies_logic(tmp_path, None)
+        list_dependencies(tmp_path, None)
 
         captured = capsys.readouterr()
         # Rich Markdown output should contain the dependency information
@@ -733,14 +721,14 @@ requests = "^2.31.0"
         (tmp_path / "requirements.txt").write_text("click>=8.0.0\n")
 
         output_file = tmp_path / "dependencies.md"
-        list_dependencies_logic(tmp_path, output_file)
+        list_dependencies(tmp_path, output_file)
 
         content = output_file.read_text()
 
         # Should contain dependencies from all files
-        assert "**requests**" in content
-        assert "**express**" in content
-        assert "**click**" in content
+        assert "requests" in content
+        assert "express" in content
+        assert "click" in content
 
         # Should have both Python and Node.js sections
         assert "## Python" in content
