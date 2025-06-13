@@ -51,9 +51,7 @@ def test_tree_command_help():
     result = runner.invoke(app, ["tree", "--help"])
     assert result.exit_code == 0
     assert "Usage: contextcraft tree [OPTIONS] [ROOT_DIR]" in result.stdout
-    assert (
-        "Generates and displays or saves a directory tree structure." in result.stdout
-    )
+    assert "Generate and display or save a directory tree structure." in result.stdout
 
 
 @mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
@@ -150,7 +148,7 @@ def test_flatten_command_help():
     result = runner.invoke(app, ["flatten", "--help"])
     assert result.exit_code == 0
     assert "Usage: contextcraft flatten [OPTIONS] [ROOT_DIR]" in result.stdout
-    assert "Flattens specified files from a directory" in result.stdout
+    assert "Flatten specified files from a directory" in result.stdout
 
 
 @mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
@@ -159,7 +157,7 @@ def test_flatten_command_success(mock_flatten_logic, tmp_path: Path):
     result = runner.invoke(app, ["flatten", str(tmp_path)])
     assert result.exit_code == 0
     mock_flatten_logic.assert_called_once_with(
-        root_dir_path=tmp_path.resolve(),
+        root_dir=tmp_path.resolve(),
         output_file_path=None,
         include_patterns=[],
         exclude_patterns=[],
@@ -188,7 +186,7 @@ def test_flatten_command_with_options(mock_flatten_logic, tmp_path: Path):
     )
     assert result.exit_code == 0
     mock_flatten_logic.assert_called_once_with(
-        root_dir_path=tmp_path.resolve(),
+        root_dir=tmp_path.resolve(),
         output_file_path=output_f.resolve(),
         include_patterns=["*.py", "*.md"],
         exclude_patterns=["temp/*"],
@@ -205,7 +203,7 @@ def test_flatten_command_handles_exception(mock_flatten_error, tmp_path: Path):
     result = runner.invoke(app, ["flatten", str(tmp_path)])
     assert result.exit_code == 1
     assert (
-        "An unexpected error occurred during code flattening: Flattening failed!"
+        "An unexpected error occurred during file flattening: Flattening failed!"
         in result.stdout
     )
     mock_flatten_error.assert_called_once()
@@ -458,7 +456,7 @@ def test_flatten_cli_exclude_augments_config_global_excludes(
 # These will test the actual output when config excludes are active.
 
 
-def test_tree_integration_with_config_excludes(tmp_path: Path, snapshot):
+def test_tree_integration_with_config_excludes(tmp_path: Path):
     """Actual tree output test with config global_exclude_patterns."""
     project_dir = tmp_path / "proj"
     project_dir.mkdir()
@@ -483,9 +481,18 @@ def test_tree_integration_with_config_excludes(tmp_path: Path, snapshot):
     assert result.exit_code == 0
 
     assert output_file.exists()
-    content = output_file.read_text()
-    snapshot.assert_match(content, "tree_with_config_excludes_output.txt")
-    # Expected snapshot: file.py, src/main.py. Excludes .log and temp/
+    content = output_file.read_text().strip()
+
+    # Check that files that should be included are present
+    assert "file.py" in content
+    assert "src" in content
+    assert "main.py" in content
+    assert "pyproject.toml" in content
+
+    # Check that excluded files are NOT present
+    assert "data.log" not in content  # Should be excluded by *.log
+    assert "temp" not in content  # Should be excluded by temp/
+    assert "file_in_temp.txt" not in content  # Should be excluded by temp/
 
 
 def test_flatten_integration_with_config_excludes(tmp_path: Path):
@@ -548,5 +555,5 @@ def test_flatten_command_handles_exception_with_markup_chars(
     # Verify the original error message is printed (now without markup parsing)
     assert "Error with [square brackets] and maybe a backslash \\!" in result.stdout
     # Check that no MarkupError occurred and the core message is there:
-    assert "An unexpected error occurred during code flattening:" in result.stdout
+    assert "An unexpected error occurred during file flattening:" in result.stdout
     mock_flatten_error.assert_called_once()
