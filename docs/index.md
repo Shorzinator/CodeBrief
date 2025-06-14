@@ -11,22 +11,28 @@
 
 ## Features
 
-### Directory Tree Generation
+### 🌳 Directory Tree Generation
 Generate beautiful, hierarchical representations of your project structure with intelligent filtering and customization options.
 
-### Code Flattening
+### 📄 Code Flattening
 Concatenate code from multiple files into a single, well-organized document with clear file markers and intelligent content handling.
 
-### Dependency Analysis
+### 📦 Dependency Analysis
 Extract and analyze project dependencies across multiple languages and package managers (Python, Node.js, and more).
 
-### Intelligent Ignore System
+### 🔄 Git Context Extraction
+Comprehensive Git repository information including branch status, commit history, and change diffs for enhanced development context.
+
+### 📋 Context Bundling
+Powerful aggregation tool that combines directory trees, Git context, dependencies, and flattened code into structured, comprehensive bundles.
+
+### 🚫 Intelligent Ignore System
 Sophisticated `.llmignore` file support with `.gitignore`-style syntax for precise control over what gets included.
 
-### Advanced Configuration
+### ⚙️ Advanced Configuration
 Flexible configuration system via `pyproject.toml` with support for default outputs, global patterns, and project-specific settings.
 
-### Rich CLI Experience
+### ✨ Rich CLI Experience
 Beautiful, intuitive command-line interface powered by Typer and Rich with helpful error messages and progress indicators.
 
 ## Quick Start
@@ -54,15 +60,29 @@ Get started with ContextCraft in minutes:
 
     # Analyze dependencies
     contextcraft deps --output deps.md
+
+    # Extract Git context
+    contextcraft git-info --output git-context.md
+
+    # Create comprehensive bundle
+    contextcraft bundle --output project-bundle.md
     ```
 
 === "Advanced Workflow"
 
     ```bash
-    # Create comprehensive project context
-    contextcraft tree --output tree.txt
-    contextcraft flatten src/ --output code.md
-    contextcraft deps --output dependencies.md
+    # Create comprehensive project context with bundle
+    contextcraft bundle \
+      --output complete-context.md \
+      --git-log-count 15 \
+      --flatten src/ tests/
+
+    # Focused code review bundle
+    contextcraft bundle \
+      --exclude-deps \
+      --git-full-diff \
+      --flatten src/ tests/ \
+      --output review-bundle.md
 
     # Use .llmignore for fine-grained control
     echo "*.log\n__pycache__/\n.venv/" > .llmignore
@@ -78,11 +98,17 @@ Get started with ContextCraft in minutes:
 
     Generate context that's perfectly formatted for ChatGPT, Claude, Copilot, and other AI coding assistants.
 
+-   :material-source-pull: **Code Reviews**
+
+    ---
+
+    Create comprehensive review bundles with Git context, code changes, and project structure for thorough reviews.
+
 -   :material-bug: **Debugging**
 
     ---
 
-    Quickly share your project structure and relevant code with others or AI tools for faster problem resolution.
+    Quickly share your project structure, Git history, and relevant code with others or AI tools for faster problem resolution.
 
 -   :material-book-open: **Documentation**
 
@@ -94,7 +120,13 @@ Get started with ContextCraft in minutes:
 
     ---
 
-    Streamline your workflow with automated context generation for various development scenarios.
+    Streamline your workflow with automated context generation for various development scenarios and CI/CD integration.
+
+-   :material-git: **Git Workflows**
+
+    ---
+
+    Integrate with Git workflows for branch-specific context, commit analysis, and development progress tracking.
 
 </div>
 
@@ -105,9 +137,9 @@ ContextCraft is built with modern Python best practices:
 - **CLI Framework**: [Typer](https://typer.tiangolo.com/) for intuitive command-line interfaces
 - **Rich Output**: [Rich](https://rich.readthedocs.io/) for beautiful terminal output
 - **Modular Design**: Clean separation between tools, utilities, and CLI commands
-- **Comprehensive Testing**: 145+ tests with 85%+ coverage
-- **Type Safety**: Full MyPy type checking for reliability
-- **Code Quality**: Ruff, Bandit, and pre-commit hooks for maintainable code
+- **Comprehensive Testing**: 165+ tests with 77%+ coverage
+- **Security Compliant**: Bandit security scanning with proper subprocess handling
+- **Code Quality**: Ruff, pre-commit hooks, and conventional commits for maintainable code
 
 ## Documentation Sections
 
@@ -137,18 +169,37 @@ ContextCraft is built with modern Python best practices:
 
     Complete API documentation for all modules and functions
 
+-   [:octicons-workflow-24: **Examples**](examples/git-workflows.md)
+
+    ---
+
+    Real-world examples for Git workflows, bundle patterns, and automation
+
 </div>
 
 ## What's New in v1.0
 
-!!! success "Production Ready Features"
+!!! success "Production Ready - All Core Features Complete"
 
-    - **Complete Tool Suite**: Tree generation, code flattening, and dependency analysis
-    - **Advanced Configuration**: `pyproject.toml` integration with type validation
+    - **Complete Tool Suite**: Tree generation, code flattening, dependency analysis, Git context, and bundling
+    - **Git Integration**: Comprehensive Git context extraction with branch info, commits, and diffs
+    - **Bundle System**: Powerful context aggregation combining all tools into structured documents
+    - **Advanced Configuration**: `pyproject.toml` integration with type validation and new tool support
     - **Sophisticated Ignore System**: `.llmignore` with full `.gitignore` syntax support
     - **Rich Error Handling**: Safe markup processing and user-friendly error messages
-    - **Comprehensive Testing**: 145 tests covering edge cases and integrations
-    - **Beautiful Documentation**: This comprehensive documentation site!
+    - **Comprehensive Testing**: 165 tests covering all functionality with robust content-based assertions
+    - **Security Compliance**: Full Bandit security compliance with proper subprocess handling
+    - **Beautiful Documentation**: This comprehensive documentation site with extensive examples!
+
+## Core Commands
+
+| Command | Purpose | Key Features |
+|---------|---------|--------------|
+| `tree` | Directory structure visualization | Rich console output, file filtering |
+| `flatten` | Code file aggregation | Multi-file concatenation, binary handling |
+| `deps` | Dependency analysis | Python & Node.js support, extensible |
+| `git-info` | Git context extraction | Branch info, commits, diffs, error handling |
+| `bundle` | Comprehensive context bundles | Multi-tool integration, selective inclusion |
 
 ## Community & Support
 
@@ -185,5 +236,5 @@ ContextCraft is built with modern Python best practices:
 Choose your path to mastery:
 
 [Get Started :material-arrow-right:](getting-started/installation.md){ .md-button .md-button--primary }
-[View Examples :material-arrow-right:](examples/python-projects.md){ .md-button }
+[View Examples :material-arrow-right:](examples/git-workflows.md){ .md-button }
 [API Reference :material-arrow-right:](reference/main.md){ .md-button }
