@@ -44,7 +44,7 @@ This Code of Conduct applies within all project spaces (GitHub repository, issue
 
 ## Enforcement: When the Soufflé Falls Flat
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at [INSERT YOUR PREFERRED CONTACT METHOD HERE - e.g., a dedicated email like conduct@contextcraft.dev, or a link to privately message a maintainer]. Please don't use the public issue tracker for CoC reports.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at shorz2905@gmail.com - e.g., a dedicated email like conduct@contextcraft.dev, or a link to privately message a maintainer]. Please don't use the public issue tracker for CoC reports.
 
 All complaints will be reviewed and investigated promptly and fairly. We respect the privacy and security of the reporter of any incident.
 
@@ -60,16 +60,3 @@ This Code of Conduct is adapted from the [Contributor Covenant][homepage], versi
 
 [homepage]: https://www.contributor-covenant.org
 [v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
-
----
-
-Remember to replace `[INSERT YOUR PREFERRED CONTACT METHOD HERE]` with how you want people to report issues.
-
-This CoC tries to be:
-*   **Clear:** States expectations directly.
-*   **Inclusive:** Emphasizes welcoming everyone.
-*   **Actionable:** Describes enforcement.
-*   **Slightly Witty/Approachable:** Uses analogies and a bit of humor to make it less dry, hopefully encouraging people to actually read it.
-*   **Standard-Based:** Attributes its source to the well-respected Contributor Covenant.
-
-Let me know what you think!
