@@ -386,8 +386,8 @@ pre, code, .md-typeset table:not([class]), .md-typeset .admonition,
 
 /* --- Animations --- */
 .fade-in {
-    opacity: 0;
-    transform: translateY(20px);
+    opacity: 1; /* Ensure content is visible by default */
+    transform: translateY(0); /* Start in final position */
     transition: opacity var(--md-transition-duration) ease-out, transform var(--md-transition-duration) ease-out;
 }
 

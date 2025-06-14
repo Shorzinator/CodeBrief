@@ -41,6 +41,9 @@ Sophisticated `.llmignore` file support with `.gitignore`-style syntax for preci
 ### ⚙️ Advanced Configuration
 Flexible configuration system via `pyproject.toml` with support for default outputs, global patterns, and project-specific settings.
 
+### 📋 Clipboard Integration
+Copy output directly to clipboard with `--to-clipboard` or `-c` flag on all commands. Cross-platform support with graceful error handling and user feedback.
+
 ### ✨ Rich CLI Experience
 Beautiful, intuitive command-line interface powered by Typer and Rich with helpful error messages and progress indicators.
 
@@ -64,8 +67,14 @@ Get started with ContextCraft in minutes:
     # Generate a directory tree
     contextcraft tree
 
+    # Copy tree to clipboard
+    contextcraft tree --to-clipboard
+
     # Flatten your Python code
     contextcraft flatten . --include "*.py" --output context.md
+
+    # Copy flattened code to clipboard
+    contextcraft flatten . --include "*.py" -c
 
     # Analyze dependencies
     contextcraft deps --output deps.md
@@ -75,6 +84,9 @@ Get started with ContextCraft in minutes:
 
     # Create comprehensive bundle
     contextcraft bundle --output project-bundle.md
+
+    # Copy bundle to clipboard
+    contextcraft bundle -c
     ```
 
 === "Advanced Workflow"
@@ -146,7 +158,7 @@ ContextCraft is built with modern Python best practices:
 - **CLI Framework**: [Typer](https://typer.tiangolo.com/) for intuitive command-line interfaces
 - **Rich Output**: [Rich](https://rich.readthedocs.io/) for beautiful terminal output
 - **Modular Design**: Clean separation between tools, utilities, and CLI commands
-- **Comprehensive Testing**: 165+ tests with 74%+ coverage
+- **Comprehensive Testing**: 175+ tests with 77%+ coverage
 - **Security Compliant**: Bandit security scanning with proper subprocess handling
 - **Code Quality**: Ruff, pre-commit hooks, and conventional commits for maintainable code
 - **Professional Infrastructure**: Complete documentation, security policies, and contributor guidelines
@@ -204,6 +216,7 @@ ContextCraft is built with modern Python best practices:
     - **Bundle System**: Powerful context aggregation combining all tools into structured documents
     - **Advanced Configuration**: `pyproject.toml` integration with type validation and comprehensive tool support
     - **Sophisticated Ignore System**: `.llmignore` with full `.gitignore` syntax support
+    - **Clipboard Integration**: Cross-platform clipboard support for all commands with `--to-clipboard/-c` flag
 
     **🏗️ Professional Project Infrastructure:**
 
@@ -215,7 +228,7 @@ ContextCraft is built with modern Python best practices:
 
     **🧪 Production Quality:**
 
-    - **Robust Testing**: 165 tests with content-based assertions for CI/CD reliability
+    - **Robust Testing**: 175 tests with content-based assertions for CI/CD reliability
     - **Security Compliance**: Full Bandit security compliance with proper subprocess handling
     - **Error Handling**: Safe markup processing and user-friendly error messages
     - **CI/CD Stability**: Fixed environment-dependent test failures for consistent pipeline performance
