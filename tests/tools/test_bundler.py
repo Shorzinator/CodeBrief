@@ -9,21 +9,35 @@ class TestBundlerHelperFunctions:
     """Test cases for the bundler helper functions."""
 
     @patch("contextcraft.tools.bundler.tree_generator")
-    def test_generate_tree_content_success(self, mock_tree_generator, tmp_path):
+    @patch("contextcraft.utils.ignore_handler")
+    def test_generate_tree_content_success(
+        self, mock_ignore_handler, mock_tree_generator, tmp_path
+    ):
         """Test successful tree content generation."""
-        # Mock StringIO to return our expected content
-        with patch("io.StringIO") as mock_stringio:
-            mock_buffer = mock_stringio.return_value
-            mock_buffer.getvalue.return_value = "mock tree output"
+        # Mock the ignore handler
+        mock_ignore_handler.load_ignore_patterns.return_value = None
 
-            result = bundler.generate_tree_content(tmp_path, [])
+        # Mock the tree generation function to return expected lines
+        mock_tree_generator._generate_tree_lines_recursive.return_value = [
+            "ContextCraft/",
+            "├── file1.py",
+            "└── file2.py",
+        ]
+        mock_tree_generator.DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC = set()
 
-            assert "mock tree output" in result
+        result = bundler.generate_tree_content(tmp_path, [])
+
+        assert "ContextCraft/" in result
+        assert "├── file1.py" in result
+        assert "└── file2.py" in result
 
     @patch("contextcraft.tools.bundler.tree_generator")
-    def test_generate_tree_content_error(self, mock_tree_generator, tmp_path):
+    @patch("contextcraft.utils.ignore_handler")
+    def test_generate_tree_content_error(
+        self, mock_ignore_handler, mock_tree_generator, tmp_path
+    ):
         """Test tree content generation with error."""
-        mock_tree_generator.generate_and_output_tree.side_effect = Exception(
+        mock_ignore_handler.load_ignore_patterns.side_effect = Exception(
             "Tree generation failed"
         )
 
