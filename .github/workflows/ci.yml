@@ -82,12 +82,12 @@ jobs:
           poetry run ruff check . --output-format=github
           poetry run ruff format . --check --diff
 
-      # TODO: Temporarily disabled due to module path conflicts
-      # - name: Run Mypy (Static Type Checking)
-      #   # Runs Mypy to perform static type checking.
-      #   # Uses the configuration from pyproject.toml.
-      #   run: |
-      #     poetry run mypy src --config-file pyproject.toml
+      - name: Run Mypy (Static Type Checking)
+        # Runs Mypy to perform static type checking.
+        # Uses the configuration from pyproject.toml.
+        # Run from src directory to avoid module path conflicts
+        run: |
+          cd src && poetry run mypy contextcraft
 
       - name: Run Bandit (Security Linting)
         # Runs Bandit to check for common security vulnerabilities.
