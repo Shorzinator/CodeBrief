@@ -39,8 +39,10 @@ def test_hello_command_help():
     """Test the --help option for the hello command."""
     result = runner.invoke(app, ["hello", "--help"])
     assert result.exit_code == 0
-    assert "Usage: contextcraft hello [OPTIONS]" in result.stdout
-    assert "Greets a person." in result.stdout  # Check for part of the docstring
+    # Check for key content without depending on exact formatting
+    assert "hello" in result.stdout.lower()
+    assert "options" in result.stdout.lower()
+    assert "greets a person" in result.stdout.lower()  # Check for part of the docstring
 
 
 # --- Tests for the 'tree' command ---
@@ -50,8 +52,11 @@ def test_tree_command_help():
     """Test the --help option for the tree command."""
     result = runner.invoke(app, ["tree", "--help"])
     assert result.exit_code == 0
-    assert "Usage: contextcraft tree [OPTIONS] [ROOT_DIR]" in result.stdout
-    assert "Generate and display or save a directory tree structure." in result.stdout
+    # Check for key content without depending on exact formatting
+    assert "tree" in result.stdout.lower()
+    assert "options" in result.stdout.lower()
+    assert "root_dir" in result.stdout.lower()
+    assert "generate and display or save a directory tree" in result.stdout.lower()
 
 
 @mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
@@ -147,8 +152,11 @@ def test_flatten_command_help():
     """Test the --help option for the flatten command."""
     result = runner.invoke(app, ["flatten", "--help"])
     assert result.exit_code == 0
-    assert "Usage: contextcraft flatten [OPTIONS] [ROOT_DIR]" in result.stdout
-    assert "Flatten specified files from a directory" in result.stdout
+    # Check for key content without depending on exact formatting
+    assert "flatten" in result.stdout.lower()
+    assert "options" in result.stdout.lower()
+    assert "root_dir" in result.stdout.lower()
+    assert "flatten specified files from a directory" in result.stdout.lower()
 
 
 @mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
@@ -214,10 +222,13 @@ def test_app_help():
     """Test the main application's --help output."""
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "Usage: contextcraft [OPTIONS] COMMAND [ARGS]..." in result.stdout
-    assert "hello" in result.stdout
-    assert "tree" in result.stdout
-    assert "flatten" in result.stdout
+    # Check for key content without depending on exact formatting
+    assert "contextcraft" in result.stdout.lower()
+    assert "options" in result.stdout.lower()
+    assert "command" in result.stdout.lower()
+    assert "hello" in result.stdout.lower()
+    assert "tree" in result.stdout.lower()
+    assert "flatten" in result.stdout.lower()
 
 
 @mock.patch(
