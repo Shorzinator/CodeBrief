@@ -9,40 +9,30 @@ class TestBundlerHelperFunctions:
     """Test cases for the bundler helper functions."""
 
     @patch("contextcraft.tools.bundler.tree_generator")
-    @patch("contextcraft.utils.ignore_handler")
-    def test_generate_tree_content_success(
-        self, mock_ignore_handler, mock_tree_generator, tmp_path
-    ):
+    def test_generate_tree_content_success(self, mock_tree_generator, tmp_path):
         """Test successful tree content generation."""
-        # Mock the ignore handler
-        mock_ignore_handler.load_ignore_patterns.return_value = None
-
-        # Mock the tree generation function to return expected lines
-        mock_tree_generator._generate_tree_lines_recursive.return_value = [
-            "ContextCraft/",
-            "├── file1.py",
-            "└── file2.py",
-        ]
-        mock_tree_generator.DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC = set()
+        # Mock the tree generation function to return expected content
+        mock_tree_generator.generate_and_output_tree.return_value = (
+            "ContextCraft/\n├── file1.py\n└── file2.py"
+        )
 
         result = bundler.generate_tree_content(tmp_path, [])
 
+        assert "# Directory Tree" in result
         assert "ContextCraft/" in result
         assert "├── file1.py" in result
         assert "└── file2.py" in result
 
     @patch("contextcraft.tools.bundler.tree_generator")
-    @patch("contextcraft.utils.ignore_handler")
-    def test_generate_tree_content_error(
-        self, mock_ignore_handler, mock_tree_generator, tmp_path
-    ):
+    def test_generate_tree_content_error(self, mock_tree_generator, tmp_path):
         """Test tree content generation with error."""
-        mock_ignore_handler.load_ignore_patterns.side_effect = Exception(
+        mock_tree_generator.generate_and_output_tree.side_effect = Exception(
             "Tree generation failed"
         )
 
         result = bundler.generate_tree_content(tmp_path, [])
 
+        assert "# Directory Tree" in result
         assert "Error generating directory tree" in result
         assert "Tree generation failed" in result
 
@@ -78,24 +68,20 @@ class TestBundlerHelperFunctions:
     @patch("contextcraft.tools.bundler.dependency_lister")
     def test_generate_deps_content_success(self, mock_dependency_lister, tmp_path):
         """Test successful dependency content generation."""
-        # Mock StringIO to return our expected content
-        with patch("io.StringIO") as mock_stringio:
-            mock_buffer = mock_stringio.return_value
-            mock_buffer.getvalue.return_value = (
-                "# Project Dependencies\n\nMock dependencies"
-            )
+        # Mock the list_dependencies function to return expected content
+        mock_dependency_lister.list_dependencies.return_value = (
+            "# Project Dependencies\n\nMock dependencies"
+        )
 
-            result = bundler.generate_deps_content(tmp_path)
+        result = bundler.generate_deps_content(tmp_path)
 
-            assert "# Project Dependencies" in result
-            assert "Mock dependencies" in result
+        assert "# Project Dependencies" in result
+        assert "Mock dependencies" in result
 
     @patch("contextcraft.tools.bundler.dependency_lister")
     def test_generate_deps_content_error(self, mock_dependency_lister, tmp_path):
         """Test dependency content generation with error."""
-        mock_dependency_lister.list_dependencies_logic.side_effect = Exception(
-            "Deps error"
-        )
+        mock_dependency_lister.list_dependencies.side_effect = Exception("Deps error")
 
         result = bundler.generate_deps_content(tmp_path)
 
