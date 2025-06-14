@@ -129,14 +129,14 @@ def _generate_tree_lines_recursive(
     root_dir_for_ignores: Path,
     llmignore_spec: Optional[pathspec.PathSpec],
     cli_ignores: Optional[list[str]],
-    config_global_excludes: Optional[list[str]],  # <--- NEW
+    config_global_excludes: Optional[list[str]],
     tool_specific_fallback_exclusions: set[str],
-    parent_prefix: str = "",
-    is_root_call_for_display: bool = True,
+    prefix: str = "",
+    is_last_at_level: bool = True,
 ) -> list[str]:
     lines: list[str] = []
 
-    if is_root_call_for_display:
+    if is_last_at_level:
         lines.append(f"{current_dir.name}/")
 
     try:
@@ -147,7 +147,7 @@ def _generate_tree_lines_recursive(
         error_msg = f"(Permission Denied for {current_dir.name}/)"
         if isinstance(e, FileNotFoundError):
             error_msg = f"(Directory not found: {current_dir.name}/)"
-        lines.append(f"{parent_prefix}└── [dim italic]{error_msg}[/dim italic]")
+        lines.append(f"{prefix}└── [dim italic]{error_msg}[/dim italic]")
         return lines
 
     displayable_children: list[Path] = []
@@ -159,7 +159,7 @@ def _generate_tree_lines_recursive(
             root_dir_for_ignores,
             llmignore_spec,
             cli_ignores,
-            config_global_excludes,  # <--- PASS config_global_excludes
+            config_global_excludes,
             tool_specific_fallback_exclusions,
         )
 
@@ -170,10 +170,10 @@ def _generate_tree_lines_recursive(
                 root_dir_for_ignores=root_dir_for_ignores,
                 llmignore_spec=llmignore_spec,
                 cli_ignores=cli_ignores,
-                config_global_excludes=config_global_excludes,  # <--- PASS config_global_excludes
+                config_global_excludes=config_global_excludes,
                 tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
-                parent_prefix="",  # Reset for children, their prefix is added in the next loop
-                is_root_call_for_display=False,
+                prefix="",
+                is_last_at_level=False,
             )
 
         should_render_this_entry = is_child_itself_displayable_by_rule or (
@@ -201,7 +201,7 @@ def _generate_tree_lines_recursive(
         connector = (
             "└── " if rendered_entry_count == num_displayable_entries else "├── "
         )
-        line_prefix_for_child = parent_prefix + connector
+        line_prefix_for_child = prefix + connector
 
         lines.append(
             f"{line_prefix_for_child}{child_path.name}{'/' if child_path.is_dir() else ''}"
@@ -210,9 +210,7 @@ def _generate_tree_lines_recursive(
         if child_path.is_dir() and generated_grandchild_lines:
             child_contents_prefix_extension = "    " if connector == "└── " else "│   "
             for grandchild_line in generated_grandchild_lines:
-                lines.append(
-                    parent_prefix + child_contents_prefix_extension + grandchild_line
-                )
+                lines.append(prefix + child_contents_prefix_extension + grandchild_line)
     return lines
 
 
@@ -224,7 +222,7 @@ def _add_nodes_to_rich_tree_recursive(
     cli_ignores: Optional[list[str]],
     config_global_excludes: Optional[list[str]],
     tool_specific_fallback_exclusions: set[str],
-):
+) -> None:
     try:
         all_children_sorted = sorted(
             current_path_obj.iterdir(),
@@ -243,7 +241,7 @@ def _add_nodes_to_rich_tree_recursive(
             root_dir_for_ignores,
             llmignore_spec,
             cli_ignores,
-            config_global_excludes,  # <--- PASS config_global_excludes
+            config_global_excludes,
             tool_specific_fallback_exclusions,
         ):
             if child_path.is_dir():
@@ -255,7 +253,7 @@ def _add_nodes_to_rich_tree_recursive(
                     root_dir_for_ignores=root_dir_for_ignores,
                     llmignore_spec=llmignore_spec,
                     cli_ignores=cli_ignores,
-                    config_global_excludes=config_global_excludes,  # <--- PASS config_global_excludes
+                    config_global_excludes=config_global_excludes,
                     tool_specific_fallback_exclusions=tool_specific_fallback_exclusions,
                 )
             else:
@@ -268,7 +266,18 @@ def generate_and_output_tree(
     output_file_path: Optional[Path] = None,
     ignore_list: Optional[list[str]] = None,
     config_global_excludes: Optional[list[str]] = None,  # <--- NEW PARAMETER
-):
+) -> Optional[str]:
+    """Generate and output tree structure.
+
+    Args:
+        root_dir: Root directory to generate tree for.
+        output_file_path: Optional path to save the tree. If None, returns string for console.
+        ignore_list: List of patterns to ignore.
+        config_global_excludes: Global exclusion patterns from config.
+
+    Returns:
+        String representation of the tree if no output file specified, None otherwise.
+    """
     if not root_dir.is_dir():
         console.print(
             f"[bold red]Error: Root directory '{root_dir}' not found or is not a directory.[/bold red]"
@@ -303,23 +312,23 @@ def generate_and_output_tree(
 
     current_tool_specific_exclusions = DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy()
 
-    if output_file_path:
-        # Create Rich tree for file output (same as console display)
-        rich_tree_root_label = f"📁 [link file://{root_dir.resolve()}]{root_dir.name}"
-        rich_tree_root = RichTree(
-            rich_tree_root_label,
-            guide_style="bold bright_blue",
-        )
-        _add_nodes_to_rich_tree_recursive(
-            rich_tree_node=rich_tree_root,
-            current_path_obj=root_dir,
-            root_dir_for_ignores=root_dir,
-            llmignore_spec=llmignore_spec,
-            cli_ignores=effective_cli_ignores,
-            config_global_excludes=config_global_excludes,
-            tool_specific_fallback_exclusions=current_tool_specific_exclusions,
-        )
+    # Create Rich tree for both file output and console display
+    rich_tree_root_label = f"📁 [link file://{root_dir.resolve()}]{root_dir.name}"
+    rich_tree_root = RichTree(
+        rich_tree_root_label,
+        guide_style="bold bright_blue",
+    )
+    _add_nodes_to_rich_tree_recursive(
+        rich_tree_node=rich_tree_root,
+        current_path_obj=root_dir,
+        root_dir_for_ignores=root_dir,
+        llmignore_spec=llmignore_spec,
+        cli_ignores=effective_cli_ignores,
+        config_global_excludes=config_global_excludes,
+        tool_specific_fallback_exclusions=current_tool_specific_exclusions,
+    )
 
+    if output_file_path:
         # Render Rich tree to string for file output
         from io import StringIO
 
@@ -342,21 +351,16 @@ def generate_and_output_tree(
                 f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]"
             )
             raise typer.Exit(code=1) from e
+        return None
     else:
-        rich_tree_root_label = (
-            f"📁 [link file://{root_dir.resolve()}]{root_dir.name}"  # Updated icon
+        # Return the string representation for console output or clipboard
+        from io import StringIO
+
+        from rich.console import Console as RichConsole
+
+        string_buffer = StringIO()
+        console_for_capture = RichConsole(
+            file=string_buffer, width=120, legacy_windows=False
         )
-        rich_tree_root = RichTree(
-            rich_tree_root_label,
-            guide_style="bold bright_blue",
-        )
-        _add_nodes_to_rich_tree_recursive(
-            rich_tree_node=rich_tree_root,
-            current_path_obj=root_dir,
-            root_dir_for_ignores=root_dir,
-            llmignore_spec=llmignore_spec,
-            cli_ignores=effective_cli_ignores,
-            config_global_excludes=config_global_excludes,  # <--- PASS
-            tool_specific_fallback_exclusions=current_tool_specific_exclusions,
-        )
-        console.print(rich_tree_root)
+        console_for_capture.print(rich_tree_root)
+        return string_buffer.getvalue()

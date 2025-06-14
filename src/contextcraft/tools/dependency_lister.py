@@ -17,21 +17,16 @@ Core functionalities:
 import json
 import re
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
 import typer
 from rich.console import Console
-from rich.markdown import Markdown
 
 # Import for TOML parsing
 try:
-    import tomllib
+    import tomllib  # Python 3.11+
 except ImportError:
-    # Fallback for Python < 3.11
-    try:
-        import toml  # type: ignore
-    except ImportError:
-        toml = None  # type: ignore
+    import tomli as tomllib
 
 console = Console()
 
@@ -111,7 +106,7 @@ class PyProjectTomlParser(PackageManagerParser):
             return False
 
         # Check if we have a TOML parser available
-        if not tomllib and not toml:
+        if not tomllib:
             console.print(
                 "[yellow]Warning: No TOML parser available for "
                 "pyproject.toml parsing[/yellow]"
@@ -123,19 +118,11 @@ class PyProjectTomlParser(PackageManagerParser):
     def _load_toml(self) -> dict[str, Any]:
         """Load TOML data from file."""
         try:
-            if tomllib:
-                with self.file_path.open("rb") as f:
-                    # Type cast needed for mypy since tomllib.load return type might be Any
-                    return cast(dict[str, Any], tomllib.load(f))
-            elif toml:
-                with self.file_path.open("r", encoding="utf-8") as f:
-                    # Type cast needed for mypy since toml.load return type is Any
-                    return cast(dict[str, Any], toml.load(f))
-            else:
-                raise RuntimeError("No TOML parser available")
+            with self.file_path.open("rb") as f:
+                return tomllib.load(f)  # type: ignore[no-any-return]
         except Exception as e:
             console.print(
-                f"[yellow]Warning: Failed to parse {self.file_path}: {e}[/yellow]"
+                f"[yellow]Warning: Failed to load TOML file {self.file_path}: {e}[/yellow]"
             )
             return {}
 
@@ -410,7 +397,7 @@ def create_parser(file_path: Path) -> Optional[PackageManagerParser]:
 
 
 def format_dependencies_as_markdown(
-    dependency_data: dict[str, dict[str, list[DependencyInfo]]],
+    dependency_data: dict[str, dict[str, dict[str, list[DependencyInfo]]]],
 ) -> str:
     """Format the collected dependency data into a Markdown string."""
     md_content = ["# Project Dependencies"]
@@ -427,8 +414,16 @@ def format_dependencies_as_markdown(
     return "\n".join(md_content)
 
 
-def list_dependencies(project_path: Path, output_file: Optional[Path]):
-    """Main logic function for listing project dependencies."""
+def list_dependencies(project_path: Path, output_file: Optional[Path]) -> Optional[str]:
+    """Main logic function for listing project dependencies.
+
+    Args:
+        project_path: Root directory to scan for dependency files.
+        output_file: Optional path to save the output. If None, returns string.
+
+    Returns:
+        Markdown string if no output file specified, None otherwise.
+    """
     console.print(f"Scanning for dependency files in: {project_path}")
     files_to_parse = discover_dependency_files(project_path)
 
@@ -460,35 +455,9 @@ def list_dependencies(project_path: Path, output_file: Optional[Path]):
                 all_deps[lang][manager][dep.group].append(dep)
 
     # Reformat the dictionary for the markdown formatter
-    formatted_data: dict[str, dict[str, list[DependencyInfo]]] = {}
-    for lang, managers in all_deps.items():
-        if lang not in formatted_data:
-            formatted_data[lang] = {}
-        for manager, groups in managers.items():
-            if manager not in formatted_data[lang]:
-                formatted_data[lang][manager] = []
-            for group_name, deps in groups.items():
-                # Add the group name to each dependency and flatten the list
-                for dep in deps:
-                    dep.group = group_name  # Ensure group is set correctly
-                formatted_data[lang][manager].extend(deps)
-
-    # Re-group for final formatting
-    final_data: dict[str, dict[str, list[DependencyInfo]]] = {}
-    for lang, managers in formatted_data.items():
-        if lang not in final_data:
-            final_data[lang] = {}
-        for manager, deps in managers.items():
-            manager_name = manager.split(" (")[0]
-            if manager_name not in final_data[lang]:
-                final_data[lang][manager_name] = {}
-
-            for dep in deps:
-                if dep.group not in final_data[lang][manager_name]:
-                    final_data[lang][manager_name][dep.group] = []
-                final_data[lang][manager_name][dep.group].append(dep)
-
-    markdown_output = format_dependencies_as_markdown(final_data)
+    # The all_deps structure is: lang -> manager -> group -> list[DependencyInfo]
+    # We need to pass this directly to format_dependencies_as_markdown
+    markdown_output = format_dependencies_as_markdown(all_deps)
 
     if output_file:
         try:
@@ -499,6 +468,7 @@ def list_dependencies(project_path: Path, output_file: Optional[Path]):
         except Exception as e:
             console.print(f"[bold red]Error saving to {output_file}: {e}[/bold red]")
             raise typer.Exit(code=1)
+        return None
     else:
-        console.print("\n--- Project Dependencies ---")
-        console.print(Markdown(markdown_output))
+        # Return the markdown output for the main command to handle
+        return markdown_output

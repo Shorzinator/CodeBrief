@@ -269,16 +269,20 @@ def flatten_code_logic(
     include_patterns: Optional[list[str]] = None,  # CLI --include
     exclude_patterns: Optional[list[str]] = None,  # This is CLI --exclude
     config_global_excludes: Optional[list[str]] = None,
-) -> None:
+) -> Optional[str]:
     """Main logic function for flattening files within a directory into a single text output.
     Integrates .llmignore handling and fallback default exclusions.
 
     Args:
     ----
         root_dir: The root directory from which to start flattening.
-        output_file_path: Optional path to save the flattened content. If None, prints to console.
+        output_file_path: Optional path to save the flattened content. If None, returns string.
         include_patterns: List of patterns from CLI --include.
         exclude_patterns: List of patterns from CLI --exclude, treated as additional ignore patterns.
+        config_global_excludes: Global exclusion patterns from config.
+
+    Returns:
+        String content if no output file specified, None otherwise.
 
     """
     if not root_dir.is_dir():
@@ -457,17 +461,12 @@ def flatten_code_logic(
                 f"[bold red]Error writing to output file '{output_file_path}': {e}[/bold red]"
             )
             raise typer.Exit(code=1) from e
-    else:  # Printing to console
-        # Use print() instead of console.print() to avoid Rich markup parsing of file contents
-        print(final_output_str)
-        # For console output, a summary might be too verbose if the content itself is printed.
-        # Consider a verbosity flag for this summary later.
-        # For now, let's make it less prominent or conditional.
-        if (
-            files_processed_count > 0 or files_skipped_binary_count > 0
-        ):  # Only print summary if something happened
-            summary_message = (
-                f"\n--- Flattened {files_processed_count} file(s). "
-                f"Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s). ---"
+        return None
+    else:  # Return string for console or clipboard
+        # Print summary message to console
+        console.print(f"--- Flattened {files_processed_count} file(s).")
+        if files_skipped_binary_count > 0:
+            console.print(
+                f"--- Skipped {files_skipped_binary_count} binary/non-UTF-8 file(s)."
             )
-            console.print(f"[blue]{summary_message}[/blue]")
+        return final_output_str

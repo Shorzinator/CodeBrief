@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 import pathspec
+from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 from rich.console import Console
 
 console = Console()
@@ -91,9 +92,7 @@ def load_ignore_patterns(root_dir: Path) -> Optional[pathspec.PathSpec]:
                 return None
 
             # console.print(f"[dim]PATTERNS TO PATHSPEC: {processed_lines}[/dim]") # DEBUG
-            spec = pathspec.PathSpec.from_lines(
-                pathspec.patterns.GitWildMatchPattern, processed_lines
-            )
+            spec = pathspec.PathSpec.from_lines(GitWildMatchPattern, processed_lines)
 
             if not spec.patterns:
                 # console.print(f"[dim].llmignore file at {llmignore_file} resulted in no patterns in spec.[/dim]")

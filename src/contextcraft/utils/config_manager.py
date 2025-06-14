@@ -8,7 +8,7 @@ from typing import Any, Dict
 try:
     import tomllib  # Python 3.11+
 except ImportError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 
 # Constants for backward compatibility with tests
 CONFIG_SECTION_NAME = "contextcraft"

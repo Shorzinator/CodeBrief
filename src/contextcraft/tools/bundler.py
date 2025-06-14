@@ -41,29 +41,24 @@ def generate_tree_content(
         config_global_excludes: Global exclude patterns from config
 
     Returns:
-        Formatted tree content as string, or error message if generation fails
+        Formatted tree content as string
     """
     try:
-        # Import the internal tree generation function to get plain text output
-        from ..utils import ignore_handler
-
-        # Load ignore patterns
-        llmignore_spec = ignore_handler.load_ignore_patterns(project_root)
-
-        # Generate plain text tree lines directly for bundle (clean text output)
-        tree_lines = tree_generator._generate_tree_lines_recursive(
-            current_dir=project_root,
-            root_dir_for_ignores=project_root,
-            llmignore_spec=llmignore_spec,
-            cli_ignores=[],
-            config_global_excludes=config_global_excludes,
-            tool_specific_fallback_exclusions=tree_generator.DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy(),
+        # Use the updated generate_and_output_tree function that returns a string
+        tree_result = tree_generator.generate_and_output_tree(
+            root_dir=project_root,
+            output_file_path=None,  # This will return the tree string
+            ignore_list=config_global_excludes,
         )
 
-        return "\n".join(tree_lines) if tree_lines else "No tree content generated"
+        return (
+            f"# Directory Tree\n\n{tree_result}"
+            if tree_result
+            else "# Directory Tree\n\nError generating directory tree.\n"
+        )
 
     except Exception as e:
-        return f"Error generating directory tree: {e}"
+        return f"# Directory Tree\n\nError generating directory tree: {e}\n"
 
 
 def generate_git_content(
@@ -97,7 +92,7 @@ def generate_git_content(
 
 def generate_deps_content(project_root: Path) -> str:
     """
-    Generate dependency listing content for the bundle.
+    Generate dependency list content for the bundle.
 
     Args:
         project_root: The root directory of the project
@@ -106,27 +101,15 @@ def generate_deps_content(project_root: Path) -> str:
         Formatted dependency content as string
     """
     try:
-        # Similar to tree generation, we need to capture the deps output
-        import sys
-        from io import StringIO
+        # Use the updated list_dependencies function that returns a string
+        deps_result = dependency_lister.list_dependencies(
+            project_path=project_root,
+            output_file=None,  # This will return the markdown string
+        )
 
-        # Temporarily redirect stdout to capture deps output
-        old_stdout = sys.stdout
-        string_buffer = StringIO()
-        sys.stdout = string_buffer
-
-        try:
-            dependency_lister.list_dependencies_logic(
-                project_path=project_root,
-                actual_output_path=None,  # This will print to stdout (our captured buffer)
-            )
-        finally:
-            sys.stdout = old_stdout
-
-        deps_content = string_buffer.getvalue()
         return (
-            deps_content.strip()
-            if deps_content
+            deps_result
+            if deps_result
             else "# Project Dependencies\n\nNo dependencies found.\n"
         )
 
@@ -151,38 +134,16 @@ def generate_flatten_content(
         Formatted flattened content as string
     """
     try:
-        # We need to capture the flattener output
-        import sys
-        from io import StringIO
+        # Use the updated flatten_code_logic function that returns a string
+        flatten_result = flattener.flatten_code_logic(
+            root_dir=flatten_path,
+            output_file_path=None,  # This will return the content string
+            include_patterns=None,  # Use defaults
+            exclude_patterns=None,  # Use defaults + config
+            config_global_excludes=config_global_excludes,
+        )
 
-        # Temporarily redirect stdout to capture flattener output
-        old_stdout = sys.stdout
-        string_buffer = StringIO()
-        sys.stdout = string_buffer
-
-        try:
-            # If flatten_path is different from project_root, we need to call flattener on that specific path
-            if flatten_path != project_root:
-                flattener.flatten_code_logic(
-                    root_dir=flatten_path,
-                    output_file_path=None,  # This will print to stdout (our captured buffer)
-                    include_patterns=None,  # Use defaults
-                    exclude_patterns=None,  # Use defaults + config
-                    config_global_excludes=config_global_excludes,
-                )
-            else:
-                flattener.flatten_code_logic(
-                    root_dir=project_root,
-                    output_file_path=None,  # This will print to stdout (our captured buffer)
-                    include_patterns=None,  # Use defaults
-                    exclude_patterns=None,  # Use defaults + config
-                    config_global_excludes=config_global_excludes,
-                )
-        finally:
-            sys.stdout = old_stdout
-
-        flatten_content = string_buffer.getvalue()
-        if not flatten_content.strip():
+        if not flatten_result or not flatten_result.strip():
             return f"# Files: {flatten_path.relative_to(project_root) if flatten_path != project_root else 'Project Root'}\n\nNo files found to flatten in this path.\n"
 
         # Add a header for this flatten section
@@ -192,7 +153,7 @@ def generate_flatten_content(
             else "Project Root"
         )
         header = f"# Files: {relative_path}\n\n"
-        return header + flatten_content.strip()
+        return header + flatten_result.strip()
 
     except Exception as e:
         relative_path = (
@@ -213,7 +174,7 @@ def create_bundle(
     git_log_count: int = 5,
     git_full_diff: bool = False,
     git_diff_options: Optional[str] = None,
-) -> None:
+) -> Optional[str]:
     """
     Create a comprehensive context bundle by aggregating multiple tool outputs.
 
@@ -223,7 +184,7 @@ def create_bundle(
 
     Args:
         project_root: The root directory of the project to bundle
-        output_file_path: Optional path to save the bundle. If None, prints to console
+        output_file_path: Optional path to save the bundle. If None, returns string
         include_tree: Whether to include directory tree (default: True)
         include_git: Whether to include Git context (default: True)
         include_deps: Whether to include dependency information (default: True)
@@ -231,6 +192,9 @@ def create_bundle(
         git_log_count: Number of recent commits to include in Git context
         git_full_diff: Whether to include full diff in Git context
         git_diff_options: Optional Git diff options string
+
+    Returns:
+        Bundle content as string if no output file specified, None otherwise.
 
     Raises:
         typer.Exit: If project_root is invalid or critical errors occur
@@ -433,9 +397,7 @@ def create_bundle(
                 f"[bold red]Error writing bundle to '{output_file_path}': {e}[/bold red]"
             )
             raise typer.Exit(code=1) from e
+        return None
     else:
-        # Print to console using Rich for better formatting
-        from rich.markdown import Markdown
-
-        markdown_obj = Markdown(bundle_content)
-        console.print(markdown_obj)
+        # Return the bundle content for the main command to handle
+        return bundle_content
