@@ -304,18 +304,36 @@ def generate_and_output_tree(
     current_tool_specific_exclusions = DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy()
 
     if output_file_path:
-        tree_lines = _generate_tree_lines_recursive(
-            current_dir=root_dir,
+        # Create Rich tree for file output (same as console display)
+        rich_tree_root_label = f"📁 [link file://{root_dir.resolve()}]{root_dir.name}"
+        rich_tree_root = RichTree(
+            rich_tree_root_label,
+            guide_style="bold bright_blue",
+        )
+        _add_nodes_to_rich_tree_recursive(
+            rich_tree_node=rich_tree_root,
+            current_path_obj=root_dir,
             root_dir_for_ignores=root_dir,
             llmignore_spec=llmignore_spec,
             cli_ignores=effective_cli_ignores,
-            config_global_excludes=config_global_excludes,  # <--- PASS
+            config_global_excludes=config_global_excludes,
             tool_specific_fallback_exclusions=current_tool_specific_exclusions,
         )
+
+        # Render Rich tree to string for file output
+        from io import StringIO
+
+        from rich.console import Console as RichConsole
+
+        string_buffer = StringIO()
+        file_console = RichConsole(file=string_buffer, width=120, legacy_windows=False)
+        file_console.print(rich_tree_root)
+        rich_output = string_buffer.getvalue()
+
         try:
             output_file_path.parent.mkdir(parents=True, exist_ok=True)
             with output_file_path.open(mode="w", encoding="utf-8") as f:
-                f.write("\n".join(tree_lines))
+                f.write(rich_output)
             console.print(
                 f"Directory tree saved to [cyan]{output_file_path.resolve()}[/cyan]"
             )

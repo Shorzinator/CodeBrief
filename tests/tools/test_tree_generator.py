@@ -54,8 +54,11 @@ def test_tree_output_to_file_basic(create_project_structure_for_tree):
     assert "file3.txt" in generated_tree_content
     assert "empty_dir" in generated_tree_content
 
-    # Check for tree structure characters (basic tree formatting)
-    assert "├──" in generated_tree_content or "└──" in generated_tree_content
+    # Check for tree structure characters (Rich tree formatting)
+    assert "┣━━" in generated_tree_content or "┗━━" in generated_tree_content
+    # Check for Rich formatting elements
+    assert "📁" in generated_tree_content  # Directory icon
+    assert "📄" in generated_tree_content  # File icon
 
 
 def test_tree_with_llmignore(create_project_structure_for_tree):

@@ -64,7 +64,7 @@ To provide developers with a simple, extensible, and portable Python CLI toolkit
 3.  **Tool 1: Directory Tree Generator (`tree` command) (Status: ✅ COMPLETE)**
     *   Logic implemented in `src/contextcraft/tools/tree_generator.py`.
     *   Handles `root_dir`, `--output`, and CLI `--ignore` options.
-    *   Uses `rich.tree.Tree` for console output, plain text for file.
+    *   Uses `rich.tree.Tree` for both console and file output with beautiful formatting.
     *   Production-level docstrings and comments.
     *   ✅ **COMPLETED:** Comprehensive unit and integration tests (145 total tests passing).
     *   ✅ **COMPLETED:** Full integration with `.llmignore` system and config management.
