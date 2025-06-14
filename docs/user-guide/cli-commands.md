@@ -37,6 +37,7 @@ contextcraft tree --output project-structure.txt
 | Option | Short | Type | Description |
 |--------|-------|------|-------------|
 | `--output` | `-o` | `Path` | Output file path |
+| `--to-clipboard` | `-c` | `Flag` | Copy output to clipboard (cannot be used with --output) |
 | `--ignore` | `-i` | `List[str]` | Patterns to ignore (repeatable) |
 | `--help` |  | | Show command help |
 
@@ -72,6 +73,15 @@ contextcraft tree --output project-structure.txt
 
     ```bash
     contextcraft tree --output docs/project-structure.txt
+    ```
+
+=== "Copy to Clipboard"
+
+    ```bash
+    # Copy tree output directly to clipboard
+    contextcraft tree --to-clipboard
+    # or use short form
+    contextcraft tree -c
     ```
 
 ### Integration with .llmignore
@@ -127,6 +137,7 @@ contextcraft flatten . --include "*.py" --include "*.md"
 | Option | Short | Type | Description |
 |--------|-------|------|-------------|
 | `--output` | `-o` | `Path` | Output file path |
+| `--to-clipboard` | `-c` | `Flag` | Copy output to clipboard (cannot be used with --output) |
 | `--include` | `-inc` | `List[str]` | Include patterns (repeatable) |
 | `--exclude` | `-exc` | `List[str]` | Exclude patterns (repeatable) |
 | `--help` |  | | Show command help |
@@ -164,6 +175,9 @@ contextcraft flatten . --include "*.py" --include "*.md"
 
     # Only tests
     contextcraft flatten tests/ --include "*.py" --output tests-only.md
+
+    # Copy flattened code to clipboard
+    contextcraft flatten src/ --to-clipboard
     ```
 
 ### Output Format
@@ -234,6 +248,7 @@ contextcraft deps --output dependencies.md
 | Option | Short | Type | Description |
 |--------|-------|------|-------------|
 | `--output` | `-o` | `Path` | Output file path |
+| `--to-clipboard` | `-c` | `Flag` | Copy output to clipboard (cannot be used with --output) |
 | `--help` |  | | Show command help |
 
 ### Supported Dependency Files
@@ -320,6 +335,7 @@ contextcraft git-info --output git-context.md
 | Option | Short | Type | Description |
 |--------|-------|------|-------------|
 | `--output` | `-o` | `Path` | Output file path |
+| `--to-clipboard` | `-c` | `Flag` | Copy output to clipboard (cannot be used with --output) |
 | `--log-count` | `-n` | `int` | Number of recent commits to include (default: 10) |
 | `--full-diff` |  | `bool` | Include full diff of uncommitted changes |
 | `--diff-options` |  | `str` | Custom git diff options (e.g., "--stat", "--name-only") |
@@ -410,6 +426,7 @@ contextcraft bundle --output project-bundle.md
 | Option | Short | Type | Description |
 |--------|-------|------|-------------|
 | `--output` | `-o` | `Path` | Output file path |
+| `--to-clipboard` | `-c` | `Flag` | Copy output to clipboard (cannot be used with --output) |
 | `--exclude-tree` |  | `bool` | Exclude directory tree section |
 | `--exclude-git` |  | `bool` | Exclude Git context section |
 | `--exclude-deps` |  | `bool` | Exclude dependencies section |
@@ -457,6 +474,16 @@ contextcraft bundle --output project-bundle.md
     ```
 
     Documentation-focused bundle without Git information.
+
+=== "Clipboard Bundle"
+
+    ```bash
+    # Copy comprehensive bundle directly to clipboard
+    contextcraft bundle --to-clipboard
+
+    # Copy focused bundle to clipboard
+    contextcraft bundle --flatten src/ -c
+    ```
 
 ### Bundle Structure
 
@@ -541,6 +568,53 @@ contextcraft hello --name "Alice"
 # Output: Hello Alice from ContextCraft!
 ```
 
+## 📋 Clipboard Integration
+
+All ContextCraft commands support clipboard functionality through the `--to-clipboard` or `-c` flag:
+
+### Usage
+
+```bash
+# Copy any command output to clipboard
+contextcraft tree --to-clipboard
+contextcraft flatten . -c
+contextcraft deps --to-clipboard
+contextcraft git-info -c
+contextcraft bundle --to-clipboard
+```
+
+### Features
+
+- **Cross-platform**: Works on Windows, macOS, and Linux
+- **Smart behavior**: Only available when no output file is specified
+- **User feedback**: Shows success/error messages
+- **Graceful errors**: Handles clipboard access issues gracefully
+
+### Examples
+
+```bash
+# ✅ Valid - copy to clipboard
+contextcraft tree -c
+
+# ❌ Invalid - cannot use both clipboard and file output
+contextcraft tree -c --output file.txt
+
+# ✅ Valid - save to file (no clipboard)
+contextcraft tree --output file.txt
+```
+
+### Error Handling
+
+When clipboard access fails, ContextCraft provides helpful feedback:
+
+```bash
+contextcraft tree -c
+# Success: 📋 Output successfully copied to clipboard!
+
+# If clipboard access fails:
+# Warning: Failed to copy to clipboard: [error details]
+```
+
 ## 🔧 Global Options
 
 These options work with all commands:
@@ -605,6 +679,9 @@ contextcraft flatten . \
 
     # Include project structure
     contextcraft tree src/ tests/ --output review-structure.txt
+
+    # Quick clipboard sharing for review
+    contextcraft bundle --flatten src/ tests/ --exclude-deps -c
     ```
 
 === "For Documentation"
@@ -614,6 +691,9 @@ contextcraft flatten . \
     contextcraft flatten . \
       --include "*.md" --include "*.rst" --include "*.toml" \
       --output docs-context.md
+
+    # Copy docs to clipboard for sharing
+    contextcraft flatten docs/ --include "*.md" -c
     ```
 
 === "For Debugging"
@@ -623,6 +703,22 @@ contextcraft flatten . \
     contextcraft flatten . \
       --include "*.py" --include "*.log" --include "*.json" \
       --output debug-context.md
+
+    # Quick debug context to clipboard
+    contextcraft bundle --flatten src/ --git-full-diff -c
+    ```
+
+=== "For Quick LLM Sharing"
+
+    ```bash
+    # Everything to clipboard for AI assistance
+    contextcraft bundle -c
+
+    # Just source code and structure
+    contextcraft flatten src/ -c && contextcraft tree -c
+
+    # Git context and recent changes
+    contextcraft git-info --full-diff -c
     ```
 
 ## 🚨 Error Handling
