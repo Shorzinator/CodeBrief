@@ -23,6 +23,7 @@ DEFAULT_CONFIG_VALUES: dict[str, Any] = {
     "default_output_filename_flatten": None,
     "default_output_filename_bundle": None,
     "default_output_filename_deps": None,
+    "default_output_filename_git_info": None,
     "global_include_patterns": [],
     "global_exclude_patterns": [],
 }
