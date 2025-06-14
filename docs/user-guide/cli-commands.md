@@ -4,13 +4,15 @@ Complete reference for all ContextCraft commands, options, and usage patterns.
 
 ## 📋 Command Overview
 
-ContextCraft provides four main commands for different types of context generation:
+ContextCraft provides six main commands for different types of context generation:
 
 | Command | Purpose | Output Format |
 |---------|---------|---------------|
 | `tree` | Generate directory structure | Text tree or Rich console |
 | `flatten` | Concatenate file contents | Markdown with file separators |
 | `deps` | Analyze project dependencies | Markdown with dependency tables |
+| `git-info` | Extract Git context information | Markdown with Git status and history |
+| `bundle` | Create comprehensive context bundles | Structured Markdown with multiple sections |
 | `hello` | Example/test command | Console output |
 
 ## 🌳 tree - Directory Tree Generation
@@ -296,6 +298,216 @@ contextcraft deps --output dependencies.md
 
     Output includes both Python and Node.js dependencies.
 
+## 🔄 git-info - Git Context Extraction
+
+Extract comprehensive Git repository information for context generation.
+
+### Basic Usage
+
+```bash
+# Generate Git context for current directory
+contextcraft git-info
+
+# Generate Git context for specific repository
+contextcraft git-info /path/to/repo
+
+# Save Git context to file
+contextcraft git-info --output git-context.md
+```
+
+### Options
+
+| Option | Short | Type | Description |
+|--------|-------|------|-------------|
+| `--output` | `-o` | `Path` | Output file path |
+| `--log-count` | `-n` | `int` | Number of recent commits to include (default: 10) |
+| `--full-diff` |  | `bool` | Include full diff of uncommitted changes |
+| `--diff-options` |  | `str` | Custom git diff options (e.g., "--stat", "--name-only") |
+| `--help` |  | | Show command help |
+
+### Examples
+
+=== "Basic Git Info"
+
+    ```bash
+    contextcraft git-info
+    ```
+
+    Output:
+    ```markdown
+    # Git Context
+
+    ## Repository Information
+    - **Current Branch:** main
+    - **Repository Status:** Clean working directory
+
+    ## Recent Commits (Last 10)
+    1. **feat: add new feature** (2024-01-15)
+       - Author: Developer <dev@example.com>
+       - Hash: abc123f
+
+    2. **fix: resolve bug in parser** (2024-01-14)
+       - Author: Developer <dev@example.com>
+       - Hash: def456a
+    ```
+
+=== "With Full Diff"
+
+    ```bash
+    contextcraft git-info --full-diff --log-count 5
+    ```
+
+    Includes complete diff of uncommitted changes.
+
+=== "Custom Diff Options"
+
+    ```bash
+    contextcraft git-info --diff-options "--stat --color=never"
+    ```
+
+    Uses custom git diff options for change summary.
+
+### Error Handling
+
+The git-info command gracefully handles various scenarios:
+
+- **Non-Git Repository**: Returns informative message
+- **Git Not Installed**: Provides installation guidance
+- **Permission Issues**: Clear error messages
+- **Network Timeouts**: Handles slow Git operations
+
+### Configuration Integration
+
+```toml
+[tool.contextcraft]
+default_output_filename_git_info = "docs/git-context.md"
+```
+
+```bash
+# Uses configuration default
+contextcraft git-info  # Creates docs/git-context.md
+```
+
+## 📦 bundle - Comprehensive Context Bundling
+
+Create structured bundles combining multiple context tools for comprehensive project understanding.
+
+### Basic Usage
+
+```bash
+# Create complete project bundle
+contextcraft bundle
+
+# Create bundle for specific directory
+contextcraft bundle /path/to/project
+
+# Save bundle to file
+contextcraft bundle --output project-bundle.md
+```
+
+### Options
+
+| Option | Short | Type | Description |
+|--------|-------|------|-------------|
+| `--output` | `-o` | `Path` | Output file path |
+| `--exclude-tree` |  | `bool` | Exclude directory tree section |
+| `--exclude-git` |  | `bool` | Exclude Git context section |
+| `--exclude-deps` |  | `bool` | Exclude dependencies section |
+| `--exclude-files` |  | `bool` | Exclude flattened files section |
+| `--flatten` |  | `List[Path]` | Specific paths to flatten (repeatable) |
+| `--git-log-count` |  | `int` | Number of Git commits to include |
+| `--git-full-diff` |  | `bool` | Include full Git diff |
+| `--git-diff-options` |  | `str` | Custom Git diff options |
+| `--help` |  | | Show command help |
+
+### Examples
+
+=== "Complete Bundle"
+
+    ```bash
+    contextcraft bundle --output complete-context.md
+    ```
+
+    Creates a comprehensive bundle with all sections:
+    - Table of Contents
+    - Directory Tree
+    - Git Context
+    - Dependencies
+    - Flattened Files
+
+=== "Code Review Bundle"
+
+    ```bash
+    contextcraft bundle \
+      --exclude-deps \
+      --flatten src/ tests/ \
+      --git-log-count 5 \
+      --output review-bundle.md
+    ```
+
+    Focused bundle for code review with recent Git history.
+
+=== "Documentation Bundle"
+
+    ```bash
+    contextcraft bundle \
+      --exclude-git \
+      --flatten docs/ README.md \
+      --output docs-bundle.md
+    ```
+
+    Documentation-focused bundle without Git information.
+
+### Bundle Structure
+
+The bundle command creates well-organized output:
+
+```markdown
+# ContextCraft Bundle
+
+## Table of Contents
+- [Directory Tree](#directory-tree)
+- [Git Context](#git-context)
+- [Dependencies](#dependencies)
+- [Files: src/contextcraft/tools](#files-srccontextcrafttools)
+
+## Directory Tree
+📁 my-project/
+├── 📄 README.md
+├── 📁 src/
+└── 📁 tests/
+
+## Git Context
+**Current Branch:** main
+**Repository Status:** Clean
+
+## Dependencies
+### Python Dependencies (pyproject.toml)
+- typer: ^0.9.0
+- rich: ^13.0.0
+
+## Files: src/contextcraft/tools
+# --- File: src/contextcraft/tools/bundler.py ---
+[File contents...]
+```
+
+### Advanced Configuration
+
+```toml
+[tool.contextcraft]
+default_output_filename_bundle = "context-bundle.md"
+global_exclude_patterns = ["*.pyc", "__pycache__/"]
+```
+
+### Integration with Other Tools
+
+The bundle command leverages all other ContextCraft tools:
+
+- **tree**: For directory structure
+- **git-info**: For Git context
+- **deps**: For dependency analysis
+- **flatten**: For file content aggregation
+
 ## 👋 hello - Example Command
 
 A simple example command for testing and demonstration.
@@ -346,6 +558,8 @@ contextcraft --version
 contextcraft tree --help
 contextcraft flatten --help
 contextcraft deps --help
+contextcraft git-info --help
+contextcraft bundle --help
 ```
 
 ### Environment Variables
@@ -369,16 +583,16 @@ contextcraft flatten . --output code.md  # Saves to ~/contextcraft-outputs/code.
 Generate complete project context:
 
 ```bash
-# Create project overview
-contextcraft tree --output docs/structure.txt
+# Option 1: Use the bundle command (recommended)
+contextcraft bundle --output complete-project-context.md
 
-# Create code summary
+# Option 2: Generate individual components
+contextcraft tree --output docs/structure.txt
+contextcraft git-info --output docs/git-context.md
+contextcraft deps --output docs/dependencies.md
 contextcraft flatten . \
   --include "*.py" --include "*.md" --include "*.toml" \
   --output docs/codebase.md
-
-# Create dependency report
-contextcraft deps --output docs/dependencies.md
 ```
 
 ### Selective Context for Different Audiences

@@ -23,6 +23,8 @@ The recommended way to configure ContextCraft is through your project's `pyproje
 default_output_filename_tree = "docs/project-structure.txt"
 default_output_filename_flatten = "docs/codebase-summary.md"
 default_output_filename_deps = "docs/dependencies.md"
+default_output_filename_git_info = "docs/git-context.md"
+default_output_filename_bundle = "docs/project-bundle.md"
 
 # Global patterns applied to all commands
 global_include_patterns = [
@@ -54,6 +56,8 @@ global_exclude_patterns = [
 | `default_output_filename_tree` | `string` | Default tree output filename | `None` |
 | `default_output_filename_flatten` | `string` | Default flatten output filename | `None` |
 | `default_output_filename_deps` | `string` | Default deps output filename | `None` |
+| `default_output_filename_git_info` | `string` | Default git-info output filename | `None` |
+| `default_output_filename_bundle` | `string` | Default bundle output filename | `None` |
 | `global_include_patterns` | `list[string]` | Patterns to include globally | `[]` |
 | `global_exclude_patterns` | `list[string]` | Patterns to exclude globally | `[]` |
 
@@ -114,6 +118,13 @@ export CONTEXTCRAFT_FLATTEN_INCLUDE="*.py,*.md"
 
 # Deps command defaults
 export CONTEXTCRAFT_DEPS_OUTPUT="dependencies.md"
+
+# Git-info command defaults
+export CONTEXTCRAFT_GIT_INFO_OUTPUT="git-context.md"
+export CONTEXTCRAFT_GIT_LOG_COUNT=10
+
+# Bundle command defaults
+export CONTEXTCRAFT_BUNDLE_OUTPUT="project-bundle.md"
 ```
 
 ### Shell Configuration
@@ -134,6 +145,8 @@ export CONTEXTCRAFT_LOG_LEVEL=WARNING
 alias ccf='contextcraft flatten'
 alias cct='contextcraft tree'
 alias ccd='contextcraft deps'
+alias ccg='contextcraft git-info'
+alias ccb='contextcraft bundle'
 ```
 
 ## 📋 Ignore Patterns (.llmignore)
