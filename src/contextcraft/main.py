@@ -13,6 +13,7 @@ import warnings
 from pathlib import Path
 from typing import List, Optional
 
+import pyperclip
 import typer
 from rich.console import Console
 
@@ -22,10 +23,12 @@ from . import __version__
 from .tools import bundler, dependency_lister, flattener, git_provider, tree_generator
 
 
-def version_callback(value: bool):
-    """Exit after showing the version."""
+def version_callback(value: bool) -> None:
+    """Show version information and exit."""
     if value:
-        console.print(f"ContextCraft Version: {__version__}")
+        console.print(
+            f"[bold green]ContextCraft[/bold green] Version: [bold cyan]{__version__}[/bold cyan]"
+        )
         raise typer.Exit()
 
 
@@ -47,23 +50,42 @@ def main_options(
         callback=version_callback,
         is_eager=True,
     ),
-):
-    """ContextCraft: A CLI toolkit to generate project context for LLMs."""
-    if ctx.invoked_subcommand is None and not version:
-        pass  # pragma: no cover
+) -> None:
+    """
+    A CLI toolkit to generate comprehensive project context for LLMs.
+
+    ContextCraft helps you create detailed project context files for use with
+    Large Language Models (LLMs). It can generate directory trees, flatten code
+    files, extract git information, list dependencies, and create comprehensive
+    bundles combining multiple outputs.
+    """
+    if ctx.invoked_subcommand is None:
+        console.print(
+            "[dim]Run [bold]contextcraft --help[/bold] to see available commands.[/dim]"
+        )
 
 
 console = Console()
 
 
+def _copy_to_clipboard_with_feedback(content: str) -> None:
+    """Copy content to clipboard with user feedback."""
+    try:
+        pyperclip.copy(content)
+        console.print("📋 Output successfully copied to clipboard!")
+    except Exception as e:
+        console.print(f"[yellow]Warning: Failed to copy to clipboard: {e}[/yellow]")
+
+
 @app.command()
-def hello(name: str = typer.Option("World", help="The person to greet.")):
+def hello(name: str = typer.Option("World", help="The person to greet.")) -> None:
     """Greets a person. (Example command)"""
-    console.print(f"Hello [bold green]{name}[/bold green] from ContextCraft!")
+    console.print(f"Hello {name} from ContextCraft!")
 
 
 @app.command(name="tree")
 def tree_command(
+    ctx: typer.Context,
     root_dir: Path = typer.Argument(
         ".",
         help="Root directory to generate tree for. Config is read from here.",
@@ -96,7 +118,13 @@ def tree_command(
         ),
         show_default="None (uses .llmignore and config)",
     ),
-):
+    to_clipboard: bool = typer.Option(
+        False,
+        "--to-clipboard",
+        "-c",
+        help="Copy output to clipboard instead of printing to console. Only applies when no output file is specified.",
+    ),
+) -> None:
     """Generate and display or save a directory tree structure."""
     config = config_manager.load_config(root_dir)
 
@@ -132,12 +160,20 @@ def tree_command(
         cfg_global_excludes = []
 
     try:
-        tree_generator.generate_and_output_tree(
+        tree_output = tree_generator.generate_and_output_tree(
             root_dir=root_dir,
             output_file_path=actual_output_path,
             ignore_list=cli_ignore_list,
             config_global_excludes=cfg_global_excludes,
         )
+
+        # Handle clipboard functionality when no output file is specified
+        if actual_output_path is None and tree_output is not None:
+            if to_clipboard:
+                _copy_to_clipboard_with_feedback(tree_output)
+            else:
+                console.print(tree_output, markup=False)
+
     except typer.Exit:
         raise
     except Exception as e:
@@ -151,6 +187,7 @@ def tree_command(
 
 @app.command(name="flatten")
 def flatten_command(
+    ctx: typer.Context,
     root_dir: Path = typer.Argument(
         ".",
         help="Root directory to flatten. Config is read from here.",
@@ -193,7 +230,13 @@ def flatten_command(
         ),
         show_default="None (uses .llmignore and config)",
     ),
-):
+    to_clipboard: bool = typer.Option(
+        False,
+        "--to-clipboard",
+        "-c",
+        help="Copy output to clipboard instead of printing to console. Only applies when no output file is specified.",
+    ),
+) -> None:
     """Flatten specified files from a directory into a single text output."""
     config = config_manager.load_config(root_dir)
 
@@ -230,13 +273,22 @@ def flatten_command(
         cfg_global_excludes = []
 
     try:
-        flattener.flatten_code_logic(
+        flattened_output = flattener.flatten_code_logic(
             root_dir=root_dir,
             output_file_path=actual_output_path,
             include_patterns=cli_include,
             exclude_patterns=cli_exclude,
             config_global_excludes=cfg_global_excludes,
         )
+
+        # Handle clipboard functionality when no output file is specified
+        if actual_output_path is None and flattened_output is not None:
+            if to_clipboard:
+                _copy_to_clipboard_with_feedback(flattened_output)
+            else:
+                # Use print() instead of console.print() to avoid Rich markup parsing of file contents
+                print(flattened_output)
+
     except typer.Exit:
         raise
     except Exception as e:
@@ -250,6 +302,7 @@ def flatten_command(
 
 @app.command(name="deps")
 def deps_command(
+    ctx: typer.Context,
     project_path: Path = typer.Argument(
         ".",
         help="Project directory to analyze. Config is read from here.",
@@ -272,7 +325,13 @@ def deps_command(
         resolve_path=True,
         show_default="None (uses config or console)",
     ),
-):
+    to_clipboard: bool = typer.Option(
+        False,
+        "--to-clipboard",
+        "-c",
+        help="Copy output to clipboard instead of printing to console. Only applies when no output file is specified.",
+    ),
+) -> None:
     """List project dependencies from various package manager files."""
     config = config_manager.load_config(project_path)
 
@@ -296,10 +355,22 @@ def deps_command(
             )
 
     try:
-        dependency_lister.list_dependencies(
+        deps_output = dependency_lister.list_dependencies(
             project_path=project_path,
             output_file=actual_output_path,
         )
+
+        # Handle clipboard functionality when no output file is specified
+        if actual_output_path is None and deps_output is not None:
+            if to_clipboard:
+                _copy_to_clipboard_with_feedback(deps_output)
+            else:
+                # The dependency_lister already prints to console, but we need to handle clipboard case
+                console.print("\n--- Project Dependencies ---")
+                from rich.markdown import Markdown
+
+                console.print(Markdown(deps_output))
+
     except FileNotFoundError as e:
         console.print(f"[bold red]Error: {e}[/bold red]")
         raise typer.Exit(code=1)
@@ -314,6 +385,7 @@ def deps_command(
 
 @app.command(name="git-info")
 def git_info_command(
+    ctx: typer.Context,
     project_root: Path = typer.Argument(
         ".",
         help="Root directory of the Git repository. Config is read from here.",
@@ -360,7 +432,13 @@ def git_info_command(
         ),
         show_default="None",
     ),
-):
+    to_clipboard: bool = typer.Option(
+        False,
+        "--to-clipboard",
+        "-c",
+        help="Copy output to clipboard instead of printing to console. Only applies when no output file is specified.",
+    ),
+) -> None:
     """Extract Git context information from a repository."""
     config = config_manager.load_config(project_root)
 
@@ -404,7 +482,11 @@ def git_info_command(
                 )
                 raise typer.Exit(code=1) from e
         else:
-            console.print(git_context)
+            # Handle clipboard functionality when no output file is specified
+            if to_clipboard:
+                _copy_to_clipboard_with_feedback(git_context)
+            else:
+                console.print(git_context)
 
     except typer.Exit:
         raise
@@ -419,6 +501,7 @@ def git_info_command(
 
 @app.command(name="bundle")
 def bundle_command(
+    ctx: typer.Context,
     project_root: Path = typer.Argument(
         ".",
         help="Root directory of the project to bundle. Config is read from here.",
@@ -492,7 +575,13 @@ def bundle_command(
         ),
         show_default="None",
     ),
-):
+    to_clipboard: bool = typer.Option(
+        False,
+        "--to-clipboard",
+        "-c",
+        help="Copy output to clipboard instead of printing to console. Only applies when no output file is specified.",
+    ),
+) -> None:
     """Create a comprehensive context bundle with multiple tool outputs."""
     config = config_manager.load_config(project_root)
 
@@ -533,7 +622,7 @@ def bundle_command(
         flatten_path_list.append(project_root)
 
     try:
-        bundler.create_bundle(
+        bundle_output = bundler.create_bundle(
             project_root=project_root,
             output_file_path=actual_output_path,
             include_tree=not exclude_tree,
@@ -544,6 +633,18 @@ def bundle_command(
             git_full_diff=git_full_diff,
             git_diff_options=git_diff_options,
         )
+
+        # Handle clipboard functionality when no output file is specified
+        if actual_output_path is None and bundle_output is not None:
+            if to_clipboard:
+                _copy_to_clipboard_with_feedback(bundle_output)
+            else:
+                # Print to console using Rich for better formatting
+                from rich.markdown import Markdown
+
+                markdown_obj = Markdown(bundle_output)
+                console.print(markdown_obj)
+
     except typer.Exit:
         raise
     except Exception as e:

@@ -1,24 +1,20 @@
 # src/contextcraft/utils/config_manager.py
-"""Manages loading and accessing configuration for ContextCraft."""
+"""Configuration management utilities."""
+
 import warnings
-from contextlib import suppress
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 try:
-    import tomllib
+    import tomllib  # Python 3.11+
 except ImportError:
-    with suppress(ImportError):
-        import toml  # type: ignore
+    import tomli as tomllib
 
-from rich.console import Console
-
-console = Console()
-
+# Constants for backward compatibility with tests
 CONFIG_SECTION_NAME = "contextcraft"
-TOOL_CONFIG_KEY = f"tool.{CONFIG_SECTION_NAME}"
 
-DEFAULT_CONFIG_VALUES: dict[str, Any] = {
+# Default configuration values
+EXPECTED_DEFAULTS: Dict[str, Any] = {
     "default_output_filename_tree": None,
     "default_output_filename_flatten": None,
     "default_output_filename_bundle": None,
@@ -28,67 +24,86 @@ DEFAULT_CONFIG_VALUES: dict[str, Any] = {
     "global_exclude_patterns": [],
 }
 
+console_instance = None
+try:
+    from rich.console import Console
 
-def _get_toml_loader():
-    """Return the appropriate TOML loading function."""
-    if "tomllib" in globals():
-        return tomllib.load  # type: ignore
-    if "toml" in globals():
-        return toml.load  # type: ignore
-    raise RuntimeError(
-        "TOML parser (tomllib or toml) not found. "
-        "Install 'toml' if using Python < 3.11."
-    )
+    console_instance = Console(stderr=True)
+except ImportError:
+    pass
 
 
-def load_config(project_root: Path) -> dict[str, Any]:
-    """Load config from [tool.contextcraft] in pyproject.toml."""
-    pyproject_path = project_root / "pyproject.toml"
-    config = DEFAULT_CONFIG_VALUES.copy()
-    toml_load = _get_toml_loader()
+def _warn_config_load_error(config_path: Path, e: Exception) -> None:
+    """Warn about config loading errors."""
+    warning_message = f"Could not parse config from {config_path}: {e}"
+    warnings.warn(warning_message, UserWarning, stacklevel=3)
 
-    if not pyproject_path.is_file():
-        return config
 
-    try:
-        with pyproject_path.open("rb") as f:
-            data = toml_load(f)
-        tool_config = data.get("tool", {}).get(CONFIG_SECTION_NAME, {})
-        if not tool_config:
-            return config
+def _get_toml_loader() -> Any:
+    """Get the appropriate TOML loader function."""
+    return tomllib.load
 
-        for key, default_value in DEFAULT_CONFIG_VALUES.items():
-            if key in tool_config:
-                loaded_value = tool_config[key]
-                expected_type = type(default_value)
 
-                is_valid = True
-                if default_value is not None:
-                    is_valid = isinstance(loaded_value, expected_type)
-                elif loaded_value is not None:
-                    # If default is None, we assume str or list are acceptable
-                    is_valid = isinstance(loaded_value, (str, list))
+def _validate_and_merge_config(raw_config: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate configuration values and merge with defaults."""
+    result = EXPECTED_DEFAULTS.copy()
 
-                if is_valid:
-                    config[key] = loaded_value
+    for key, value in raw_config.items():
+        if key not in EXPECTED_DEFAULTS:
+            # Ignore unknown keys
+            continue
+
+        # Validate list types
+        if key in ["global_include_patterns", "global_exclude_patterns"]:
+            if not isinstance(value, list):
+                warnings.warn(
+                    f"Expected list for '{key}', got {type(value).__name__}. Using default.",
+                    UserWarning,
+                    stacklevel=3,
+                )
+                continue
+
+        # Validate string types (that can be None)
+        elif key.startswith("default_output_filename_"):
+            if value is not None and not isinstance(value, str):
+                warnings.warn(
+                    f"Expected string or None for '{key}', got {type(value).__name__}. Using default.",
+                    UserWarning,
+                    stacklevel=3,
+                )
+                continue
+
+        result[key] = value
+
+    return result
+
+
+def load_config(project_root: Path) -> Dict[str, Any]:
+    """Load configuration from contextcraft.toml or pyproject.toml."""
+    config_paths = [
+        project_root / "contextcraft.toml",
+        project_root / "pyproject.toml",
+    ]
+
+    for config_path in config_paths:
+        if config_path.exists():
+            try:
+                with config_path.open("rb") as f:
+                    data = _get_toml_loader()(f)
+
+                raw_config = {}
+                if config_path.name == "pyproject.toml":
+                    # Extract contextcraft section from pyproject.toml
+                    raw_config = data.get("tool", {}).get(CONFIG_SECTION_NAME, {})
                 else:
-                    default_type_name = (
-                        "list" if isinstance(default_value, list) else "string or None"
-                    )
-                    warnings.warn(
-                        f"Config Warning: Expected {default_type_name} for '{key}', "
-                        f"got {type(loaded_value).__name__}. Using default.",
-                        UserWarning,
-                        stacklevel=2,
-                    )
-                    config[key] = default_value
+                    # For contextcraft.toml, return the whole thing
+                    raw_config = data
 
-    except Exception as e:
-        warnings.warn(
-            f"Could not parse config from {pyproject_path}: {e}. " "Using defaults.",
-            UserWarning,
-            stacklevel=2,
-        )
-        return DEFAULT_CONFIG_VALUES.copy()
+                return _validate_and_merge_config(raw_config)
 
-    return config
+            except Exception as e:
+                _warn_config_load_error(config_path, e)
+                continue
+
+    # No config found or all failed to load - return defaults
+    return EXPECTED_DEFAULTS.copy()
