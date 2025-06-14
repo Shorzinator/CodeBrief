@@ -1,8 +1,6 @@
-# Dependency Lister (`contextcraft.tools.dependency_lister`)
+# Dependency Lister API Reference
 
-This module provides comprehensive dependency analysis capabilities for multi-language projects.
-
-::: src.contextcraft.tools.dependency_lister
+::: contextcraft.tools.dependency_lister
     handler: python
     options:
         show_root_heading: true

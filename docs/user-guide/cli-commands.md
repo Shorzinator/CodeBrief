@@ -215,7 +215,7 @@ Output includes:
 # Python content here...
 ```
 
-## 📦 deps - Dependency Analysis
+## 📦 deps - Dependency Analysis {#deps-command}
 
 Analyze and document project dependencies across multiple languages.
 

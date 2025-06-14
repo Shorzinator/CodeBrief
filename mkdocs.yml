@@ -141,6 +141,7 @@ plugins:
       default_handler: python
       handlers:
         python:
+          paths: [src]
           options:
             docstring_style: google
             docstring_options:
@@ -202,11 +203,18 @@ nav:
     - Main CLI: reference/main.md
     - Tree Generator: reference/tree_generator.md
     - Flattener: reference/flattener.md
-    - Dependency Lister: reference/tools/dependency_lister.md
+    - Config Manager: reference/config_manager.md
+    - Tools:
+      - Dependency Lister: reference/tools/dependency_lister.md
+      - Bundler: reference/tools/bundler.md
+      - Git Provider: reference/tools/git_provider.md
   - Examples:
     - Python Projects: examples/python-projects.md
+    - Bundle Workflows: examples/bundle-workflows.md
+    - Git Workflows: examples/git-workflows.md
   - Development:
     - Contributing: development/contributing.md
+    - Infrastructure: development/infrastructure.md
   - Help:
     - FAQ: help/faq.md
     - Troubleshooting: help/troubleshooting.md

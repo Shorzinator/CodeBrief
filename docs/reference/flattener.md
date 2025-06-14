@@ -2,7 +2,7 @@
 
 This module contains the logic for flattening code and text files from a directory.
 
-::: src.contextcraft.tools.flattener
+::: contextcraft.tools.flattener
     handler: python
     options:
         show_root_heading: true

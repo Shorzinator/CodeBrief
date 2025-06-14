@@ -2,7 +2,7 @@
 
 This section provides an API reference for the main CLI application and its commands, generated from the source code docstrings.
 
-::: src.contextcraft.main.app
+::: contextcraft.main
     handler: python
     options:
         show_root_heading: true

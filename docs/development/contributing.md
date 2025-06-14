@@ -18,7 +18,7 @@ Thank you for your interest in contributing to ContextCraft! We welcome contribu
 
 ## 📜 Code of Conduct
 
-This project and everyone participating in it is governed by our [Code of Conduct](../../CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+This project and everyone participating in it is governed by our [Code of Conduct](https://github.com/Shorzinator/ContextCraft/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## 🚀 Getting Started
 
@@ -78,7 +78,7 @@ Before creating a bug report, please check the [existing issues](https://github.
 
 ### Bug Report Template
 
-When reporting bugs, please use our [issue template](../../.github/ISSUE_TEMPLATE.md) and include:
+When reporting bugs, please use our [issue template](https://github.com/Shorzinator/ContextCraft/blob/main/.github/ISSUE_TEMPLATE.md) and include:
 
 - **Clear Description**: What happened vs. what you expected
 - **Reproduction Steps**: Detailed steps to reproduce the issue
@@ -279,7 +279,7 @@ poetry run pytest -k "test_tree"
 
 ### PR Template
 
-We provide a [PR template](../../.github/PULL_REQUEST_TEMPLATE.md) that includes:
+We provide a [PR template](https://github.com/Shorzinator/ContextCraft/blob/main/.github/PULL_REQUEST_TEMPLATE.md) that includes:
 
 - Description of changes
 - Type of change (bug fix, feature, etc.)
@@ -317,7 +317,7 @@ We provide a [PR template](../../.github/PULL_REQUEST_TEMPLATE.md) that includes
 
 - **GitHub Issues**: For bugs and feature requests
 - **GitHub Discussions**: For questions and general discussion
-- **Documentation**: Check our [comprehensive docs](../../docs/)
+- **Documentation**: Check our [comprehensive docs](../index.md)
 
 ### Maintainer Contact
 

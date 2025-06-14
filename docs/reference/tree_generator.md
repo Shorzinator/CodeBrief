@@ -2,7 +2,7 @@
 
 This module provides the core logic for generating directory tree structures.
 
-::: src.contextcraft.tools.tree_generator
+::: contextcraft.tools.tree_generator
     handler: python
     options:
         show_root_heading: true
