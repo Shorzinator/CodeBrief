@@ -137,9 +137,10 @@ ContextCraft is built with modern Python best practices:
 - **CLI Framework**: [Typer](https://typer.tiangolo.com/) for intuitive command-line interfaces
 - **Rich Output**: [Rich](https://rich.readthedocs.io/) for beautiful terminal output
 - **Modular Design**: Clean separation between tools, utilities, and CLI commands
-- **Comprehensive Testing**: 165+ tests with 77%+ coverage
+- **Comprehensive Testing**: 165+ tests with 74%+ coverage
 - **Security Compliant**: Bandit security scanning with proper subprocess handling
 - **Code Quality**: Ruff, pre-commit hooks, and conventional commits for maintainable code
+- **Professional Infrastructure**: Complete documentation, security policies, and contributor guidelines
 
 ## Documentation Sections
 
@@ -175,21 +176,40 @@ ContextCraft is built with modern Python best practices:
 
     Real-world examples for Git workflows, bundle patterns, and automation
 
+-   [:octicons-heart-24: **Contributing**](development/contributing.md)
+
+    ---
+
+    Developer guides, contribution guidelines, and community standards
+
 </div>
 
 ## What's New in v1.0
 
-!!! success "Production Ready - All Core Features Complete"
+!!! success "Production Ready - Complete Professional Infrastructure"
+
+    **🎯 All Core Features Complete:**
 
     - **Complete Tool Suite**: Tree generation, code flattening, dependency analysis, Git context, and bundling
     - **Git Integration**: Comprehensive Git context extraction with branch info, commits, and diffs
     - **Bundle System**: Powerful context aggregation combining all tools into structured documents
-    - **Advanced Configuration**: `pyproject.toml` integration with type validation and new tool support
+    - **Advanced Configuration**: `pyproject.toml` integration with type validation and comprehensive tool support
     - **Sophisticated Ignore System**: `.llmignore` with full `.gitignore` syntax support
-    - **Rich Error Handling**: Safe markup processing and user-friendly error messages
-    - **Comprehensive Testing**: 165 tests covering all functionality with robust content-based assertions
+
+    **🏗️ Professional Project Infrastructure:**
+
+    - **Security Policy**: Comprehensive responsible disclosure process and security guidelines
+    - **Contributing Guidelines**: Complete onboarding documentation for contributors
+    - **Issue & PR Templates**: Professional community engagement templates
+    - **Changelog**: Structured version tracking following industry standards
+    - **Code Standards**: EditorConfig, consistent formatting, and development guidelines
+
+    **🧪 Production Quality:**
+
+    - **Robust Testing**: 165 tests with content-based assertions for CI/CD reliability
     - **Security Compliance**: Full Bandit security compliance with proper subprocess handling
-    - **Beautiful Documentation**: This comprehensive documentation site with extensive examples!
+    - **Error Handling**: Safe markup processing and user-friendly error messages
+    - **CI/CD Stability**: Fixed environment-dependent test failures for consistent pipeline performance
 
 ## Core Commands
 
@@ -198,43 +218,51 @@ ContextCraft is built with modern Python best practices:
 | `tree` | Directory structure visualization | Rich console output, file filtering |
 | `flatten` | Code file aggregation | Multi-file concatenation, binary handling |
 | `deps` | Dependency analysis | Python & Node.js support, extensible |
-| `git-info` | Git context extraction | Branch info, commits, diffs, error handling |
-| `bundle` | Comprehensive context bundles | Multi-tool integration, selective inclusion |
+| `git-info` | Git context extraction | Branch info, commits, diffs, status |
+| `bundle` | Multi-tool context aggregation | Configurable, structured output |
 
 ## Community & Support
 
 <div class="grid cards" markdown>
 
--   [:octicons-mark-github-24: **GitHub**](https://github.com/Shorzinator/ContextCraft)
+-   [:octicons-issue-opened-24: **Issues & Bug Reports**](https://github.com/Shorzinator/ContextCraft/issues)
 
     ---
 
-    Source code, issues, and discussions
+    Found a bug or have a feature request? Open an issue with our detailed templates.
 
--   [:octicons-question-24: **FAQ**](help/faq.md)
-
-    ---
-
-    Frequently asked questions and common solutions
-
--   [:octicons-tools-24: **Contributing**](development/contributing.md)
+-   [:octicons-comment-discussion-24: **Discussions**](https://github.com/Shorzinator/ContextCraft/discussions)
 
     ---
 
-    Guidelines for contributing to the project
+    Join the community discussion for questions, ideas, and collaboration.
 
--   [:octicons-bug-24: **Support**](help/support.md)
+-   [:octicons-shield-check-24: **Security**](https://github.com/Shorzinator/ContextCraft/security)
 
     ---
 
-    Get help and report issues
+    Report security vulnerabilities through our responsible disclosure process.
+
+-   [:octicons-git-pull-request-24: **Contributing**](development/contributing.md)
+
+    ---
+
+    Help improve ContextCraft! Read our comprehensive contribution guidelines.
 
 </div>
 
-## Ready to Get Started?
+## Quick Links
 
-Choose your path to mastery:
+- **[Installation Guide](getting-started/installation.md)** - Get up and running in minutes
+- **[CLI Commands Reference](user-guide/cli-commands.md)** - Complete command documentation
+- **[Configuration Guide](getting-started/configuration.md)** - Advanced setup and customization
+- **[Bundle Workflows](examples/bundle-workflows.md)** - Real-world usage examples
+- **[Contributing Guidelines](development/contributing.md)** - Join the development community
+- **[Security Policy](https://github.com/Shorzinator/ContextCraft/blob/main/SECURITY.md)** - Report vulnerabilities responsibly
 
-[Get Started :material-arrow-right:](getting-started/installation.md){ .md-button .md-button--primary }
-[View Examples :material-arrow-right:](examples/git-workflows.md){ .md-button }
-[API Reference :material-arrow-right:](reference/main.md){ .md-button }
+---
+
+<div align="center">
+  <p><strong>Ready to transform your development workflow?</strong></p>
+  <p><a href="getting-started/installation.md" class="md-button md-button--primary">Get Started Now</a></p>
+</div>
