@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initCardAnimations();
     initTableEnhancements();
     initThemeTransitions();
+    initLEDEffects();
 
     console.log('ContextCraft documentation enhanced! 🚀');
 });
@@ -459,3 +460,205 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+/**
+ * LED Effects Initialization and Dynamic Behaviors
+ */
+function initLEDEffects() {
+    const ledText = document.querySelector('.led-text.neon-flicker');
+    const heroSection = document.querySelector('.hero-section');
+
+    if (!ledText) return;
+
+    // More authentic random flicker intensity with varied timing
+    let flickerInterval1 = setInterval(() => {
+        const flickerIntensity = Math.random() * 0.4 + 0.6; // 0.6 to 1.0
+        ledText.style.filter = `brightness(${flickerIntensity})`;
+
+        // Random micro-flickers
+        if (Math.random() < 0.15) { // 15% chance
+            setTimeout(() => {
+                ledText.style.filter = `brightness(${Math.random() * 0.3 + 0.2})`;
+                setTimeout(() => {
+                    ledText.style.filter = `brightness(1)`;
+                }, Math.random() * 50 + 10); // 10-60ms
+            }, Math.random() * 100 + 50); // 50-150ms delay
+        }
+    }, Math.random() * 300 + 100); // 100-400ms intervals
+
+    // Secondary random flicker layer
+    let flickerInterval2 = setInterval(() => {
+        if (Math.random() < 0.08) { // 8% chance of deep flicker
+            const originalOpacity = ledText.style.opacity || '1';
+            ledText.style.opacity = Math.random() * 0.3 + 0.1; // 0.1 to 0.4
+
+            setTimeout(() => {
+                ledText.style.opacity = originalOpacity;
+            }, Math.random() * 80 + 20); // 20-100ms
+        }
+    }, Math.random() * 500 + 200); // 200-700ms intervals
+
+    // Occasional power surge effect (more random timing)
+    let surgeTimeout;
+    function schedulePowerSurge() {
+        const delay = Math.random() * 8000 + 2000; // 2-10 seconds
+        surgeTimeout = setTimeout(() => {
+            if (Math.random() < 0.3) { // 30% chance when triggered
+                ledText.classList.add('power-surge');
+                setTimeout(() => ledText.classList.remove('power-surge'), 300);
+            }
+            schedulePowerSurge(); // Schedule next surge
+        }, delay);
+    }
+    schedulePowerSurge();
+
+    // Add mouse interaction effects
+    if (heroSection) {
+        heroSection.addEventListener('mouseenter', () => {
+            // Faster flicker on hover with more intensity variation
+            clearInterval(flickerInterval1);
+            clearInterval(flickerInterval2);
+
+            flickerInterval1 = setInterval(() => {
+                const flickerIntensity = Math.random() * 0.5 + 0.5; // 0.5 to 1.0
+                ledText.style.filter = `brightness(${flickerIntensity})`;
+            }, Math.random() * 150 + 50); // Faster: 50-200ms
+
+            heroSection.style.background = 'radial-gradient(circle at center, rgba(0, 255, 255, 0.2), rgba(0, 0, 0, 0.8))';
+        });
+
+        heroSection.addEventListener('mouseleave', () => {
+            // Reset to normal flicker speed
+            clearInterval(flickerInterval1);
+            clearInterval(flickerInterval2);
+
+            // Restart normal intervals
+            flickerInterval1 = setInterval(() => {
+                const flickerIntensity = Math.random() * 0.4 + 0.6;
+                ledText.style.filter = `brightness(${flickerIntensity})`;
+            }, Math.random() * 300 + 100);
+
+            heroSection.style.background = 'radial-gradient(circle at center, rgba(0, 255, 255, 0.1), rgba(0, 0, 0, 0.9))';
+        });
+    }
+
+    // Add click effect for LED display
+    const ledContainer = document.querySelector('.led-display-container');
+    if (ledContainer) {
+        ledContainer.addEventListener('click', () => {
+            // Temporarily boost all effects
+            ledContainer.style.boxShadow = `
+                inset 0 0 30px rgba(0, 255, 255, 0.3),
+                0 0 60px rgba(0, 255, 255, 0.5),
+                0 0 4px var(--neon-primary)
+            `;
+
+            ledText.style.textShadow = `
+                0 0 10px var(--neon-primary),
+                0 0 20px var(--neon-primary),
+                0 0 30px var(--neon-primary),
+                0 0 40px var(--neon-primary)
+            `;
+
+            // Add temporary fast flicker
+            let clickFlickerCount = 0;
+            const clickFlicker = setInterval(() => {
+                ledText.style.filter = `brightness(${Math.random() * 0.6 + 0.4})`;
+                clickFlickerCount++;
+                if (clickFlickerCount > 20) {
+                    clearInterval(clickFlicker);
+                    ledText.style.filter = '';
+                }
+            }, 50);
+
+            // Reset after 1 second
+            setTimeout(() => {
+                ledContainer.style.boxShadow = '';
+                ledText.style.textShadow = '';
+            }, 1000);
+        });
+    }
+
+    // Add keyboard shortcuts for LED effects
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'l' && e.ctrlKey) {
+            e.preventDefault();
+            toggleLEDEffects();
+        }
+    });
+
+    // Clean up intervals when page unloads
+    window.addEventListener('beforeunload', () => {
+        clearInterval(flickerInterval1);
+        clearInterval(flickerInterval2);
+        clearTimeout(surgeTimeout);
+    });
+
+    // Performance optimization: reduce animations on low-end devices
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
+        // Reduce animation frequency on low-end devices
+        clearInterval(flickerInterval1);
+        clearInterval(flickerInterval2);
+
+        // Slower, less intensive flicker for low-end devices
+        flickerInterval1 = setInterval(() => {
+            const flickerIntensity = Math.random() * 0.3 + 0.7;
+            ledText.style.filter = `brightness(${flickerIntensity})`;
+        }, Math.random() * 500 + 200);
+    }
+}
+
+/**
+ * Toggle LED effects on/off
+ */
+function toggleLEDEffects() {
+    const ledElements = document.querySelectorAll('.neon-flicker, .led-indicator, .led-border-top, .led-border-bottom, .led-border-left, .led-border-right');
+
+    ledElements.forEach(element => {
+        if (element.style.animationPlayState === 'paused') {
+            element.style.animationPlayState = 'running';
+        } else {
+            element.style.animationPlayState = 'paused';
+        }
+    });
+}
+
+// Add CSS for power surge effect
+const powerSurgeCSS = `
+.power-surge {
+    animation: powerSurge 0.3s ease-out !important;
+}
+
+@keyframes powerSurge {
+    0% {
+        text-shadow:
+            0 0 5px var(--neon-primary),
+            0 0 10px var(--neon-primary),
+            0 0 15px var(--neon-primary),
+            0 0 20px var(--neon-primary);
+        transform: scale(1);
+    }
+    50% {
+        text-shadow:
+            0 0 15px var(--neon-primary),
+            0 0 30px var(--neon-primary),
+            0 0 45px var(--neon-primary),
+            0 0 60px var(--neon-primary);
+        transform: scale(1.05);
+        filter: brightness(1.5);
+    }
+    100% {
+        text-shadow:
+            0 0 5px var(--neon-primary),
+            0 0 10px var(--neon-primary),
+            0 0 15px var(--neon-primary),
+            0 0 20px var(--neon-primary);
+        transform: scale(1);
+    }
+}
+`;
+
+// Inject the CSS
+const style = document.createElement('style');
+style.textContent = powerSurgeCSS;
+document.head.appendChild(style);

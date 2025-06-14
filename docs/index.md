@@ -1,8 +1,17 @@
 # Welcome to ContextCraft
 
-<div align="center">
-  <h2>A Powerful CLI Toolkit for LLM-Ready Project Context</h2>
-  <p><em>Transform your codebase into comprehensive, structured context that Large Language Models love!</em></p>
+<div align="center" class="hero-section">
+  <div class="led-display-container">
+    <div class="led-border-top"></div>
+    <div class="led-border-sides">
+      <div class="led-border-left"></div>
+      <div class="led-border-right"></div>
+    </div>
+    <h2 class="led-text neon-flicker">A Powerful CLI Toolkit for LLM-Ready Project Context</h2>
+    <div class="led-scanlines"></div>
+    <div class="led-border-bottom"></div>
+  </div>
+  <p class="subtitle-glow"><em>Transform your codebase into comprehensive, structured context that Large Language Models love!</em></p>
 </div>
 
 ---

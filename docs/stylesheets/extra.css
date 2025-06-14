@@ -17,6 +17,16 @@
   --md-accent-fg-color--transparent: #3498db20;
   --md-border-radius: 8px;
   --md-transition-duration: 0.3s;
+
+  /* LED/Neon theme variables */
+  --neon-primary: #00ffff;
+  --neon-secondary: #ff0080;
+  --neon-accent: #ffff00;
+  --neon-green: #00ff00;
+  --neon-red: #ff0040;
+  --neon-orange: #ff8000;
+  --led-bg: #0a0a0a;
+  --led-border: #333333;
 }
 
 /* Enhanced hero section */
@@ -394,4 +404,230 @@ pre, code, .md-typeset table:not([class]), .md-typeset .admonition,
 
 .md-typeset .codehilite:hover {
     box-shadow: 0 0 15px var(--md-accent-fg-color--transparent);
+}
+
+/* LED/Neon Display Effects */
+.hero-section {
+  position: relative;
+  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1), rgba(0, 0, 0, 0.9));
+  padding: 3rem 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.led-display-container {
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+  border: 2px solid var(--neon-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem 0;
+  box-shadow:
+    inset 0 0 20px rgba(0, 255, 255, 0.1),
+    0 0 40px rgba(0, 255, 255, 0.3),
+    0 0 2px var(--neon-primary);
+}
+
+/* LED Borders with animated lights - matching LED text color */
+.led-border-top, .led-border-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--neon-primary) 20%,
+    rgba(0, 255, 255, 0.8) 40%,
+    var(--neon-primary) 60%,
+    rgba(0, 255, 255, 0.6) 80%,
+    transparent 100%);
+  animation: ledBorderFlow 2s linear infinite;
+  box-shadow: 0 0 10px var(--neon-primary);
+}
+
+.led-border-top {
+  top: 0;
+}
+
+.led-border-bottom {
+  bottom: 0;
+  animation-direction: reverse;
+}
+
+.led-border-sides {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.led-border-left, .led-border-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--neon-primary) 20%,
+    rgba(0, 255, 255, 0.8) 40%,
+    var(--neon-primary) 60%,
+    rgba(0, 255, 255, 0.6) 80%,
+    transparent 100%);
+  animation: ledBorderFlow 2.5s linear infinite;
+  box-shadow: 0 0 10px var(--neon-primary);
+}
+
+.led-border-left {
+  left: 0;
+}
+
+.led-border-right {
+  right: 0;
+  animation-direction: reverse;
+}
+
+/* Main LED Text with Authentic Random Neon Flicker */
+.led-text {
+  font-family: 'Courier New', 'Monaco', monospace;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--neon-primary);
+  text-shadow:
+    0 0 5px var(--neon-primary),
+    0 0 10px var(--neon-primary),
+    0 0 15px var(--neon-primary),
+    0 0 20px var(--neon-primary);
+  text-align: center;
+  margin: 1rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+.neon-flicker {
+  animation:
+    neonFlickerRandom1 3.2s infinite,
+    neonFlickerRandom2 5.7s infinite,
+    neonFlickerRandom3 2.1s infinite;
+}
+
+/* Scanlines effect */
+.led-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    transparent 48%,
+    rgba(0, 255, 255, 0.05) 49%,
+    rgba(0, 255, 255, 0.05) 50%,
+    transparent 52%
+  );
+  background-size: 100% 4px;
+  animation: scanlines 0.1s linear infinite;
+  pointer-events: none;
+}
+
+/* Subtitle glow */
+.subtitle-glow {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  margin: 1.5rem 0;
+}
+
+/* Multiple Random Flicker Animations for Authentic Effect */
+@keyframes neonFlickerRandom1 {
+  0%, 2%, 3%, 5%, 6%, 100% {
+    opacity: 1;
+    text-shadow:
+      0 0 5px var(--neon-primary),
+      0 0 10px var(--neon-primary),
+      0 0 15px var(--neon-primary),
+      0 0 20px var(--neon-primary);
+  }
+  1%, 4% {
+    opacity: 0.8;
+    text-shadow:
+      0 0 2px var(--neon-primary),
+      0 0 5px var(--neon-primary),
+      0 0 8px var(--neon-primary),
+      0 0 12px var(--neon-primary);
+  }
+  2.5% {
+    opacity: 0.3;
+    text-shadow:
+      0 0 1px var(--neon-primary),
+      0 0 2px var(--neon-primary);
+  }
+}
+
+@keyframes neonFlickerRandom2 {
+  0%, 7%, 9%, 12%, 15%, 100% {
+    opacity: 1;
+  }
+  8%, 13% {
+    opacity: 0.4;
+  }
+  10% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes neonFlickerRandom3 {
+  0%, 17%, 18%, 22%, 25%, 100% {
+    filter: brightness(1);
+  }
+  16%, 19%, 23% {
+    filter: brightness(0.6);
+  }
+  20% {
+    filter: brightness(0.2);
+  }
+}
+
+@keyframes ledBorderFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+@keyframes scanlines {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4px);
+  }
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] .hero-section {
+  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.15), rgba(0, 0, 0, 0.95));
+}
+
+[data-md-color-scheme="slate"] .led-display-container {
+  background: linear-gradient(135deg, #000000, #111111);
+  border-color: var(--neon-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .led-text {
+    font-size: 1.8rem;
+  }
+
+  .led-display-container {
+    padding: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .led-text {
+    font-size: 1.4rem;
+  }
 }

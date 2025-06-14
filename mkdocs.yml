@@ -87,8 +87,8 @@ theme:
       bug: fontawesome/solid/robot
       example: fontawesome/solid/flask
       quote: fontawesome/solid/quote-left
-  logo: assets/logo.png # Add logo if available
-  favicon: assets/favicon.ico # Add favicon if available
+  # logo: assets/logo.png # Add logo if available
+  # favicon: assets/favicon.ico # Add favicon if available
 
 # Extensions
 markdown_extensions:
@@ -162,8 +162,8 @@ plugins:
 
 # Customization
 extra:
-  version:
-    provider: mike
+  # version:
+  #   provider: mike
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/Shorzinator/ContextCraft

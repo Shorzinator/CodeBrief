@@ -48,7 +48,7 @@ def get_git_context(
     Returns:
         Formatted Markdown string containing Git context information
 
-    Raises:
+    Note:
         No exceptions are raised; all errors are captured and included in the output
     """
     if not project_root.exists():
