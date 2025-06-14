@@ -42,6 +42,12 @@ ContextCraft transforms your codebase into well-structured, LLM-friendly documen
 - Well-structured Markdown with navigation
 - Perfect for LLM consumption
 
+### 📋 **Clipboard Integration**
+- Copy output directly to clipboard with `--to-clipboard` or `-c`
+- Available for all commands (tree, flatten, deps, git-info, bundle)
+- Smart behavior: only works when no output file specified
+- Cross-platform support with graceful error handling
+
 ### 🎯 **Intelligent Filtering**
 - `.llmignore` files with `.gitignore`-style syntax
 - Configurable global patterns via `pyproject.toml`
@@ -71,8 +77,14 @@ contextcraft tree
 # Save tree to file
 contextcraft tree -o project_structure.txt
 
+# Copy tree to clipboard
+contextcraft tree --to-clipboard
+
 # Flatten code files
 contextcraft flatten src/ -o flattened_code.md
+
+# Copy flattened code to clipboard
+contextcraft flatten src/ -c
 
 # Analyze dependencies
 contextcraft deps
@@ -82,6 +94,9 @@ contextcraft git-info
 
 # Create a comprehensive bundle
 contextcraft bundle -o project_context.md
+
+# Copy bundle to clipboard
+contextcraft bundle --to-clipboard
 ```
 
 ### Configuration
@@ -117,11 +132,16 @@ global_exclude_patterns = [
 
 ## 📖 Documentation
 
-- **[Getting Started](docs/getting-started/quick-start.md)** - Installation and basic usage
-- **[CLI Commands](docs/user-guide/cli-commands.md)** - Complete command reference
-- **[Configuration](docs/getting-started/configuration.md)** - Advanced configuration options
-- **[API Reference](docs/reference/)** - Detailed API documentation
-- **[Examples](docs/examples/)** - Real-world usage examples
+**🌐 [Live Documentation Website](https://shorzinator.github.io/ContextCraft/)**
+
+Comprehensive documentation including:
+
+- **[Getting Started](https://shorzinator.github.io/ContextCraft/getting-started/installation/)** - Installation and basic usage
+- **[CLI Commands](https://shorzinator.github.io/ContextCraft/user-guide/cli-commands/)** - Complete command reference
+- **[Configuration](https://shorzinator.github.io/ContextCraft/getting-started/configuration/)** - Advanced configuration options
+- **[API Reference](https://shorzinator.github.io/ContextCraft/reference/)** - Detailed API documentation
+- **[Examples](https://shorzinator.github.io/ContextCraft/examples/)** - Real-world usage examples
+- **[Tutorials](https://shorzinator.github.io/ContextCraft/tutorials/)** - Step-by-step guides
 
 ## 🛠️ Development
 
@@ -188,7 +208,7 @@ ContextCraft is actively developed and maintained. Current status:
 - ✅ **Core Tools**: All primary tools implemented and tested
 - ✅ **CLI Interface**: Complete command-line interface
 - ✅ **Documentation**: Comprehensive docs with examples
-- ✅ **Testing**: 165+ tests with 77% coverage
+- ✅ **Testing**: 175+ tests with 77% coverage
 - ✅ **CI/CD**: Automated testing and quality checks
 - 🚀 **V1.0**: Feature-complete and production-ready
 
@@ -196,7 +216,7 @@ ContextCraft is actively developed and maintained. Current status:
 
 <div align="center">
 
-**[Documentation](docs/) • [Issues](https://github.com/Shorzinator/ContextCraft/issues) • [Discussions](https://github.com/Shorzinator/ContextCraft/discussions)**
+**[📖 Documentation](https://shorzinator.github.io/ContextCraft/) • [🐛 Issues](https://github.com/Shorzinator/ContextCraft/issues) • [💬 Discussions](https://github.com/Shorzinator/ContextCraft/discussions)**
 
 Made with ❤️ for the developer community
 

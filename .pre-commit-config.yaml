@@ -30,18 +30,16 @@ repos:
         args: [--fix, --exit-non-zero-on-fix] # Apply fixes and exit if fixes were made
       - id: ruff-format # Runs ruff format
 
-  # TODO: Temporarily disabled due to module path conflicts
   # Mypy: Static type checker
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.8.0 # Or latest
-  #   hooks:
-  #     - id: mypy
-  #       args: [
-  #           "--config-file=pyproject.toml",
-  #           "-m", "contextcraft",
-  #           "-m", "tests"
-  #         ]
-  #       pass_filenames: false
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0 # Or latest
+    hooks:
+      - id: mypy
+        args: ["contextcraft"]
+        pass_filenames: false
+        # Run from src directory to avoid module path conflicts
+        language: system
+        entry: bash -c 'cd src && mypy contextcraft'
 
   # Bandit: Security linter for Python
   - repo: https://github.com/PyCQA/bandit
