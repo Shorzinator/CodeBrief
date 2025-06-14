@@ -34,7 +34,10 @@ jobs:
     steps:
       - name: Checkout repository
         # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+        # fetch-depth: 0 ensures full git history for git-revision-date-localized-plugin
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         # Sets up the specified Python version
