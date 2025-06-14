@@ -568,3 +568,215 @@ def test_flatten_command_handles_exception_with_markup_chars(
     # Check that no MarkupError occurred and the core message is there:
     assert "An unexpected error occurred during file flattening:" in result.stdout
     mock_flatten_error.assert_called_once()
+
+
+# --- Tests for clipboard functionality ---
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_tree_command_with_clipboard_flag(
+    mock_generate_tree, mock_clipboard_copy, tmp_path: Path
+):
+    """Test tree command with --to-clipboard flag copies output to clipboard."""
+    mock_tree_output = "Sample tree output"
+    mock_generate_tree.return_value = mock_tree_output
+
+    result = runner.invoke(app, ["tree", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    # Verify tree generator was called correctly
+    mock_generate_tree.assert_called_once_with(
+        root_dir=tmp_path.resolve(),
+        output_file_path=None,
+        ignore_list=[],
+        config_global_excludes=[],
+    )
+
+    # Verify clipboard copy was called with tree output
+    mock_clipboard_copy.assert_called_once_with(mock_tree_output)
+
+    # Verify success message is shown
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_tree_command_with_short_clipboard_flag(
+    mock_generate_tree, mock_clipboard_copy, tmp_path: Path
+):
+    """Test tree command with -c flag (short form) copies output to clipboard."""
+    mock_tree_output = "Sample tree output"
+    mock_generate_tree.return_value = mock_tree_output
+
+    result = runner.invoke(app, ["tree", str(tmp_path), "-c"])
+    assert result.exit_code == 0
+
+    mock_clipboard_copy.assert_called_once_with(mock_tree_output)
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.flattener.flatten_code_logic")
+def test_flatten_command_with_clipboard_flag(
+    mock_flatten_logic, mock_clipboard_copy, tmp_path: Path
+):
+    """Test flatten command with --to-clipboard flag copies output to clipboard."""
+    mock_flatten_output = "Sample flattened output"
+    mock_flatten_logic.return_value = mock_flatten_output
+
+    result = runner.invoke(app, ["flatten", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    mock_flatten_logic.assert_called_once_with(
+        root_dir=tmp_path.resolve(),
+        output_file_path=None,
+        include_patterns=[],
+        exclude_patterns=[],
+        config_global_excludes=[],
+    )
+
+    mock_clipboard_copy.assert_called_once_with(mock_flatten_output)
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.git_provider.get_git_context")
+def test_git_info_command_with_clipboard_flag(
+    mock_git_context, mock_clipboard_copy, tmp_path: Path
+):
+    """Test git-info command with --to-clipboard flag copies output to clipboard."""
+    mock_git_output = "Sample git context output"
+    mock_git_context.return_value = mock_git_output
+
+    result = runner.invoke(app, ["git-info", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    mock_git_context.assert_called_once_with(
+        project_root=tmp_path.resolve(),
+        diff_options=None,
+        log_count=5,
+        full_diff=False,
+    )
+
+    mock_clipboard_copy.assert_called_once_with(mock_git_output)
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.dependency_lister.list_dependencies")
+def test_deps_command_with_clipboard_flag(
+    mock_list_deps, mock_clipboard_copy, tmp_path: Path
+):
+    """Test deps command with --to-clipboard flag copies output to clipboard."""
+    mock_deps_output = "Sample dependencies output"
+    mock_list_deps.return_value = mock_deps_output
+
+    result = runner.invoke(app, ["deps", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    mock_list_deps.assert_called_once_with(
+        project_path=tmp_path.resolve(),
+        output_file=None,
+    )
+
+    mock_clipboard_copy.assert_called_once_with(mock_deps_output)
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.pyperclip.copy")
+@mock.patch("src.contextcraft.tools.bundler.create_bundle")
+def test_bundle_command_with_clipboard_flag(
+    mock_create_bundle, mock_clipboard_copy, tmp_path: Path
+):
+    """Test bundle command with --to-clipboard flag copies output to clipboard."""
+    mock_bundle_output = "Sample bundle output"
+    mock_create_bundle.return_value = mock_bundle_output
+
+    result = runner.invoke(app, ["bundle", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    mock_create_bundle.assert_called_once()
+    mock_clipboard_copy.assert_called_once_with(mock_bundle_output)
+    assert "📋 Output successfully copied to clipboard!" in result.stdout
+
+
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_clipboard_flag_ignored_when_output_file_specified(
+    mock_generate_tree, tmp_path: Path
+):
+    """Test that --to-clipboard flag is ignored when --output file is specified."""
+    output_file = tmp_path / "tree_output.txt"
+    mock_generate_tree.return_value = None  # Returns None when output file is specified
+
+    result = runner.invoke(
+        app, ["tree", str(tmp_path), "--output", str(output_file), "--to-clipboard"]
+    )
+    assert result.exit_code == 0
+
+    # Verify tree generator was called with output file
+    mock_generate_tree.assert_called_once_with(
+        root_dir=tmp_path.resolve(),
+        output_file_path=output_file.resolve(),
+        ignore_list=[],
+        config_global_excludes=[],
+    )
+
+    # Verify clipboard success message is NOT shown since output went to file
+    assert "📋 Output successfully copied to clipboard!" not in result.stdout
+
+
+@mock.patch(
+    "src.contextcraft.main.pyperclip.copy", side_effect=Exception("Clipboard error")
+)
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_clipboard_error_handling(
+    mock_generate_tree, mock_clipboard_copy, tmp_path: Path
+):
+    """Test that clipboard errors are handled gracefully with warning message."""
+    mock_tree_output = "Sample tree output"
+    mock_generate_tree.return_value = mock_tree_output
+
+    result = runner.invoke(app, ["tree", str(tmp_path), "--to-clipboard"])
+    assert result.exit_code == 0
+
+    # Verify clipboard copy was attempted
+    mock_clipboard_copy.assert_called_once_with(mock_tree_output)
+
+    # Verify error warning is shown
+    assert "Warning: Failed to copy to clipboard: Clipboard error" in result.stdout
+
+
+@mock.patch("src.contextcraft.main.console.print")
+@mock.patch("src.contextcraft.tools.tree_generator.generate_and_output_tree")
+def test_tree_command_normal_console_output_without_clipboard_flag(
+    mock_generate_tree, mock_console_print, tmp_path: Path
+):
+    """Test tree command without --to-clipboard flag prints to console normally."""
+    mock_tree_output = "Sample tree output"
+    mock_generate_tree.return_value = mock_tree_output
+
+    result = runner.invoke(app, ["tree", str(tmp_path)])
+    assert result.exit_code == 0
+
+    # Verify console.print was called with the tree output (markup=False)
+    mock_console_print.assert_called_with(mock_tree_output, markup=False)
+
+    # Verify clipboard success message is NOT shown
+    assert "📋 Output successfully copied to clipboard!" not in result.stdout
+
+
+@mock.patch("src.contextcraft.tools.dependency_lister.list_dependencies")
+def test_deps_command_normal_console_output_without_clipboard_flag(
+    mock_list_deps, tmp_path: Path
+):
+    """Test deps command without --to-clipboard flag prints to console normally."""
+    mock_deps_output = "Sample dependencies output"
+    mock_list_deps.return_value = mock_deps_output
+
+    result = runner.invoke(app, ["deps", str(tmp_path)])
+    assert result.exit_code == 0
+
+    # For deps command, we expect the console output to be handled by the command
+    # since it has its own formatting with Markdown
+    assert "--- Project Dependencies ---" in result.stdout

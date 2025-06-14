@@ -689,11 +689,15 @@ requests = "^2.31.0"
 
         (tmp_path / "package.json").write_text(json.dumps(package_data, indent=2))
 
-        list_dependencies(tmp_path, None)
+        result = list_dependencies(tmp_path, None)
 
         captured = capsys.readouterr()
-        # Rich Markdown output should contain the dependency information
-        assert "express" in captured.out
+        # Function should return markdown string when no output file specified
+        assert result is not None
+        assert "express" in result
+        assert "# Project Dependencies" in result
+        # Should still print diagnostic messages to console
+        assert "Scanning for dependency files" in captured.out
 
     def test_list_dependencies_mixed_files(self, tmp_path):
         """Test listing dependencies from multiple file types."""

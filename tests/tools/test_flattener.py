@@ -223,15 +223,17 @@ def test_flatten_to_console_output(create_project_structure, capsys):
     project_root = create_project_structure(
         {"file_a.txt": "Content of A", "file_b.txt": "Content of B"}
     )
-    flattener.flatten_code_logic(
+    result = flattener.flatten_code_logic(
         root_dir=project_root,
         output_file_path=None,  # Output to console
         include_patterns=["file_a.txt", "file_b.txt"],
     )
     captured = capsys.readouterr()
-    # Order might vary due to sorted(files), so check for presence
-    assert "# --- File: file_a.txt ---" in captured.out
-    assert "Content of A" in captured.out
-    assert "# --- File: file_b.txt ---" in captured.out
-    assert "Content of B" in captured.out
-    assert "--- Flattened 2 file(s)." in captured.out  # Summary message
+    # Function should return string when no output file specified
+    assert result is not None
+    assert "# --- File: file_a.txt ---" in result
+    assert "Content of A" in result
+    assert "# --- File: file_b.txt ---" in result
+    assert "Content of B" in result
+    # Summary message should be in console output
+    assert "--- Flattened 2 file(s)." in captured.out

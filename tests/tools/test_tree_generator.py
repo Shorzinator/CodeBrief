@@ -105,23 +105,23 @@ def test_tree_console_output_basic(create_project_structure_for_tree, capsys):
         }
     )
 
-    tree_generator.generate_and_output_tree(
+    result = tree_generator.generate_and_output_tree(
         root_dir=project_root,
         output_file_path=None,  # Output to console
     )
-    captured = capsys.readouterr()
-    stdout = captured.out
 
+    # Function should return string when no output file specified
+    assert result is not None
     # For Rich output, assertions will be less precise than snapshots.
     # Check for key elements. The exact formatting characters can vary.
-    assert project_root.name in stdout  # Root directory name
-    assert "file1.txt" in stdout
-    assert "dir1" in stdout
-    assert "file2.txt" in stdout
+    assert project_root.name in result  # Root directory name
+    assert "file1.txt" in result
+    assert "dir1" in result
+    assert "file2.txt" in result
     # Check for tree structure elements
-    assert "📁" in stdout  # Directory icon
-    assert "📄" in stdout  # File icon
-    assert "┣━━" in stdout or "┗━━" in stdout  # Tree connectors
+    assert "📁" in result  # Directory icon
+    assert "📄" in result  # File icon
+    assert "┣━━" in result or "┗━━" in result  # Tree connectors
 
 
 def test_tree_console_with_llmignore_negation(
@@ -137,7 +137,7 @@ def test_tree_console_with_llmignore_negation(
         }
     )
 
-    tree_generator.generate_and_output_tree(
+    result = tree_generator.generate_and_output_tree(
         root_dir=project_root,
         output_file_path=None,  # Console output
     )
@@ -145,14 +145,17 @@ def test_tree_console_with_llmignore_negation(
     stdout = captured.out
 
     print("\nDEBUG CONSOLE OUTPUT (llmignore_negation):\n", stdout)
+    print("\nDEBUG RESULT:\n", result)
 
-    assert "app.py" in stdout
+    # Function should return string when no output file specified
+    assert result is not None
+    assert "app.py" in result
     assert (
-        "build" not in stdout
+        "build" not in result
     )  # build/ itself is ignored by .llmignore and simpler Rich logic won't show it
-    assert "important.md" not in stdout  # Consequently, important.md isn't shown either
-    assert "artifact.bin" not in stdout
-    assert ".llmignore" in stdout  # Assuming .llmignore is not ignored by itself
+    assert "important.md" not in result  # Consequently, important.md isn't shown either
+    assert "artifact.bin" not in result
+    assert ".llmignore" in result  # Assuming .llmignore is not ignored by itself
 
 
 @mock.patch("pathlib.Path.iterdir", autospec=True)
@@ -221,7 +224,7 @@ def test_tree_permission_error_console_output(
 
     mock_iterdir.side_effect = iterdir_side_effect
 
-    tree_generator.generate_and_output_tree(
+    result = tree_generator.generate_and_output_tree(
         root_dir=project_root,
         output_file_path=None,  # Console output
     )
@@ -231,6 +234,10 @@ def test_tree_permission_error_console_output(
     print(
         f"\nDEBUG STDOUT for permission error console test:\n{stdout}"
     )  # Add this to see actual output
+    print(f"\nDEBUG RESULT:\n{result}")  # Add this to see actual result
+
+    # Function should return string when no output file specified
+    assert result is not None
 
     # Assertions need to be robust to Rich's output.
     # The Rich output for a denied directory looks like:
@@ -240,9 +247,9 @@ def test_tree_permission_error_console_output(
     # ┗━━ 📁 denied_dir
     #     └── [dim italic](Permission Denied)[/dim italic]
 
-    assert "allowed_dir" in stdout
-    assert "file.txt" in stdout  # Assuming allowed_dir is listed and its contents shown
-    assert "denied_dir" in stdout  # The directory name itself should be listed
+    assert "allowed_dir" in result
+    assert "file.txt" in result  # Assuming allowed_dir is listed and its contents shown
+    assert "denied_dir" in result  # The directory name itself should be listed
     # Check for the specific Permission Denied message associated with denied_dir
     # A more robust check might involve parsing the tree structure slightly or using regex
     # For now, let's check if "Permission Denied" appears after "denied_dir" in the output.
@@ -259,10 +266,10 @@ def test_tree_permission_error_console_output(
     #     (Permission Denied)
 
     # Let's look for the sequence
-    denied_dir_index = stdout.find("denied_dir")
+    denied_dir_index = result.find("denied_dir")
     assert denied_dir_index != -1, "The 'denied_dir' should be listed in the output."
 
-    permission_denied_message_index = stdout.find(
+    permission_denied_message_index = result.find(
         "(Permission Denied)", denied_dir_index
     )
     assert (
@@ -276,7 +283,7 @@ def test_tree_permission_error_console_output(
     # The most important thing is that the code path for PermissionError in
     # _add_nodes_to_rich_tree_recursive is hit.
 
-    assert "secret.txt" not in stdout  # File inside denied_dir should not be listed
+    assert "secret.txt" not in result  # File inside denied_dir should not be listed
 
 
 def test_tree_fallback_exclusions_no_llmignore(
