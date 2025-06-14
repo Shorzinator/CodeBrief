@@ -35,3 +35,6 @@ coverage.xml
 .coverage.*.*.*.*.*
 .coverage.*.*.*.*.*.*
 .coverage.*.*.*.*.*.*.*
+
+htmlcov/
+site/

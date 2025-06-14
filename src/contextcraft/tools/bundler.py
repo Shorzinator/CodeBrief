@@ -50,7 +50,7 @@ def generate_tree_content(
         # Load ignore patterns
         llmignore_spec = ignore_handler.load_ignore_patterns(project_root)
 
-        # Generate plain text tree lines directly (same logic as file output)
+        # Generate plain text tree lines directly for bundle (clean text output)
         tree_lines = tree_generator._generate_tree_lines_recursive(
             current_dir=project_root,
             root_dir_for_ignores=project_root,
