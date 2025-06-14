@@ -107,6 +107,17 @@ jobs:
             --cov-report=term-missing tests/
           # The --cov-report=xml is useful for uploading coverage to services like Codecov.
 
+      - name: Quick Documentation Check
+        # Quick validation that documentation can build successfully
+        # This ensures basic documentation dependencies are working
+        run: |
+          echo "Running quick documentation check..."
+          # Install docs dependencies
+          poetry install --no-interaction --with docs
+          # Quick validation - test build
+          poetry run mkdocs build --clean --strict --quiet
+          echo "Documentation configuration is valid"
+
       # Optional: Upload Coverage Report (e.g., to Codecov)
       # - name: Upload coverage to Codecov
       #   uses: codecov/codecov-action@v3

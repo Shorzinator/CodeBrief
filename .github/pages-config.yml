@@ -1,0 +1,38 @@
+# .github/pages-config.yml
+# GitHub Pages configuration for ContextCraft documentation
+
+# Site metadata
+site:
+  name: "ContextCraft Documentation"
+  description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
+  url: "https://Shorzinator.github.io/ContextCraft"
+  baseurl: "/ContextCraft"
+
+# Build configuration
+build:
+  source: "docs"
+  destination: "site"
+  exclude:
+    - "*.tmp"
+    - "*.log"
+    - ".DS_Store"
+    - "Thumbs.db"
+
+# Deployment settings
+deploy:
+  branch: "gh-pages"
+  message: "Deploy documentation [skip ci]"
+
+# Security settings
+security:
+  allowed_origins:
+    - "https://github.com"
+    - "https://api.github.com"
+
+# Performance settings
+performance:
+  compress: true
+  minify: true
+  cache_control:
+    static: "public, max-age=31536000, immutable"
+    html: "public, max-age=3600"

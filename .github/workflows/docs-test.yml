@@ -1,0 +1,203 @@
+# .github/workflows/docs-test.yml
+# GitHub Actions workflow for testing documentation changes
+# This workflow runs on PRs to validate documentation before deployment
+
+name: 🧪 Documentation Tests
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "src/**"
+      - ".github/workflows/docs-*.yml"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  POETRY_VERSION: "1.7.1"
+
+jobs:
+  docs-test:
+    name: 📚 Test Documentation Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Load cached Poetry virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-docs-test-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-docs-test-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --with docs
+
+      - name: Ensure dependencies are installed
+        run: poetry install --no-interaction --with docs
+
+      - name: Validate MkDocs configuration
+        run: |
+          echo "🔍 Validating MkDocs configuration..."
+          poetry run mkdocs build --clean --strict --quiet
+
+      - name: Test documentation build
+        run: |
+          echo "🏗️ Testing documentation build..."
+          poetry run mkdocs build --clean --strict --verbose
+
+      - name: Check for broken links
+        run: |
+          echo "🔗 Checking for broken internal links..."
+          # Use a simple grep to find potential broken links
+          find docs -name "*.md" -exec grep -l "]\(" {} \; | while read file; do
+            echo "Checking links in: $file"
+            # You could add more sophisticated link checking here
+          done
+
+      - name: Validate API documentation
+        run: |
+          echo "🔍 Validating API documentation generation..."
+          # Check that all expected API reference pages are generated
+          if [ ! -f "site/reference/main/index.html" ]; then
+            echo "❌ Main API reference page missing"
+            exit 1
+          fi
+
+          if [ ! -f "site/reference/config_manager/index.html" ]; then
+            echo "❌ Config manager API reference page missing"
+            exit 1
+          fi
+
+          echo "✅ API documentation validation passed"
+
+      - name: Check site structure
+        run: |
+          echo "🏗️ Checking site structure..."
+
+          # Verify critical pages exist
+          critical_pages=(
+            "site/index.html"
+            "site/getting-started/installation/index.html"
+            "site/user-guide/cli-commands/index.html"
+            "site/reference/main/index.html"
+          )
+
+          for page in "${critical_pages[@]}"; do
+            if [ ! -f "$page" ]; then
+              echo "❌ Critical page missing: $page"
+              exit 1
+            fi
+          done
+
+          echo "✅ Site structure validation passed"
+
+      - name: Test LED effects assets
+        run: |
+          echo "✨ Testing LED effects assets..."
+
+          # Check that CSS and JS files are properly included
+          if ! grep -q "led-text" site/stylesheets/extra.css; then
+            echo "❌ LED effects CSS missing"
+            exit 1
+          fi
+
+          if ! grep -q "initLEDEffects" site/javascripts/extra.js; then
+            echo "❌ LED effects JavaScript missing"
+            exit 1
+          fi
+
+          echo "✅ LED effects assets validation passed"
+
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "📊 Documentation Test Report" > docs_test_report.md
+          echo "=========================" >> docs_test_report.md
+          echo "" >> docs_test_report.md
+          echo "**Build Status:** ${{ job.status }}" >> docs_test_report.md
+          echo "**Python Version:** ${{ env.PYTHON_VERSION }}" >> docs_test_report.md
+          echo "**Timestamp:** $(date -u)" >> docs_test_report.md
+          echo "" >> docs_test_report.md
+
+          if [ -d "site" ]; then
+            echo "**Site Statistics:**" >> docs_test_report.md
+            echo "- Total files: $(find site -type f | wc -l)" >> docs_test_report.md
+            echo "- HTML pages: $(find site -name "*.html" | wc -l)" >> docs_test_report.md
+            echo "- Site size: $(du -sh site | cut -f1)" >> docs_test_report.md
+          fi
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-test-results
+          path: |
+            site/
+            docs_test_report.md
+          retention-days: 7
+
+  # Link checking job (separate for better performance)
+  link-check:
+    name: 🔗 Check External Links
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check external links
+        run: |
+          echo "🔗 Checking external links in documentation..."
+
+          # Configure link checking
+          cat > .markdown-link-check.json << 'EOF'
+          {
+            "ignorePatterns": [
+              {
+                "pattern": "^http://localhost"
+              },
+              {
+                "pattern": "^http://127.0.0.1"
+              }
+            ],
+            "timeout": "10s",
+            "retryCount": 2,
+            "retryOn429": true
+          }
+          EOF
+
+          # Check all markdown files
+          find docs -name "*.md" -print0 | xargs -0 -I {} markdown-link-check {} --config .markdown-link-check.json

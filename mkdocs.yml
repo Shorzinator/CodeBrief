@@ -159,6 +159,19 @@ plugins:
             group_by_category: true
             show_symbol_type_heading: true
             show_symbol_type_toc: true
+  - minify:
+      minify_html: true
+      minify_css: true
+      minify_js: true
+      htmlmin_opts:
+        remove_comments: true
+        remove_empty_space: true
+        remove_optional_attribute_quotes: false
+        reduce_boolean_attributes: true
+        keep_pre: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
 
 # Customization
 extra:
