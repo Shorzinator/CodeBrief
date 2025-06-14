@@ -13,3 +13,4 @@ __pycache__/
 .venv
 /site/
 coverage.xml
+htmlcov/

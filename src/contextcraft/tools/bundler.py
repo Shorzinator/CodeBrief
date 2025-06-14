@@ -44,29 +44,23 @@ def generate_tree_content(
         Formatted tree content as string, or error message if generation fails
     """
     try:
-        # We need to capture the tree output as a string rather than printing it
-        # The tree_generator currently outputs to file or console, we need string output
-        # Let's use a temporary approach by redirecting to a temporary file-like object
-        import sys
-        from io import StringIO
+        # Import the internal tree generation function to get plain text output
+        from ..utils import ignore_handler
 
-        # Temporarily redirect stdout to capture tree output
-        old_stdout = sys.stdout
-        string_buffer = StringIO()
-        sys.stdout = string_buffer
+        # Load ignore patterns
+        llmignore_spec = ignore_handler.load_ignore_patterns(project_root)
 
-        try:
-            tree_generator.generate_and_output_tree(
-                root_dir=project_root,
-                output_file_path=None,  # This will print to stdout (our captured buffer)
-                ignore_list=[],
-                config_global_excludes=config_global_excludes,
-            )
-        finally:
-            sys.stdout = old_stdout
+        # Generate plain text tree lines directly for bundle (clean text output)
+        tree_lines = tree_generator._generate_tree_lines_recursive(
+            current_dir=project_root,
+            root_dir_for_ignores=project_root,
+            llmignore_spec=llmignore_spec,
+            cli_ignores=[],
+            config_global_excludes=config_global_excludes,
+            tool_specific_fallback_exclusions=tree_generator.DEFAULT_EXCLUDED_ITEMS_TOOL_SPECIFIC.copy(),
+        )
 
-        tree_content = string_buffer.getvalue()
-        return tree_content.strip() if tree_content else "No tree content generated"
+        return "\n".join(tree_lines) if tree_lines else "No tree content generated"
 
     except Exception as e:
         return f"Error generating directory tree: {e}"
