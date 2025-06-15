@@ -5,8 +5,22 @@ name = "contextcraft"
 version = "0.1.0"
 description = "A CLI toolkit to generate comprehensive project context for LLMs."
 authors = ["Your Name <you@example.com>"]
-license = "MIT" # Or Apache-2.0
-readme = "README.md" # if you have one, or poetry will create a default
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/Shorzinator/ContextCraft"
+repository = "https://github.com/Shorzinator/ContextCraft"
+documentation = "https://shorzinator.github.io/ContextCraft/"
+keywords = ["llm", "cli", "context", "toolkit", "documentation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Utilities"
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"

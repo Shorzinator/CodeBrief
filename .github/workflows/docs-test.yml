@@ -2,7 +2,7 @@
 # GitHub Actions workflow for testing documentation changes
 # This workflow runs on PRs to validate documentation before deployment
 
-name: 🧪 Documentation Tests
+name: Documentation Tests
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ env:
 
 jobs:
   docs-test:
-    name: 📚 Test Documentation Build
+    name: Test Documentation Build
     runs-on: ubuntu-latest
 
     steps:
@@ -71,7 +71,7 @@ jobs:
 
       - name: Check for broken links
         run: |
-          echo "🔗 Checking for broken internal links..."
+          echo "Checking for broken internal links..."
           # Use a simple grep to find potential broken links
           find docs -name "*.md" -exec grep -l "]\(" {} \; | while read file; do
             echo "Checking links in: $file"
@@ -96,7 +96,7 @@ jobs:
 
       - name: Check site structure
         run: |
-          echo "🏗️ Checking site structure..."
+          echo "Checking site structure..."
 
           # Verify critical pages exist
           critical_pages=(
@@ -117,7 +117,7 @@ jobs:
 
       - name: Test LED effects assets
         run: |
-          echo "✨ Testing LED effects assets..."
+          echo "Testing LED effects assets..."
 
           # Check that CSS and JS files are properly included
           if ! grep -q "led-text" site/stylesheets/extra.css; then
@@ -135,7 +135,7 @@ jobs:
       - name: Generate test report
         if: always()
         run: |
-          echo "📊 Documentation Test Report" > docs_test_report.md
+          echo "Documentation Test Report" > docs_test_report.md
           echo "=========================" >> docs_test_report.md
           echo "" >> docs_test_report.md
           echo "**Build Status:** ${{ job.status }}" >> docs_test_report.md

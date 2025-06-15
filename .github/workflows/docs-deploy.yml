@@ -2,7 +2,7 @@
 # GitHub Actions workflow to build and deploy the MkDocs documentation
 # site to GitHub Pages with enhanced CI integration and error handling.
 
-name: 📚 Deploy Documentation
+name: Deploy Documentation
 
 # Controls when the workflow will run
 on:
@@ -99,7 +99,7 @@ jobs:
       - name: Run documentation linting
         run: |
           # Check for broken internal links in markdown files
-          echo "🔍 Checking documentation quality..."
+          echo "Checking documentation quality..."
 
           # Basic markdown validation could go here
           # You could add markdownlint or other tools
