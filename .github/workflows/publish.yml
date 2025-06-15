@@ -1,0 +1,153 @@
+# .github/workflows/publish.yml
+name: 🚀 Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish_to_pypi:
+        description: 'Publish to PyPI'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  validation:
+    name: 🔍 Pre-publish Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: 🔄 Load cached dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: 🧰 Install dependencies
+        run: poetry install --with dev
+
+      - name: 🔍 Code quality checks
+        run: |
+          poetry run ruff check src/ tests/
+          poetry run ruff format --check src/ tests/
+          poetry run mypy src/
+
+      - name: 🛡️ Security scan
+        run: poetry run bandit -r src/
+
+      - name: 🧪 Run test suite
+        run: poetry run pytest --cov=src/contextcraft --cov-report=xml --cov-report=term-missing
+
+      - name: 📋 Validate package metadata
+        run: |
+          poetry build
+          poetry run twine check dist/*
+
+  build-and-publish:
+    name: 📦 Build & Publish Package
+    runs-on: ubuntu-latest
+    needs: validation
+    if: >
+      (github.event_name == 'release' && github.event.action == 'published') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_to_pypi == 'true')
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+      contents: read
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: 🔄 Load cached dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: 🧰 Install dependencies
+        run: poetry install --only main
+
+      - name: 🏗️ Build package
+        run: poetry build
+
+      - name: 📊 Package info
+        run: |
+          echo "📦 Package files:"
+          ls -la dist/
+          echo ""
+          echo "📋 Package metadata:"
+          poetry run twine check dist/* --strict
+
+      - name: 🚀 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true
+          verbose: true
+
+      - name: ✅ Publication success
+        run: |
+          echo "🎉 ContextCraft successfully published to PyPI!"
+          echo "📦 Package: https://pypi.org/project/contextcraft/"
+          echo "🔗 Installation: pip install contextcraft"
+
+  post-publish:
+    name: 📢 Post-publish Actions
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    if: success()
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📧 Create release notification
+        run: |
+          echo "🎉 ContextCraft has been published to PyPI!"
+          echo "Version: ${{ github.event.release.tag_name || github.sha }}"
+          echo "PyPI: https://pypi.org/project/contextcraft/"
+          echo "Docs: https://shorzinator.github.io/ContextCraft/"
+
+      - name: 🔄 Trigger documentation update
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docs.yml',
+              ref: 'main'
+            });
