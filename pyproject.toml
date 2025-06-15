@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "contextcraft"
-version = "1.0.0"
+version = "1.0.1"
 description = "A CLI toolkit to generate comprehensive project context for LLMs."
 authors = ["Shourya Maheshwari shorz2905@gmail.com"]
 license = "MIT"
