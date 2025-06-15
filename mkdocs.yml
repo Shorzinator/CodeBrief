@@ -228,6 +228,7 @@ nav:
   - Development:
     - Contributing: development/contributing.md
     - Infrastructure: development/infrastructure.md
+  - Community: community.md
   - Help:
     - FAQ: help/faq.md
     - Troubleshooting: help/troubleshooting.md
