@@ -7,13 +7,13 @@
 
 # Project information
 site_name: ContextCraft
-site_url: "https://Shorzinator.github.io/ContextCraft" # Replace with your GitHub Pages URL or custom domain
+site_url: "https://Shorzinator.github.io/ContextCraft"
 site_author: ContextCraft Team
 site_description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
 
 # Repository
-repo_url: https://github.com/Shorzinator/ContextCraft # Replace with your repo URL
-repo_name: Shorzinator/ContextCraft # Replace
+repo_url: https://github.com/Shorzinator/ContextCraft
+repo_name: Shorzinator/ContextCraft
 edit_uri: edit/main/docs/
 
 # Copyright

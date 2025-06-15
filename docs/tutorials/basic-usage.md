@@ -80,7 +80,7 @@ build-backend = "poetry.core.masonry.api"
 name = "myapp"
 version = "0.1.0"
 description = "A demo application"
-authors = ["Shourya Maheshwari <you@example.com>"]
+authors = ["Shourya Maheshwari <shorz2905@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"

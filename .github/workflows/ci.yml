@@ -29,7 +29,7 @@ jobs:
         # Define the Python version(s) to test against.
         # For now, we'll use one, matching our project's target.
         # Example: python-version: ["3.9", "3.10", "3.11"]
-        python-version: ["3.11"] # Update this to your project's target Python version
+        python-version: ["3.11"]
 
     steps:
       - name: Checkout repository

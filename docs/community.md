@@ -50,7 +50,7 @@ Have you used ContextCraft to solve a tricky problem? We'd love to hear about it
 
     Comprehensive guides, tutorials, and API reference
 
--   [:octicons-mail-24: **Contact**](mailto:your-email@example.com)
+-   [:octicons-mail-24: **Contact**](mailto:shorz2905@gmail.com)
 
     ---
 

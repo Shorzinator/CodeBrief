@@ -273,7 +273,7 @@ Centralized project configuration:
 name = "contextcraft"
 version = "0.1.0"
 description = "A powerful CLI toolkit for LLM-ready project context"
-authors = [{name = "Shourya Maheshwari", email = "your.email@example.com"}]
+authors = [{name = "Shourya Maheshwari", email = "shorz2905@gmail.com"}]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"

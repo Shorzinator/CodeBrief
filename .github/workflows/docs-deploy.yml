@@ -170,7 +170,7 @@ jobs:
           echo "✅ Build completed successfully"
 
           # Add CNAME file for custom domain AFTER build
-          # echo "docs.contextcraft.com" > site/CNAME  # Replace with YOUR desired custom domain
+          # echo "docs.contextcraft.com" > site/CNAME  # Uncomment and replace with your custom domain if needed
 
       - name: Optimize build output
         run: |
