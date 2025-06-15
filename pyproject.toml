@@ -82,10 +82,10 @@ warn_unused_configs = true
 ignore_missing_imports = true
 strict = true
 exclude = ["tests/"]
-# Fix for module path conflicts: Run mypy from src/ directory
-# This avoids conflicts between installed package and source code
-check_untyped_defs = true
-# Configuration works when run as: cd src && mypy contextcraft
+mypy_path = "src"
+packages = ["contextcraft"]
+namespace_packages = true
+explicit_package_bases = true
 
 # Configuration for Pytest (optional, many things are auto-discovered)
 [tool.pytest.ini_options]
