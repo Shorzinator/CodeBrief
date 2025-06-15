@@ -1,4 +1,7 @@
-# <center>ContextCraft</center>
+<div align="center">
+
+# ContextCraft</center>
+</div>
 
 <div align="center">
 
@@ -10,9 +13,10 @@
 
 </div>
 
+<div align="center">
 
-**<center>A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs).</center>**
-
+**A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs).</center>**
+</div>
 
 ContextCraft transforms your codebase into well-structured, LLM-friendly documentation by intelligently aggregating directory trees, code files, dependencies, and Git context into clean, consumable formats. It's like a translator between your repo and the digital mind you just hired to read it.
 
