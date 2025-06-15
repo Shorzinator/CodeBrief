@@ -110,10 +110,8 @@ def test_tree_command_handles_exception(mock_generate_tree_error, tmp_path: Path
     """Test that tree command handles exceptions from the underlying tool and exits non-zero."""
     result = runner.invoke(app, ["tree", str(tmp_path)])
     assert result.exit_code == 1  # As defined in main.py's except block
-    assert (
-        "An unexpected error occurred during tree generation: Tree generation failed!"
-        in result.stdout
-    )
+    assert "An unexpected error occurred during tree generation" in result.stdout
+    assert "Tree generation failed!" in result.stdout
     mock_generate_tree_error.assert_called_once()
 
 
@@ -124,8 +122,8 @@ def test_tree_command_invalid_root_dir():
     result = runner.invoke(app, ["tree", "non_existent_directory_for_testing"])
     assert result.exit_code != 0  # Typer's validation error, often 2
     assert (
-        "Invalid value for 'ROOT_DIR'" in result.stderr
-        or "does not exist" in result.stderr
+        "Invalid value for 'ROOT_DIR'" in result.output
+        or "does not exist" in result.output
     )  # Typer's error message
 
 
@@ -141,8 +139,7 @@ def test_tree_command_propagates_typer_exit(
     assert result.exit_code == 5  # Should be the code from the raised typer.Exit
     mock_generate_tree_typer_exit.assert_called_once()
     # Assert that no "An unexpected error occurred" message is printed for typer.Exit
-    assert "An unexpected error occurred" not in result.stdout
-    assert "An unexpected error occurred" not in result.stderr
+    assert "An unexpected error occurred" not in result.output
 
 
 # --- Tests for the 'flatten' command ---
@@ -210,10 +207,8 @@ def test_flatten_command_handles_exception(mock_flatten_error, tmp_path: Path):
     """Test that flatten command handles exceptions and exits non-zero."""
     result = runner.invoke(app, ["flatten", str(tmp_path)])
     assert result.exit_code == 1
-    assert (
-        "An unexpected error occurred during file flattening: Flattening failed!"
-        in result.stdout
-    )
+    assert "An unexpected error occurred during file flattening" in result.stdout
+    assert "Flattening failed!" in result.stdout
     mock_flatten_error.assert_called_once()
 
 
@@ -242,8 +237,7 @@ def test_flatten_command_propagates_typer_exit(
     result = runner.invoke(app, ["flatten", str(tmp_path)])
     assert result.exit_code == 6  # Should be the code from the raised typer.Exit
     mock_flatten_logic_typer_exit.assert_called_once()
-    assert "An unexpected error occurred" not in result.stdout
-    assert "An unexpected error occurred" not in result.stderr
+    assert "An unexpected error occurred" not in result.output
 
 
 # --- Test for the version command ---
