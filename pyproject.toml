@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "contextcraft"
-version = "1.0.1"
+version = "1.0.2"
 description = "A CLI toolkit to generate comprehensive project context for LLMs."
 authors = ["Shourya Maheshwari <shorz2905@gmail.com>"]
 license = "MIT"
@@ -25,6 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Utilities"
 ]
+packages = [{include = "contextcraft", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -123,4 +124,4 @@ exclude_dirs = ["tests"]
 
 # Add a script entry point for your CLI
 [tool.poetry.scripts]
-contextcraft = "src.contextcraft.main:app"  # Fixed to use correct module path
+contextcraft = "contextcraft.main:app"

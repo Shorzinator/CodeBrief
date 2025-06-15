@@ -17,10 +17,9 @@ import pyperclip
 import typer
 from rich.console import Console
 
-from src.contextcraft.utils import config_manager
-
 from . import __version__
 from .tools import bundler, dependency_lister, flattener, git_provider, tree_generator
+from .utils import config_manager
 
 
 def version_callback(value: bool) -> None:

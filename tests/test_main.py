@@ -16,7 +16,7 @@ from src.contextcraft.main import app
 from src.contextcraft.utils import config_manager
 
 # Create a CliRunner instance to invoke commands
-runner = CliRunner(mix_stderr=False)
+runner = CliRunner()
 
 # --- Test for the 'hello' command ---
 
