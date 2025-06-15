@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "contextcraft"
-version = "0.1.0"
+version = "1.0.0"
 description = "A CLI toolkit to generate comprehensive project context for LLMs."
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
