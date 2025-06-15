@@ -11,40 +11,40 @@ Get ContextCraft up and running on your system in just a few minutes!
 
 ### Installing Prerequisites
 
-=== "macOS"
+#### macOS
 
-    ```bash
-    # Install Python via Homebrew
-    brew install python@3.11
+```bash
+# Install Python via Homebrew
+brew install python@3.11
 
-    # Install Poetry
-    curl -sSL https://install.python-poetry.org | python3 -
-    ```
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+```
 
-=== "Ubuntu/Debian"
+#### Ubuntu/Debian
 
-    ```bash
-    # Update package list
-    sudo apt update
+```bash
+# Update package list
+sudo apt update
 
-    # Install Python and pip
-    sudo apt install python3.11 python3.11-pip python3.11-venv
+# Install Python and pip
+sudo apt install python3.11 python3.11-pip python3.11-venv
 
-    # Install Poetry
-    curl -sSL https://install.python-poetry.org | python3 -
-    ```
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+```
 
-=== "Windows"
+#### Windows
 
-    ```powershell
-    # Install Python from Microsoft Store or python.org
-    # Then install Poetry
-    (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-    ```
+```powershell
+# Install Python from Microsoft Store or python.org
+# Then install Poetry
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+```
 
-=== "Other Systems"
+#### Other Systems
 
-    Visit [Python.org](https://www.python.org/downloads/) for Python installation and [Poetry's documentation](https://python-poetry.org/docs/#installation) for Poetry setup.
+Visit [Python.org](https://www.python.org/downloads/) for Python installation and [Poetry's documentation](https://python-poetry.org/docs/#installation) for Poetry setup.
 
 ## Installation Methods
 
@@ -54,7 +54,7 @@ The fastest way to get started with ContextCraft:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/ContextCraft.git
+git clone https://github.com/Shorzinator/ContextCraft.git
 cd ContextCraft
 
 # Install with Poetry
@@ -67,17 +67,12 @@ poetry shell
 contextcraft --version
 ```
 
-### 📦 PyPI Installation (Coming Soon)
+### 📦 PyPI Installation
 
-Once ContextCraft is published to PyPI, you'll be able to install it directly:
 
 ```bash
-# This will be available soon!
 pip install contextcraft
 ```
-
-!!! note "PyPI Status"
-    ContextCraft will be published to PyPI soon. For now, please use the source installation method above.
 
 ### 🛠️ Development Installation
 
@@ -99,24 +94,6 @@ poetry run pytest
 
 # Activate the virtual environment
 poetry shell
-```
-
-### 🐳 Docker Installation (Advanced)
-
-For containerized environments:
-
-```dockerfile
-# Dockerfile example
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY . .
-
-RUN pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install --only main
-
-ENTRYPOINT ["contextcraft"]
 ```
 
 ## Verification
@@ -158,33 +135,6 @@ contextcraft deps
 cd ..
 rm -rf contextcraft-test
 ```
-
-## Configuration
-
-### Shell Completion (Optional)
-
-Enable command completion for your shell:
-
-=== "Bash"
-
-    ```bash
-    # Add to ~/.bashrc
-    eval "$(_CONTEXTCRAFT_COMPLETE=bash_source contextcraft)"
-    ```
-
-=== "Zsh"
-
-    ```zsh
-    # Add to ~/.zshrc
-    eval "$(_CONTEXTCRAFT_COMPLETE=zsh_source contextcraft)"
-    ```
-
-=== "Fish"
-
-    ```fish
-    # Add to ~/.config/fish/config.fish
-    eval (env _CONTEXTCRAFT_COMPLETE=fish_source contextcraft)
-    ```
 
 ### Environment Variables
 

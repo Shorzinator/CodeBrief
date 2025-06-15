@@ -1,9 +1,6 @@
 <div align="center">
 
-# ContextCraft</center>
-</div>
-
-<div align="center">
+# ContextCraft
 
 [![CI](https://github.com/Shorzinator/ContextCraft/workflows/ContextCraft%20CI/badge.svg)](https://github.com/Shorzinator/ContextCraft/actions)
 [![Coverage](https://img.shields.io/badge/coverage-77%25-yellow)](https://github.com/Shorzinator/ContextCraft)
@@ -11,58 +8,57 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
+**The missing link between your codebase and AI assistants.**
+
+*Stop copying files. Start solving problems.*
+
 </div>
 
-<div align="center">
+ContextCraft is a production-ready CLI toolkit that solves the core problem developers face when working with AI assistants: manually preparing context from their projects. Whether you're debugging with ChatGPT, explaining your codebase to Claude, or preparing documentation for any LLM, ContextCraft provides the essential tools to create rich, contextual project summaries in seconds, not minutes.
 
-**A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs).</center>**
-</div>
+## Core Problem Solved
 
-ContextCraft transforms your codebase into well-structured, LLM-friendly documentation by intelligently aggregating directory trees, code files, dependencies, and Git context into clean, consumable formats. It's like a translator between your repo and the digital mind you just hired to read it.
+Developers waste 5-10 minutes manually copying files, explaining project structure, and gathering context every time they need AI assistance. ContextCraft reduces this to a single command that takes seconds.
 
-Transform your entire codebase into AI-ready context with one command.
-No more copy-paste nightmares. No more explaining your project structure.
-Just instant, comprehensive context that LLMs actually understand.
+## Essential Features
 
-## ✨ Features
-
-### 🌳 **Smart Directory Trees**
-- Beautiful, hierarchical project structure visualization
-- Rich console output with emojis and colors
-- Intelligent filtering with `.llmignore` support
+### **Smart Directory Trees**
+- Hierarchical project structure visualization
+- Rich console output with intelligent formatting
+- Advanced filtering with `.llmignore` support
 - Clean file output for documentation
 
-### 📄 **Code Flattening**
+### **Code Flattening**
 - Concatenate multiple files into organized documents
 - Clear file markers and intelligent content handling
 - Support for include/exclude patterns
 - Binary file detection and graceful handling
 
-### 📦 **Dependency Analysis**
+### **Dependency Analysis**
 - Multi-language dependency extraction (Python, Node.js)
 - Support for Poetry, pip, npm, and yarn
 - Clean Markdown output with language grouping
 - Extensible architecture for additional languages
 
-### 🔄 **Git Context**
+### **Git Context**
 - Current branch and status information
 - Recent commit history with configurable depth
 - Diff analysis for understanding changes
 - Graceful handling of non-Git repositories
 
-### 📋 **Context Bundling**
+### **Context Bundling**
 - Aggregate multiple tools into comprehensive bundles
 - Configurable section inclusion/exclusion
 - Well-structured Markdown with navigation
-- Perfect for LLM consumption
+- Optimized for LLM consumption
 
-### 📋 **Clipboard Integration**
+### **Clipboard Integration**
 - Copy output directly to clipboard with `--to-clipboard` or `-c`
 - Available for all commands (tree, flatten, deps, git-info, bundle)
 - Smart behavior: only works when no output file specified
 - Cross-platform support with graceful error handling
 
-### 🎯 **Intelligent Filtering**
+### **Intelligent Filtering**
 - `.llmignore` files with `.gitignore`-style syntax
 - Configurable global patterns via `pyproject.toml`
 - Smart precedence hierarchy
@@ -70,18 +66,16 @@ Just instant, comprehensive context that LLMs actually understand.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
 ```bash
-# Install from PyPI (coming soon)
+# Install from PyPI
 pip install contextcraft
 
-# Or install from source
-git clone https://github.com/Shorzinator/ContextCraft.git
-cd ContextCraft
-poetry install
+# Or install with Poetry
+poetry add contextcraft
 ```
 
 ### Basic Usage
@@ -146,9 +140,9 @@ global_exclude_patterns = [
 ]
 ```
 
-## 📖 Documentation
+## Documentation
 
-**🌐 [Live Documentation Website](https://shorzinator.github.io/ContextCraft/)**
+**[Live Documentation Website](https://shorzinator.github.io/ContextCraft/)**
 
 Comprehensive documentation including:
 
@@ -159,7 +153,7 @@ Comprehensive documentation including:
 - **[Examples](https://shorzinator.github.io/ContextCraft/examples/)** - Real-world usage examples
 - **[Tutorials](https://shorzinator.github.io/ContextCraft/tutorials/)** - Step-by-step guides
 
-## 🛠️ Development
+## Development
 
 ### Prerequisites
 
@@ -189,15 +183,15 @@ poetry run pytest --cov=src/contextcraft --cov-report=html
 
 ### Code Quality
 
-We maintain high code quality standards. Some say it's obsessive. We say it's... necessary:
+We maintain high code quality standards:
 
-- **Linting**: Ruff for fast Python linting (not a dog, but still keeps your repo clean)
+- **Linting**: Ruff for fast Python linting
 - **Formatting**: Ruff formatter for consistent code style
 - **Security**: Bandit for security vulnerability scanning
-- **Testing**: Pytest with 77%+ coverage (because 100% would be... suspicious)
-- **Commits**: Conventional Commits for clear history and less git shame
+- **Testing**: Pytest with 77%+ coverage
+- **Commits**: Conventional Commits for clear history
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
 
@@ -206,34 +200,34 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - Code standards and testing
 - Pull request process
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. (TL;DR: Use it, don’t sue us.)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with [Typer](https://typer.tiangolo.com/) for the CLI framework
-- Styled with [Rich](https://rich.readthedocs.io/) for beautiful terminal output
+- Styled with [Rich](https://rich.readthedocs.io/) for clean terminal output
 - Powered by [Poetry](https://python-poetry.org/) for dependency management
 - Quality assured with [Ruff](https://github.com/astral-sh/ruff) and [Pytest](https://pytest.org/)
 
-## 📊 Project Status
+## Project Status
 
 ContextCraft is actively developed and maintained. Current status:
 
-- ✅ **Core Tools**: All primary tools implemented and tested
-- ✅ **CLI Interface**: Complete command-line interface
-- ✅ **Documentation**: Comprehensive docs with examples
-- ✅ **Testing**: 175+ tests with 77% coverage
-- ✅ **CI/CD**: Automated testing and quality checks
-- 🚀 **V1.0**: Feature-complete and production-ready
+- **Core Tools**: All primary tools implemented and tested
+- **CLI Interface**: Complete command-line interface
+- **Documentation**: Comprehensive docs with examples
+- **Testing**: 175+ tests with 77% coverage
+- **CI/CD**: Automated testing and quality checks
+- **V1.0.2**: Production-ready with critical fixes resolved
 
 ---
 
 <div align="center">
 
-**[📖 Documentation](https://shorzinator.github.io/ContextCraft/) • [🐛 Issues](https://github.com/Shorzinator/ContextCraft/issues) • [💬 Discussions](https://shorzinator.github.io/ContextCraft/community/)**
+**[Documentation](https://shorzinator.github.io/ContextCraft/) • [Issues](https://github.com/Shorzinator/ContextCraft/issues) • [Discussions](https://shorzinator.github.io/ContextCraft/community/)**
 
-Made with ❤️ for the developer community
+Made for the developer community
 
 </div>

@@ -17,16 +17,6 @@
   --md-accent-fg-color--transparent: #3498db20;
   --md-border-radius: 8px;
   --md-transition-duration: 0.3s;
-
-  /* LED/Neon theme variables */
-  --neon-primary: #00ffff;
-  --neon-secondary: #ff0080;
-  --neon-accent: #ffff00;
-  --neon-green: #00ff00;
-  --neon-red: #ff0040;
-  --neon-orange: #ff8000;
-  --led-bg: #0a0a0a;
-  --led-border: #333333;
 }
 
 /* Enhanced hero section */
@@ -39,6 +29,31 @@
   font-size: 3rem;
   line-height: 1.1;
   margin-bottom: 1.5rem;
+}
+
+/* Hero section styling */
+.hero-section {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(16, 185, 129, 0.05));
+  border-radius: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--cc-primary-dark);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--cc-primary);
+  font-weight: 500;
+  margin-bottom: 0;
 }
 
 /* Centered content sections */
@@ -95,6 +110,15 @@
   color: #059669;
 }
 
+.md-typeset .admonition.info {
+  border-left: 4px solid var(--cc-primary);
+}
+
+.md-typeset .admonition.info .admonition-title {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--cc-primary-dark);
+}
+
 .md-typeset .admonition.tip {
   border-left: 4px solid #f59e0b;
 }
@@ -122,7 +146,7 @@
 }
 
 .grid.cards .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--cc-shadow-lg);
 }
 
@@ -148,7 +172,7 @@
 }
 
 .md-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--cc-shadow-lg);
   text-decoration: none;
 }
@@ -200,20 +224,20 @@
   font-weight: 700;
 }
 
-/* Footer customizations */
+/* Footer styling */
 .md-footer {
-  background: linear-gradient(135deg, #1f2937, #374151);
+  background: var(--cc-primary-dark);
 }
 
-/* Emoji sizing and spacing */
+/* Icon adjustments */
 .md-typeset h2 svg.twemoji,
 .md-typeset h3 svg.twemoji {
-  height: 1em;
-  width: 1em;
-  margin-right: 0.3em;
+  height: 1.2em;
+  width: 1.2em;
+  margin-right: 0.5em;
 }
 
-/* Code copy button enhancements */
+/* Clipboard button */
 .md-typeset .highlight:hover .md-clipboard {
   opacity: 1;
 }
@@ -227,7 +251,7 @@
   background: var(--cc-primary-light);
 }
 
-/* Search enhancements */
+/* Search styling */
 .md-search__form {
   border-radius: 8px;
   box-shadow: var(--cc-shadow);
@@ -237,18 +261,18 @@
   border-radius: 8px;
 }
 
-/* Tabbed content enhancements */
+/* Tabbed content */
 .md-typeset .tabbed-set {
   border-radius: 8px;
-  box-shadow: var(--cc-shadow);
   overflow: hidden;
+  box-shadow: var(--cc-shadow);
   margin: 1.5rem 0;
 }
 
 .md-typeset .tabbed-labels > label {
   background: rgba(37, 99, 235, 0.05);
-  color: var(--cc-primary);
-  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .md-typeset .tabbed-labels > label:hover {
@@ -263,10 +287,18 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* Responsive improvements */
+/* Responsive design */
 @media screen and (max-width: 768px) {
   .md-typeset h1:first-child {
+    font-size: 2.5rem;
+  }
+
+  .hero-title {
     font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
   }
 
   .grid {
@@ -274,12 +306,12 @@
   }
 
   .md-button {
-    padding: 0.5rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     font-size: 0.9rem;
   }
 }
 
-/* Animations */
+/* Smooth animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -292,7 +324,7 @@
 }
 
 .md-typeset .grid.cards .card {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .md-typeset .grid.cards .card:nth-child(2) {
@@ -307,9 +339,9 @@
   animation-delay: 0.3s;
 }
 
-/* Focus improvements for accessibility */
+/* Focus states */
 .md-button:focus,
-.md-nav__link:focus {
+.md-button:focus-visible {
   outline: 2px solid var(--cc-accent);
   outline-offset: 2px;
 }
@@ -317,19 +349,20 @@
 /* Print styles */
 @media print {
   .md-button,
+  .hero-section,
   .grid.cards .card {
     box-shadow: none;
-    border: 1px solid #ddd;
+    background: white !important;
+    color: black !important;
   }
 
   .md-typeset h1:first-child {
-    -webkit-text-fill-color: unset;
-    background: none;
-    color: #000;
+    color: black !important;
+    -webkit-text-fill-color: initial;
   }
 }
 
-/* Custom scrollbar */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -347,287 +380,64 @@
   background: var(--cc-primary-dark);
 }
 
-/* Loading animation for code blocks */
+/* Code highlighting improvements */
 .md-typeset .highlight pre code {
-  opacity: 0;
-  animation: fadeIn 0.5s ease forwards 0.2s;
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
+/* Fade in animation */
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
   to {
     opacity: 1;
   }
 }
 
-/* --- General --- */
 body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  animation: fadeIn 0.3s ease-in;
 }
 
-/* --- Rounded Corners --- */
+/* Enhanced interactive elements */
 .md-card, .md-tabs__item, .md-button, .md-content,
-.md-header, .md-footer, .md-footer-meta, .md-source,
-pre, code, .md-typeset table:not([class]), .md-typeset .admonition,
-.md-search-result__article, .md-search__input {
-    border-radius: var(--md-border-radius);
+.md-typeset .admonition, .md-typeset .highlight,
+.grid.cards .card {
+  transition: all 0.3s ease;
 }
 
 .md-button--primary {
-    background-color: var(--md-accent-fg-color);
-    color: white;
-    border-radius: 50px; /* pill shape */
-    transition: background-color var(--md-transition-duration);
+  background: var(--cc-gradient);
+  border: none;
+  color: white;
+  font-weight: 600;
+  text-transform: none;
 }
 
 .md-button--primary:hover {
-    background-color: var(--md-primary-fg-color--light);
+  transform: translateY(-1px);
+  box-shadow: var(--cc-shadow-lg);
 }
 
-/* --- Animations --- */
+/* Visibility utilities */
 .fade-in {
-    opacity: 1; /* Ensure content is visible by default */
-    transform: translateY(0); /* Start in final position */
-    transition: opacity var(--md-transition-duration) ease-out, transform var(--md-transition-duration) ease-out;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
 }
 
 .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* --- Code Blocks --- */
+/* Code block enhancements */
 .md-typeset .codehilite {
-    border-radius: var(--md-border-radius);
-    transition: box-shadow var(--md-transition-duration);
-}
-
-.md-typeset .codehilite:hover {
-    box-shadow: 0 0 15px var(--md-accent-fg-color--transparent);
-}
-
-/* LED/Neon Display Effects */
-.hero-section {
-  position: relative;
-  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1), rgba(0, 0, 0, 0.9));
-  padding: 3rem 2rem;
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.led-display-container {
-  position: relative;
-  background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-  border: 2px solid var(--neon-primary);
-  border-radius: 12px;
-  padding: 2rem;
-  margin: 1rem 0;
-  box-shadow:
-    inset 0 0 20px rgba(0, 255, 255, 0.1),
-    0 0 40px rgba(0, 255, 255, 0.3),
-    0 0 2px var(--neon-primary);
-}
-
-/* LED Borders with animated lights - matching LED text color */
-.led-border-top, .led-border-bottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--neon-primary) 20%,
-    rgba(0, 255, 255, 0.8) 40%,
-    var(--neon-primary) 60%,
-    rgba(0, 255, 255, 0.6) 80%,
-    transparent 100%);
-  animation: ledBorderFlow 2s linear infinite;
-  box-shadow: 0 0 10px var(--neon-primary);
-}
-
-.led-border-top {
-  top: 0;
-}
-
-.led-border-bottom {
-  bottom: 0;
-  animation-direction: reverse;
-}
-
-.led-border-sides {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-}
-
-.led-border-left, .led-border-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(180deg,
-    transparent 0%,
-    var(--neon-primary) 20%,
-    rgba(0, 255, 255, 0.8) 40%,
-    var(--neon-primary) 60%,
-    rgba(0, 255, 255, 0.6) 80%,
-    transparent 100%);
-  animation: ledBorderFlow 2.5s linear infinite;
-  box-shadow: 0 0 10px var(--neon-primary);
-}
-
-.led-border-left {
-  left: 0;
-}
-
-.led-border-right {
-  right: 0;
-  animation-direction: reverse;
-}
-
-/* Main LED Text with Authentic Random Neon Flicker */
-.led-text {
-  font-family: 'Courier New', 'Monaco', monospace;
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: var(--neon-primary);
-  text-shadow:
-    0 0 5px var(--neon-primary),
-    0 0 10px var(--neon-primary),
-    0 0 15px var(--neon-primary),
-    0 0 20px var(--neon-primary);
-  text-align: center;
-  margin: 1rem 0;
-  position: relative;
-  z-index: 2;
-}
-
-.neon-flicker {
-  animation:
-    neonFlickerRandom1 3.2s infinite,
-    neonFlickerRandom2 5.7s infinite,
-    neonFlickerRandom3 2.1s infinite;
-}
-
-/* Scanlines effect */
-.led-scanlines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    transparent 48%,
-    rgba(0, 255, 255, 0.05) 49%,
-    rgba(0, 255, 255, 0.05) 50%,
-    transparent 52%
-  );
-  background-size: 100% 4px;
-  animation: scanlines 0.1s linear infinite;
-  pointer-events: none;
-}
-
-/* Subtitle glow */
-.subtitle-glow {
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-  margin: 1.5rem 0;
-}
-
-/* Multiple Random Flicker Animations for Authentic Effect */
-@keyframes neonFlickerRandom1 {
-  0%, 2%, 3%, 5%, 6%, 100% {
-    opacity: 1;
-    text-shadow:
-      0 0 5px var(--neon-primary),
-      0 0 10px var(--neon-primary),
-      0 0 15px var(--neon-primary),
-      0 0 20px var(--neon-primary);
-  }
-  1%, 4% {
-    opacity: 0.8;
-    text-shadow:
-      0 0 2px var(--neon-primary),
-      0 0 5px var(--neon-primary),
-      0 0 8px var(--neon-primary),
-      0 0 12px var(--neon-primary);
-  }
-  2.5% {
-    opacity: 0.3;
-    text-shadow:
-      0 0 1px var(--neon-primary),
-      0 0 2px var(--neon-primary);
-  }
-}
-
-@keyframes neonFlickerRandom2 {
-  0%, 7%, 9%, 12%, 15%, 100% {
-    opacity: 1;
-  }
-  8%, 13% {
-    opacity: 0.4;
-  }
-  10% {
-    opacity: 0.1;
-  }
-}
-
-@keyframes neonFlickerRandom3 {
-  0%, 17%, 18%, 22%, 25%, 100% {
-    filter: brightness(1);
-  }
-  16%, 19%, 23% {
-    filter: brightness(0.6);
-  }
-  20% {
-    filter: brightness(0.2);
-  }
-}
-
-@keyframes ledBorderFlow {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 200% 0%;
-  }
-}
-
-@keyframes scanlines {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(4px);
-  }
-}
-
-/* Dark mode adjustments */
-[data-md-color-scheme="slate"] .hero-section {
-  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.15), rgba(0, 0, 0, 0.95));
-}
-
-[data-md-color-scheme="slate"] .led-display-container {
-  background: linear-gradient(135deg, #000000, #111111);
-  border-color: var(--neon-primary);
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-  .led-text {
-    font-size: 1.8rem;
-  }
-
-  .led-display-container {
-    padding: 1.5rem;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .led-text {
-    font-size: 1.4rem;
-  }
+.md-typeset .codehilite:hover {
+  box-shadow: var(--cc-shadow-lg);
 }
