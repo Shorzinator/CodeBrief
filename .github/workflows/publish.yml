@@ -101,7 +101,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
-        run: poetry install --only main
+        run: poetry install --with dev
 
       - name: Build package
         run: poetry build
