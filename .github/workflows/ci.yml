@@ -60,12 +60,20 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv # Path to the virtual environment directory (if virtualenvs-in-project: true)
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-v2-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies with Poetry
         # Installs project dependencies using Poetry.
         # Always install dependencies to ensure dev tools like bandit are available
         run: poetry install --no-interaction --with dev
+
+      - name: Verify bandit installation
+        # Debug step to verify bandit is properly installed
+        run: |
+          echo "Checking bandit installation..."
+          poetry run which bandit || echo "bandit not found in PATH"
+          poetry run bandit --version || echo "bandit --version failed"
+          ls -la .venv/bin/ | grep bandit || echo "bandit executable not found"
 
       - name: Run Ruff (Linting and Formatting Check)
         # Runs Ruff to check for linting errors and formatting issues.
