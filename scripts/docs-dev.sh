@@ -124,7 +124,7 @@ test_docs() {
 
 # Function to show help
 show_help() {
-    echo "ContextCraft Documentation Development Helper"
+    echo "codebrief Documentation Development Helper"
     echo ""
     echo "Usage: $0 [command]"
     echo ""

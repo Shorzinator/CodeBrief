@@ -4,7 +4,7 @@ The `deps` command provides comprehensive dependency analysis across multiple pr
 
 ## Overview
 
-ContextCraft's dependency analysis tool:
+codebrief's dependency analysis tool:
 
 - **Multi-language Support**: Python, Node.js, with extensible architecture for more languages
 - **Multiple Package Managers**: Poetry, pip, npm, yarn
@@ -35,13 +35,13 @@ ContextCraft's dependency analysis tool:
 
 ```bash
 # Analyze dependencies in current directory
-contextcraft deps
+codebrief deps
 
 # Analyze specific project directory
-contextcraft deps /path/to/project
+codebrief deps /path/to/project
 
 # Save to file
-contextcraft deps --output dependencies.md
+codebrief deps --output dependencies.md
 ```
 
 ### Example Output
@@ -72,7 +72,7 @@ contextcraft deps --output dependencies.md
 Configure default output files in `pyproject.toml`:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_deps = "project-dependencies.md"
 ```
 
@@ -81,7 +81,7 @@ default_output_filename_deps = "project-dependencies.md"
 Exclude certain dependency files from analysis:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 global_exclude_patterns = [
     "test-requirements.txt",
     "*/experimental-deps.toml"
@@ -96,7 +96,7 @@ For projects with multiple dependency environments:
 
 ```bash
 # Analyze all dependency files in project
-contextcraft deps --output all-deps.md
+codebrief deps --output all-deps.md
 
 # This will automatically detect:
 # - pyproject.toml (main + dev dependencies)
@@ -113,7 +113,7 @@ Perfect for automated dependency tracking:
 # GitHub Actions example
 - name: Generate Dependency Report
   run: |
-    poetry run contextcraft deps --output deps-report.md
+    poetry run codebrief deps --output deps-report.md
     cat deps-report.md >> $GITHUB_STEP_SUMMARY
 ```
 
@@ -151,7 +151,7 @@ Version information is preserved as specified in your dependency files:
 Create dependency documentation for your project:
 
 ```bash
-contextcraft deps --output docs/dependencies.md
+codebrief deps --output docs/dependencies.md
 ```
 
 ### LLM Context
@@ -160,10 +160,10 @@ Generate clean dependency context for AI assistance:
 
 ```bash
 # Include in bundle for comprehensive project context
-contextcraft bundle --output project-context.md
+codebrief bundle --output project-context.md
 
 # Or standalone for dependency-focused questions
-contextcraft deps --output deps-context.md
+codebrief deps --output deps-context.md
 ```
 
 ### Dependency Auditing
@@ -172,7 +172,7 @@ Regular dependency analysis for project maintenance:
 
 ```bash
 # Weekly dependency check
-contextcraft deps --output weekly-deps-$(date +%Y-%m-%d).md
+codebrief deps --output weekly-deps-$(date +%Y-%m-%d).md
 ```
 
 ### Code Reviews
@@ -181,7 +181,7 @@ Include dependency changes in code reviews:
 
 ```bash
 # Generate dependency snapshot for PR
-contextcraft deps --output pr-dependencies.md
+codebrief deps --output pr-dependencies.md
 git add pr-dependencies.md
 ```
 
@@ -221,8 +221,8 @@ npm install --dry-run  # For package.json
 
 If your language isn't supported:
 
-1. Check our [roadmap](https://github.com/Shorzinator/ContextCraft/issues) for planned support
-2. [Open a feature request](https://github.com/Shorzinator/ContextCraft/issues/new) for new language support
+1. Check our [roadmap](https://github.com/Shorzinator/codebrief/issues) for planned support
+2. [Open a feature request](https://github.com/Shorzinator/codebrief/issues/new) for new language support
 3. Consider [contributing](../development/contributing.md) an implementation
 
 ## Performance
@@ -240,15 +240,15 @@ The dependency analysis is optimized for speed:
 
 ```bash
 # Show structure and dependencies
-contextcraft tree --output structure.txt
-contextcraft deps --output deps.md
+codebrief tree --output structure.txt
+codebrief deps --output deps.md
 ```
 
 ### With Bundle Command
 
 ```bash
 # Comprehensive project context including dependencies
-contextcraft bundle \
+codebrief bundle \
   --output complete-context.md \
   --include-deps
 ```
@@ -257,8 +257,8 @@ contextcraft bundle \
 
 ```bash
 # Dependencies with Git context for version tracking
-contextcraft git-info --output git-context.md
-contextcraft deps --output deps-context.md
+codebrief git-info --output git-context.md
+codebrief deps --output deps-context.md
 ```
 
 ## Best Practices
@@ -272,7 +272,7 @@ contextcraft deps --output deps-context.md
 ## Command Reference
 
 ```bash
-contextcraft deps --help
+codebrief deps --help
 ```
 
 For complete command options and flags, see the [CLI Commands Reference](cli-commands.md#deps-command).

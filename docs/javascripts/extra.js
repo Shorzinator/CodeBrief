@@ -1,4 +1,4 @@
-// Custom JavaScript for ContextCraft Documentation
+// Custom JavaScript for codebrief Documentation
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initThemeTransitions();
     initLEDEffects();
 
-    console.log('ContextCraft documentation enhanced! 🚀');
+    console.log('codebrief documentation enhanced! 🚀');
 });
 
 /**

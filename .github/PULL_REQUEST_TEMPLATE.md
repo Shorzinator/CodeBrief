@@ -1,5 +1,5 @@
 <!--
-Thank you for contributing to ContextCraft! 🚀
+Thank you for contributing to codebrief! 🚀
 Your contributions help make this project better for everyone.
 -->
 
@@ -59,7 +59,7 @@ Your contributions help make this project better for everyone.
 ```bash
 # Commands used for testing
 poetry run pytest
-poetry run pytest --cov=src/contextcraft
+poetry run pytest --cov=src/codebrief
 ```
 
 ### Test Cases
@@ -182,6 +182,6 @@ Thank you for taking the time to contribute!
 Our maintainers will review your PR as soon as possible.
 
 Need help? Check out our:
-- 🤝 Contributing Guide: https://github.com/Shorzinator/ContextCraft/blob/main/CONTRIBUTING.md
-- 💬 Discussions: https://github.com/Shorzinator/ContextCraft/discussions
+- 🤝 Contributing Guide: https://github.com/Shorzinator/codebrief/blob/main/CONTRIBUTING.md
+- 💬 Discussions: https://github.com/Shorzinator/codebrief/discussions
 -->

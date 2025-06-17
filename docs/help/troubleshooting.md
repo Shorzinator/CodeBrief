@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Common issues and solutions for ContextCraft users.
+Common issues and solutions for codebrief users.
 
 ## Installation Issues
 
@@ -48,9 +48,9 @@ pyenv local 3.11.0
 **Solutions**:
 ```bash
 # Use virtual environment
-python -m venv contextcraft-env
-source contextcraft-env/bin/activate  # Linux/macOS
-# contextcraft-env\Scripts\activate  # Windows
+python -m venv codebrief-env
+source codebrief-env/bin/activate  # Linux/macOS
+# codebrief-env\Scripts\activate  # Windows
 
 # Install in user directory
 pip install --user -e .
@@ -60,7 +60,7 @@ pip install --user -e .
 
 ### Command Not Found
 
-**Problem**: `contextcraft: command not found`
+**Problem**: `codebrief: command not found`
 
 **Solutions**:
 ```bash
@@ -68,11 +68,11 @@ pip install --user -e .
 poetry shell
 
 # Use poetry run prefix
-poetry run contextcraft --help
+poetry run codebrief --help
 
 # Check installation
-which contextcraft
-poetry show contextcraft
+which codebrief
+poetry show codebrief
 ```
 
 ### Git Repository Not Found
@@ -88,10 +88,10 @@ git commit -m "Initial commit"
 
 # Run from project root
 cd /path/to/your/project
-contextcraft tree
+codebrief tree
 
 # Specify project path
-contextcraft tree /path/to/project
+codebrief tree /path/to/project
 ```
 
 ### File Permission Issues
@@ -126,13 +126,13 @@ sudo chown -R $USER:$USER /path/to/project
 **Debug Steps**:
 ```bash
 # Test with verbose output
-contextcraft tree --help
+codebrief tree --help
 
 # Check file detection
 ls -la src/  # Verify files exist
 
 # Test basic command
-contextcraft tree .
+codebrief tree .
 ```
 
 ### Encoding Issues
@@ -146,7 +146,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Force UTF-8 output
-contextcraft tree --output output.md
+codebrief tree --output output.md
 file output.md  # Check file encoding
 ```
 
@@ -157,14 +157,14 @@ file output.md  # Check file encoding
 **Solutions**:
 ```bash
 # Use focused context
-contextcraft flatten src/ --include "*.py" --exclude "*test*"
+codebrief flatten src/ --include "*.py" --exclude "*test*"
 
 # Exclude large directories
-contextcraft tree --ignore "node_modules/" "venv/" "__pycache__/"
+codebrief tree --ignore "node_modules/" "venv/" "__pycache__/"
 
 # Split into smaller files
-contextcraft flatten src/core/ --output core.md
-contextcraft flatten src/utils/ --output utils.md
+codebrief flatten src/core/ --output core.md
+codebrief flatten src/utils/ --output utils.md
 ```
 
 ## Configuration Issues
@@ -182,7 +182,7 @@ ls -la pyproject.toml
 poetry check
 
 # Test with explicit config
-contextcraft tree --output custom-output.txt
+codebrief tree --output custom-output.txt
 ```
 
 ### Invalid Configuration Format
@@ -192,7 +192,7 @@ contextcraft tree --output custom-output.txt
 **Solutions**:
 ```toml
 # Correct configuration format
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_tree = "project-tree.txt"
 global_exclude_patterns = [
     "*.log",
@@ -251,7 +251,7 @@ git status
 git diff --stat
 
 # Use specific git options
-contextcraft git-info --diff-options "--name-only"
+codebrief git-info --diff-options "--name-only"
 ```
 
 ## Performance Issues
@@ -263,10 +263,10 @@ contextcraft git-info --diff-options "--name-only"
 **Optimization Strategies**:
 ```bash
 # Use focused patterns
-contextcraft flatten src/ --include "*.py"
+codebrief flatten src/ --include "*.py"
 
 # Exclude large directories
-contextcraft tree --ignore "node_modules/" "build/" "dist/"
+codebrief tree --ignore "node_modules/" "build/" "dist/"
 
 # Process in parallel (custom script)
 # See Advanced Workflows documentation
@@ -279,21 +279,21 @@ contextcraft tree --ignore "node_modules/" "build/" "dist/"
 **Solutions**:
 ```bash
 # Process smaller sections
-contextcraft flatten src/module1/ --output module1.md
-contextcraft flatten src/module2/ --output module2.md
+codebrief flatten src/module1/ --output module1.md
+codebrief flatten src/module2/ --output module2.md
 
 # Use exclude patterns
-contextcraft tree --ignore "*.log" "*.tmp" "__pycache__/"
+codebrief tree --ignore "*.log" "*.tmp" "__pycache__/"
 
 # Limit git history
-contextcraft git-info --log-count 5
+codebrief git-info --log-count 5
 ```
 
 ## Dependency Analysis Issues
 
 ### No Dependencies Found
 
-**Problem**: `contextcraft deps` shows no dependencies
+**Problem**: `codebrief deps` shows no dependencies
 
 **Check List**:
 1. **File Names**: Verify dependency files exist
@@ -331,7 +331,7 @@ file pyproject.toml
 
 ### GitHub Actions Failures
 
-**Problem**: ContextCraft fails in CI/CD pipelines
+**Problem**: codebrief fails in CI/CD pipelines
 
 **Common Solutions**:
 ```yaml
@@ -387,7 +387,7 @@ pwd
 ls -la
 
 # Use absolute paths
-contextcraft tree /full/path/to/project
+codebrief tree /full/path/to/project
 ```
 
 ### "Permission denied"
@@ -416,12 +416,12 @@ git init
 
 # Or run from correct directory
 cd /path/to/git/repo
-contextcraft git-info
+codebrief git-info
 ```
 
 ### "Command not found"
 
-**Cause**: ContextCraft not in PATH or not installed
+**Cause**: codebrief not in PATH or not installed
 
 **Solution**:
 ```bash
@@ -429,10 +429,10 @@ contextcraft git-info
 poetry shell
 
 # Or use poetry run
-poetry run contextcraft --help
+poetry run codebrief --help
 
 # Check installation
-which contextcraft
+which codebrief
 ```
 
 ## Getting Help
@@ -448,9 +448,9 @@ python --version           # Python version
 poetry --version           # Poetry version
 git --version             # Git version
 
-# ContextCraft information
-poetry run contextcraft --version
-poetry show contextcraft
+# codebrief information
+poetry run codebrief --version
+poetry show codebrief
 
 # Environment details
 pwd                        # Current directory
@@ -460,15 +460,15 @@ git status                # Git status (if applicable)
 
 ### Community Support
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/Shorzinator/ContextCraft/issues)
-- **GitHub Discussions**: [Community help and questions](https://github.com/Shorzinator/ContextCraft/discussions)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/Shorzinator/codebrief/issues)
+- **GitHub Discussions**: [Community help and questions](https://github.com/Shorzinator/codebrief/discussions)
 - **Documentation**: [Complete documentation](../index.md)
 
 ### Professional Support
 
 For enterprise users requiring dedicated support:
-- Contact through [GitHub Issues](https://github.com/Shorzinator/ContextCraft/issues) with `[Enterprise]` tag
-- See [Security Policy](https://github.com/Shorzinator/ContextCraft/security) for security-related issues
+- Contact through [GitHub Issues](https://github.com/Shorzinator/codebrief/issues) with `[Enterprise]` tag
+- See [Security Policy](https://github.com/Shorzinator/codebrief/security) for security-related issues
 
 ## Prevention Tips
 
@@ -490,8 +490,8 @@ poetry update
 poetry cache clear pypi --all
 
 # Verify installation
-poetry run contextcraft --help
+poetry run codebrief --help
 
 # Test basic functionality
-poetry run contextcraft tree
+poetry run codebrief tree
 ```

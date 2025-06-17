@@ -7,17 +7,17 @@
 
 # Project information
 site_name: CodeBrief
-site_url: "https://Shorzinator.github.io/ContextCraft"
-site_author: CodeBrief Team
+site_url: "https://Shorzinator.github.io/CodeBrief"
+site_author: Shourya Maheshwari
 site_description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
 
 # Repository
-repo_url: https://github.com/Shorzinator/ContextCraft
-repo_name: Shorzinator/ContextCraft
+repo_url: https://github.com/Shorzinator/CodeBrief
+repo_name: Shorzinator/CodeBrief
 edit_uri: edit/main/docs/
 
 # Copyright
-copyright: Copyright © 2024 CodeBrief Team
+copyright: Copyright © 2024 Shourya Maheshwari
 
 # Theme Configuration
 theme:
@@ -119,7 +119,7 @@ markdown_extensions:
   - pymdownx.magiclink:
       repo_url_shorthand: true
       user: Shorzinator
-      repo: ContextCraft
+      repo: CodeBrief
   - pymdownx.mark # Highlight text
   - pymdownx.smartsymbols # Smart symbols
   - pymdownx.superfences:
@@ -179,7 +179,7 @@ extra:
   #   provider: mike
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Shorzinator/ContextCraft
+      link: https://github.com/Shorzinator/CodeBrief
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/codebrief/
     - icon: fontawesome/brands/twitter

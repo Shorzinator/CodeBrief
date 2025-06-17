@@ -170,7 +170,7 @@ jobs:
           echo "✅ Build completed successfully"
 
           # Add CNAME file for custom domain AFTER build
-          # echo "docs.contextcraft.com" > site/CNAME  # Uncomment and replace with your custom domain if needed
+          # echo "docs.codebrief.com" > site/CNAME  # Uncomment and replace with your custom domain if needed
 
       - name: Optimize build output
         run: |
@@ -213,7 +213,7 @@ jobs:
 
       - name: Check site accessibility
         run: |
-          SITE_URL="${{ needs.deploy-docs.outputs.page_url || 'https://shorzinator.github.io/ContextCraft' }}"
+          SITE_URL="${{ needs.deploy-docs.outputs.page_url || 'https://shorzinator.github.io/CodeBrief' }}"
           echo "🔍 Checking site accessibility at: $SITE_URL"
 
           # Basic HTTP check

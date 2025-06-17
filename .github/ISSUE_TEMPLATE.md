@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug Report / 💡 Feature Request / ❓ Question
-about: Create a report to help us improve ContextCraft
+about: Create a report to help us improve codebrief
 title: '[TYPE] Brief description of the issue/request'
 labels: 'needs-triage'
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 
 <!--
 Thank you for taking the time to report an issue or suggest a feature!
-Your feedback helps make ContextCraft better for everyone.
+Your feedback helps make codebrief better for everyone.
 
 Please choose the appropriate section below and delete the others.
 If you're unsure, just fill out what you can - we're here to help!
@@ -35,7 +35,7 @@ If you're unsure, just fill out what you can - we're here to help!
 <!-- Please complete the following information -->
 - **OS**: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
 - **Python Version**: [e.g., 3.11.5]
-- **ContextCraft Version**: [e.g., 0.1.0]
+- **codebrief Version**: [e.g., 0.1.0]
 - **Installation Method**: [e.g., pip, poetry, from source]
 
 ### Error Output
@@ -92,7 +92,7 @@ Example: I'm always frustrated when [...]
 ### Environment (if relevant)
 - **OS**: [e.g., macOS 14.0]
 - **Python Version**: [e.g., 3.11.5]
-- **ContextCraft Version**: [e.g., 0.1.0]
+- **codebrief Version**: [e.g., 0.1.0]
 
 ### Additional Context
 <!-- Any additional information that might be helpful -->
@@ -103,9 +103,9 @@ Example: I'm always frustrated when [...]
 
 <!-- Please check all that apply -->
 - [ ] I have searched existing issues to avoid duplicates
-- [ ] I have read the [documentation](https://github.com/Shorzinator/ContextCraft#documentation)
+- [ ] I have read the [documentation](https://github.com/Shorzinator/codebrief#documentation)
 - [ ] I have provided all requested information above
-- [ ] I am using the latest version of ContextCraft (or have noted my version above)
+- [ ] I am using the latest version of codebrief (or have noted my version above)
 
 ---
 
@@ -117,11 +117,11 @@ By submitting this issue, you agree to:
 - Follow up with additional information if requested
 - Be patient as maintainers review and respond to issues
 
-Thank you for contributing to ContextCraft! 🚀
+Thank you for contributing to codebrief! 🚀
 
 <!--
 Need immediate help? Check out our:
-- 📖 Documentation: https://github.com/Shorzinator/ContextCraft#documentation
-- 💬 Discussions: https://github.com/Shorzinator/ContextCraft/discussions
-- 🤝 Contributing Guide: https://github.com/Shorzinator/ContextCraft/blob/main/CONTRIBUTING.md
+- 📖 Documentation: https://github.com/Shorzinator/codebrief#documentation
+- 💬 Discussions: https://github.com/Shorzinator/codebrief/discussions
+- 🤝 Contributing Guide: https://github.com/Shorzinator/codebrief/blob/main/CONTRIBUTING.md
 -->

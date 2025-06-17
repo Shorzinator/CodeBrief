@@ -11,7 +11,7 @@ We're setting up GitHub Discussions to provide a dedicated space for:
 - **🎉 Show & Tell** - Share your CodeBrief workflows and success stories
 - **💬 General Discussion** - Connect with other developers using CodeBrief
 
-*In the meantime, please use [GitHub Issues](https://github.com/Shorzinator/ContextCraft/issues) for bug reports and feature requests.*
+*In the meantime, please use [GitHub Issues](https://github.com/Shorzinator/codebrief/issues) for bug reports and feature requests.*
 
 ## 🤝 How to Get Involved
 
@@ -32,13 +32,13 @@ Have you used CodeBrief to solve a tricky problem? We'd love to hear about it! Y
 
 <div class="grid cards" markdown>
 
--   [:octicons-issue-opened-24: **GitHub Issues**](https://github.com/Shorzinator/ContextCraft/issues)
+-   [:octicons-issue-opened-24: **GitHub Issues**](https://github.com/Shorzinator/codebrief/issues)
 
     ---
 
     Report bugs, request features, and track development progress
 
--   [:octicons-code-24: **GitHub Repository**](https://github.com/Shorzinator/ContextCraft)
+-   [:octicons-code-24: **GitHub Repository**](https://github.com/Shorzinator/codebrief)
 
     ---
 
@@ -78,11 +78,11 @@ To keep our community welcoming and productive:
 - Share solutions that work for you
 
 ### Follow the Code of Conduct
-We adhere to the [Contributor Covenant Code of Conduct](https://github.com/Shorzinator/ContextCraft/blob/main/CODE_OF_CONDUCT.md) to ensure a welcoming environment for everyone.
+We adhere to the [Contributor Covenant Code of Conduct](https://github.com/Shorzinator/codebrief/blob/main/CODE_OF_CONDUCT.md) to ensure a welcoming environment for everyone.
 
 ## 📈 Community Stats
 
-- **GitHub Stars**: ![GitHub Stars](https://img.shields.io/github/stars/Shorzinator/ContextCraft?style=social)
+- **GitHub Stars**: ![GitHub Stars](https://img.shields.io/github/stars/Shorzinator/codebrief?style=social)
 - **Contributors**: Growing community of developers
 - **Active Issues**: Continuous improvement and feature development
 
@@ -99,7 +99,7 @@ We're actively working on:
 
 The best features come from real developer needs. If you have ideas for improving CodeBrief:
 
-1. Check existing [issues](https://github.com/Shorzinator/ContextCraft/issues) to see if it's already been suggested
+1. Check existing [issues](https://github.com/Shorzinator/codebrief/issues) to see if it's already been suggested
 2. Open a new issue with the `enhancement` label
 3. Describe your use case and how the feature would help
 4. Join the conversation when others comment on your idea
@@ -108,6 +108,6 @@ The best features come from real developer needs. If you have ideas for improvin
 
 <div align="center">
   <p><strong>Ready to contribute to the CodeBrief community?</strong></p>
-  <p><a href="https://github.com/Shorzinator/ContextCraft" class="md-button md-button--primary">🌟 Star on GitHub</a></p>
+  <p><a href="https://github.com/Shorzinator/codebrief" class="md-button md-button--primary">🌟 Star on GitHub</a></p>
   <p><em>Every star helps more developers discover CodeBrief!</em></p>
 </div>

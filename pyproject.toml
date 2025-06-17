@@ -11,9 +11,9 @@ description = "A CLI toolkit to generate comprehensive project context for LLMs.
 authors = ["Shourya Maheshwari <shorz2905@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/Shorzinator/ContextCraft"
-repository = "https://github.com/Shorzinator/ContextCraft"
-documentation = "https://shorzinator.github.io/ContextCraft/"
+homepage = "https://github.com/Shorzinator/CodeBrief"
+repository = "https://github.com/Shorzinator/CodeBrief"
+documentation = "https://shorzinator.github.io/CodeBrief/"
 keywords = ["llm", "cli", "context", "toolkit", "documentation"]
 classifiers = [
     "Development Status :: 4 - Beta",

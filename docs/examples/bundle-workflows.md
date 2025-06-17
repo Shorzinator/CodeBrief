@@ -1,6 +1,6 @@
 # Bundle Workflow Examples
 
-Discover powerful ways to use ContextCraft's bundle command for comprehensive project context generation across different scenarios and workflows.
+Discover powerful ways to use codebrief's bundle command for comprehensive project context generation across different scenarios and workflows.
 
 ## 🎯 Bundle Fundamentals
 
@@ -10,17 +10,17 @@ Generate a comprehensive overview of your entire project:
 
 ```bash
 # Full project context
-contextcraft bundle --output complete-project.md
+codebrief bundle --output complete-project.md
 
 # Customized complete bundle
-contextcraft bundle \
+codebrief bundle \
   --output project-overview-$(date +%Y%m%d).md \
   --git-log-count 15
 ```
 
 **Output Structure:**
 ```markdown
-# ContextCraft Bundle
+# codebrief Bundle
 
 ## Table of Contents
 - [Directory Tree](#directory-tree)
@@ -47,19 +47,19 @@ Create focused bundles for specific purposes:
 
 ```bash
 # Code-only bundle (no dependencies)
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --exclude-tree \
   --output code-only.md
 
 # Documentation bundle (no Git info)
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten docs/ README.md CHANGELOG.md \
   --output documentation.md
 
 # Git-focused bundle (no file contents)
-contextcraft bundle \
+codebrief bundle \
   --exclude-files \
   --git-log-count 25 \
   --git-full-diff \
@@ -75,13 +75,13 @@ Track feature development progress:
 ```bash
 # Feature branch bundle
 FEATURE_BRANCH=$(git branch --show-current)
-contextcraft bundle \
+codebrief bundle \
   --output "features/${FEATURE_BRANCH}-context.md" \
   --git-log-count 10 \
   --flatten "src/features/" "tests/features/"
 
 # Feature comparison bundle
-contextcraft bundle \
+codebrief bundle \
   --git-diff-options "--name-only" \
   --flatten src/ tests/ \
   --output "feature-changes-$(date +%Y%m%d).md"
@@ -93,14 +93,14 @@ Create focused bundles for debugging:
 
 ```bash
 # Bug investigation bundle
-contextcraft bundle \
+codebrief bundle \
   --output "bugs/investigation-$(date +%Y%m%d-%H%M).md" \
   --git-log-count 20 \
   --git-full-diff \
   --flatten src/problematic/ tests/failing/
 
 # Minimal bug context
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --exclude-tree \
   --git-log-count 5 \
@@ -114,14 +114,14 @@ Generate comprehensive review materials:
 
 ```bash
 # Pull request bundle
-contextcraft bundle \
+codebrief bundle \
   --output "reviews/pr-$(git branch --show-current).md" \
   --git-log-count 5 \
   --git-full-diff \
   --flatten src/ tests/
 
 # Review checklist bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --git-log-count 3 \
   --flatten src/ tests/ docs/REVIEW_CHECKLIST.md \
@@ -136,19 +136,19 @@ Optimize bundles for Python development:
 
 ```bash
 # Python web application
-contextcraft bundle \
+codebrief bundle \
   --output python-webapp-context.md \
   --flatten src/ tests/ requirements.txt pyproject.toml \
   --git-log-count 10
 
 # Python library
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ tests/ README.md setup.py \
   --exclude-tree \
   --output library-context.md
 
 # Django project
-contextcraft bundle \
+codebrief bundle \
   --flatten myproject/ manage.py requirements.txt \
   --git-log-count 8 \
   --output django-context.md
@@ -160,19 +160,19 @@ Tailor bundles for JavaScript development:
 
 ```bash
 # React application
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ public/ package.json \
   --git-log-count 12 \
   --output react-app-context.md
 
 # Node.js API
-contextcraft bundle \
+codebrief bundle \
   --flatten routes/ models/ controllers/ package.json \
   --git-log-count 10 \
   --output nodejs-api-context.md
 
 # Full-stack project
-contextcraft bundle \
+codebrief bundle \
   --flatten frontend/ backend/ package.json \
   --git-log-count 15 \
   --output fullstack-context.md
@@ -184,13 +184,13 @@ Create bundles for documentation workflows:
 
 ```bash
 # Documentation site
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten docs/ README.md mkdocs.yml \
   --output docs-bundle.md
 
 # API documentation
-contextcraft bundle \
+codebrief bundle \
   --flatten docs/api/ openapi.yaml README.md \
   --exclude-deps \
   --output api-docs-context.md
@@ -207,14 +207,14 @@ Automate regular context generation:
 # scheduled-context.sh
 
 # Daily development summary
-contextcraft bundle \
+codebrief bundle \
   --output "daily/$(date +%Y-%m-%d)-summary.md" \
   --git-log-count 10 \
   --git-diff-options "--stat"
 
 # Weekly comprehensive review
 if [ $(date +%u) -eq 1 ]; then  # Monday
-  contextcraft bundle \
+  codebrief bundle \
     --output "weekly/week-$(date +%Y-W%U)-review.md" \
     --git-log-count 50 \
     --git-full-diff
@@ -230,13 +230,13 @@ Integrate with Git hooks for automatic context generation:
 # .git/hooks/post-commit
 
 # Generate context after each commit
-contextcraft bundle \
-  --output ".contextcraft/latest-commit-context.md" \
+codebrief bundle \
+  --output ".codebrief/latest-commit-context.md" \
   --git-log-count 3 \
   --git-full-diff \
   --flatten src/
 
-echo "Context updated: .contextcraft/latest-commit-context.md"
+echo "Context updated: .codebrief/latest-commit-context.md"
 ```
 
 ### CI/CD Pipeline Integration
@@ -266,12 +266,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install ContextCraft
-        run: pip install contextcraft
+      - name: Install codebrief
+        run: pip install codebrief
 
       - name: Generate Bundle
         run: |
-          contextcraft bundle \
+          codebrief bundle \
             --output "context-${{ github.sha }}.md" \
             --git-log-count 10
 
@@ -290,7 +290,7 @@ Create bundles with multiple specific paths:
 
 ```bash
 # Multi-component bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten src/auth/ \
   --flatten src/api/ \
   --flatten src/utils/ \
@@ -299,7 +299,7 @@ contextcraft bundle \
   --output multi-component-context.md
 
 # Cross-cutting concerns
-contextcraft bundle \
+codebrief bundle \
   --flatten src/logging/ \
   --flatten src/config/ \
   --flatten src/middleware/ \
@@ -320,26 +320,26 @@ HAS_CHANGES=$(git status --porcelain | wc -l)
 
 if [ "$BRANCH" = "main" ]; then
   # Production bundle
-  contextcraft bundle \
+  codebrief bundle \
     --output "production-context.md" \
     --git-log-count 20 \
     --exclude-files
 elif [[ "$BRANCH" == feature/* ]]; then
   # Feature development bundle
-  contextcraft bundle \
+  codebrief bundle \
     --output "feature-development.md" \
     --git-log-count 5 \
     --git-full-diff \
     --flatten src/ tests/
 elif [ "$HAS_CHANGES" -gt 0 ]; then
   # Work-in-progress bundle
-  contextcraft bundle \
+  codebrief bundle \
     --output "wip-context.md" \
     --git-log-count 3 \
     --git-full-diff
 else
   # Standard development bundle
-  contextcraft bundle \
+  codebrief bundle \
     --output "dev-context.md" \
     --git-log-count 10
 fi
@@ -352,7 +352,7 @@ Create reusable bundle templates:
 ```bash
 # Template functions
 bundle_for_review() {
-  contextcraft bundle \
+  codebrief bundle \
     --exclude-deps \
     --git-log-count 5 \
     --git-full-diff \
@@ -361,14 +361,14 @@ bundle_for_review() {
 }
 
 bundle_for_onboarding() {
-  contextcraft bundle \
+  codebrief bundle \
     --git-log-count 25 \
     --flatten README.md docs/ src/core/ \
     --output "${1:-onboarding-bundle.md}"
 }
 
 bundle_for_debugging() {
-  contextcraft bundle \
+  codebrief bundle \
     --exclude-tree \
     --git-log-count 10 \
     --git-full-diff \
@@ -390,14 +390,14 @@ Generate bundles for project analysis:
 
 ```bash
 # Health check bundle
-contextcraft bundle \
+codebrief bundle \
   --git-log-count 30 \
   --git-diff-options "--stat --numstat" \
   --flatten README.md CHANGELOG.md \
   --output health-check.md
 
 # Technical debt analysis
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --git-log-count 50 \
   --flatten src/ docs/technical-debt.md \
@@ -415,7 +415,7 @@ Track bundle generation performance:
 echo "Starting bundle generation at $(date)"
 START_TIME=$(date +%s)
 
-contextcraft bundle \
+codebrief bundle \
   --output "performance-test-$(date +%Y%m%d-%H%M%S).md" \
   --git-log-count 20
 
@@ -434,7 +434,7 @@ Configure bundles for specific project needs:
 
 ```toml
 # pyproject.toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_bundle = "context/project-bundle.md"
 
 # Optimize for Python projects
@@ -467,16 +467,16 @@ Set up different configurations for different environments:
 
 ```bash
 # Development environment
-export CONTEXTCRAFT_BUNDLE_OUTPUT="dev-context.md"
-export CONTEXTCRAFT_GIT_LOG_COUNT=10
+export codebrief_BUNDLE_OUTPUT="dev-context.md"
+export codebrief_GIT_LOG_COUNT=10
 
 # Production environment
-export CONTEXTCRAFT_BUNDLE_OUTPUT="prod-context.md"
-export CONTEXTCRAFT_GIT_LOG_COUNT=25
+export codebrief_BUNDLE_OUTPUT="prod-context.md"
+export codebrief_GIT_LOG_COUNT=25
 
 # CI environment
-export CONTEXTCRAFT_BUNDLE_OUTPUT="ci-context-${CI_BUILD_ID}.md"
-export CONTEXTCRAFT_GIT_LOG_COUNT=15
+export codebrief_BUNDLE_OUTPUT="ci-context-${CI_BUILD_ID}.md"
+export codebrief_GIT_LOG_COUNT=15
 ```
 
 ## 🎯 Best Practices
@@ -490,17 +490,17 @@ Organize your bundles effectively:
 mkdir -p {daily,weekly,features,releases,reviews,debugging}
 
 # Daily bundles
-contextcraft bundle \
+codebrief bundle \
   --output "daily/$(date +%Y-%m-%d).md" \
   --git-log-count 5
 
 # Feature bundles
-contextcraft bundle \
+codebrief bundle \
   --output "features/$(git branch --show-current).md" \
   --git-log-count 8
 
 # Release bundles
-contextcraft bundle \
+codebrief bundle \
   --output "releases/v$(git describe --tags --abbrev=0).md" \
   --git-log-count 30
 ```
@@ -511,7 +511,7 @@ Optimize bundle generation for large projects:
 
 ```bash
 # Fast bundle for quick reviews
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --exclude-deps \
   --git-log-count 3 \
@@ -519,7 +519,7 @@ contextcraft bundle \
   --output quick-review.md
 
 # Comprehensive but optimized
-contextcraft bundle \
+codebrief bundle \
   --git-log-count 15 \
   --flatten src/ tests/ \
   --output optimized-comprehensive.md
@@ -531,14 +531,14 @@ Establish team standards for bundle usage:
 
 ```bash
 # Team review template
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --git-log-count 5 \
   --flatten src/ tests/ docs/REVIEW.md \
   --output "reviews/$(git branch --show-current)-$(date +%Y%m%d).md"
 
 # Handoff bundle for team transitions
-contextcraft bundle \
+codebrief bundle \
   --git-log-count 20 \
   --flatten README.md docs/ src/core/ \
   --output "handoffs/$(whoami)-to-team-$(date +%Y%m%d).md"
@@ -550,20 +550,20 @@ contextcraft bundle \
 
 ```bash
 # Large repository optimization
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --git-log-count 5 \
   --flatten src/specific-module/ \
   --output focused-bundle.md
 
 # Memory-efficient bundle for huge projects
-contextcraft bundle \
+codebrief bundle \
   --exclude-files \
   --git-log-count 10 \
   --output metadata-only.md
 
 # Network-friendly bundle (no large diffs)
-contextcraft bundle \
+codebrief bundle \
   --git-diff-options "--name-only" \
   --exclude-tree \
   --output network-friendly.md
@@ -571,4 +571,4 @@ contextcraft bundle \
 
 ---
 
-*These examples showcase the versatility and power of ContextCraft's bundle command for various development workflows and project types.*
+*These examples showcase the versatility and power of codebrief's bundle command for various development workflows and project types.*

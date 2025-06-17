@@ -1,6 +1,6 @@
 # Git Workflow Examples
 
-Learn how to integrate ContextCraft's Git tools into your development workflow for enhanced context generation and code review processes.
+Learn how to integrate codebrief's Git tools into your development workflow for enhanced context generation and code review processes.
 
 ## 🔄 Git Context Extraction
 
@@ -10,10 +10,10 @@ Extract essential Git context for your current project:
 
 ```bash
 # Get basic Git context
-contextcraft git-info
+codebrief git-info
 
 # Save to file for sharing
-contextcraft git-info --output git-context.md
+codebrief git-info --output git-context.md
 ```
 
 **Output Example:**
@@ -45,10 +45,10 @@ Get detailed Git information with full diffs:
 
 ```bash
 # Include full diff of uncommitted changes
-contextcraft git-info --full-diff --log-count 5
+codebrief git-info --full-diff --log-count 5
 
 # Custom diff options for specific information
-contextcraft git-info --diff-options "--stat --color=never"
+codebrief git-info --diff-options "--stat --color=never"
 ```
 
 ## 📦 Bundle Integration
@@ -59,14 +59,14 @@ Create comprehensive bundles for code review:
 
 ```bash
 # Complete review bundle
-contextcraft bundle \
+codebrief bundle \
   --output review-$(git branch --show-current).md \
   --git-log-count 5 \
   --git-full-diff \
   --flatten src/ tests/
 
 # Focused review without dependencies
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --flatten src/auth/ tests/auth/ \
   --git-log-count 3 \
@@ -79,7 +79,7 @@ Document feature development progress:
 
 ```bash
 # Feature branch context
-contextcraft bundle \
+codebrief bundle \
   --output feature-$(git branch --show-current)-context.md \
   --git-log-count 10 \
   --flatten src/features/$(git branch --show-current | cut -d'/' -f2)/
@@ -89,16 +89,16 @@ contextcraft bundle \
 
 ### Pre-commit Hook
 
-Add ContextCraft to your pre-commit workflow:
+Add codebrief to your pre-commit workflow:
 
 ```yaml
 # .pre-commit-config.yaml
 repos:
   - repo: local
     hooks:
-      - id: contextcraft-bundle
+      - id: codebrief-bundle
         name: Generate context bundle
-        entry: contextcraft bundle --output .contextcraft/pre-commit-bundle.md
+        entry: codebrief bundle --output .codebrief/pre-commit-bundle.md
         language: system
         pass_filenames: false
         always_run: true
@@ -129,13 +129,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install ContextCraft
+      - name: Install codebrief
         run: |
-          pip install contextcraft
+          pip install codebrief
 
       - name: Generate PR Context Bundle
         run: |
-          contextcraft bundle \
+          codebrief bundle \
             --output pr-context-${{ github.event.number }}.md \
             --git-log-count 10 \
             --git-full-diff \
@@ -164,12 +164,12 @@ BRANCH=$(git branch --show-current)
 echo "Generating daily context for $BRANCH on $DATE..."
 
 # Git context with recent activity
-contextcraft git-info \
+codebrief git-info \
   --log-count 15 \
   --output "daily-context/$DATE-git.md"
 
 # Code changes bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --git-log-count 5 \
   --git-full-diff \
@@ -185,7 +185,7 @@ Create focused bundles for bug investigation:
 
 ```bash
 # Bug investigation context
-contextcraft bundle \
+codebrief bundle \
   --output bug-investigation-$(date +%Y%m%d).md \
   --git-log-count 20 \
   --git-diff-options "--name-only" \
@@ -198,7 +198,7 @@ Generate comprehensive release context:
 
 ```bash
 # Release context bundle
-contextcraft bundle \
+codebrief bundle \
   --output release-v$(git describe --tags --abbrev=0)-context.md \
   --git-log-count 50 \
   --flatten CHANGELOG.md README.md docs/
@@ -212,14 +212,14 @@ Create standardized review contexts:
 
 ```bash
 # Template for feature reviews
-contextcraft bundle \
+codebrief bundle \
   --output templates/feature-review-template.md \
   --exclude-deps \
   --git-log-count 5 \
   --flatten src/ tests/ docs/
 
 # Template for hotfix reviews
-contextcraft bundle \
+codebrief bundle \
   --output templates/hotfix-review-template.md \
   --git-log-count 3 \
   --git-full-diff \
@@ -232,13 +232,13 @@ Share project context with new team members:
 
 ```bash
 # Onboarding bundle
-contextcraft bundle \
+codebrief bundle \
   --output onboarding/project-overview.md \
   --git-log-count 25 \
   --flatten README.md docs/ src/core/
 
 # Architecture overview
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten src/ docs/architecture/ \
   --output onboarding/architecture-context.md
@@ -263,7 +263,7 @@ for repo in "${REPOS[@]}"; do
   echo "Processing $repo..."
   cd "$repo"
 
-  contextcraft bundle \
+  codebrief bundle \
     --output "../$OUTPUT_DIR/$repo-context.md" \
     --git-log-count 10
 
@@ -286,13 +286,13 @@ BRANCH=$(git branch --show-current)
 case "$BRANCH" in
   main|master)
     # Production context - comprehensive
-    contextcraft bundle \
+    codebrief bundle \
       --output "contexts/production-context.md" \
       --git-log-count 20
     ;;
   develop)
     # Development context - focus on recent changes
-    contextcraft bundle \
+    codebrief bundle \
       --output "contexts/development-context.md" \
       --git-log-count 10 \
       --git-full-diff
@@ -300,14 +300,14 @@ case "$BRANCH" in
   feature/*)
     # Feature context - focused on feature files
     FEATURE_NAME=$(echo "$BRANCH" | cut -d'/' -f2)
-    contextcraft bundle \
+    codebrief bundle \
       --output "contexts/feature-$FEATURE_NAME-context.md" \
       --git-log-count 5 \
       --flatten "src/*$FEATURE_NAME*" "tests/*$FEATURE_NAME*"
     ;;
   hotfix/*)
     # Hotfix context - minimal, focused
-    contextcraft bundle \
+    codebrief bundle \
       --exclude-deps \
       --exclude-tree \
       --git-log-count 3 \
@@ -325,13 +325,13 @@ Analyze development patterns:
 
 ```bash
 # Recent activity summary
-contextcraft git-info \
+codebrief git-info \
   --log-count 50 \
   --diff-options "--stat" \
   --output analysis/recent-activity.md
 
 # Author contribution context
-contextcraft git-info \
+codebrief git-info \
   --log-count 100 \
   --output analysis/contributor-activity.md
 ```
@@ -342,7 +342,7 @@ Assess the impact of changes:
 
 ```bash
 # Impact assessment bundle
-contextcraft bundle \
+codebrief bundle \
   --git-full-diff \
   --git-diff-options "--stat --numstat" \
   --flatten src/ tests/ \
@@ -353,11 +353,11 @@ contextcraft bundle \
 
 ### Project-Specific Configuration
 
-Configure ContextCraft for Git workflows:
+Configure codebrief for Git workflows:
 
 ```toml
 # pyproject.toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_git_info = "docs/git-context.md"
 default_output_filename_bundle = "context/project-bundle.md"
 
@@ -378,15 +378,15 @@ Set up environment for Git workflows:
 ```bash
 # ~/.bashrc or ~/.zshrc
 
-# ContextCraft Git workflow aliases
-alias ccgit='contextcraft git-info'
-alias ccreview='contextcraft bundle --exclude-deps --git-log-count 5'
-alias ccfeature='contextcraft bundle --git-full-diff --flatten src/ tests/'
+# codebrief Git workflow aliases
+alias ccgit='codebrief git-info'
+alias ccreview='codebrief bundle --exclude-deps --git-log-count 5'
+alias ccfeature='codebrief bundle --git-full-diff --flatten src/ tests/'
 
 # Function for branch-specific context
 ccbranch() {
     local branch=$(git branch --show-current)
-    contextcraft bundle \
+    codebrief bundle \
         --output "context-$branch-$(date +%Y%m%d).md" \
         --git-log-count 10 \
         "$@"
@@ -407,18 +407,18 @@ ccbranch() {
 
 ```bash
 # For large repositories - optimize performance
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --git-log-count 5 \
   --flatten src/core/ \
   --output optimized-context.md
 
 # For quick reviews - minimal context
-contextcraft git-info \
+codebrief git-info \
   --log-count 3 \
   --diff-options "--name-only"
 ```
 
 ---
 
-*These examples demonstrate the power of combining Git context with ContextCraft's bundling capabilities for enhanced development workflows.*
+*These examples demonstrate the power of combining Git context with codebrief's bundling capabilities for enhanced development workflows.*

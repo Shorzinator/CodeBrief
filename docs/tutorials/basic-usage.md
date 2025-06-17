@@ -1,6 +1,6 @@
 # Basic Usage Tutorial
 
-Learn ContextCraft through hands-on examples and real-world scenarios. This tutorial covers the most common use cases and workflows.
+Learn codebrief through hands-on examples and real-world scenarios. This tutorial covers the most common use cases and workflows.
 
 ## 🎯 Tutorial Overview
 
@@ -14,7 +14,7 @@ In this tutorial, you'll learn to:
 
 ## 📋 Prerequisites
 
-- ContextCraft installed and working
+- codebrief installed and working
 - A sample project to work with (or use our examples)
 
 !!! tip "Using Your Own Project"
@@ -24,12 +24,12 @@ In this tutorial, you'll learn to:
 
 ### Step 1: Setting Up a Sample Project
 
-Let's create a sample project to demonstrate ContextCraft features:
+Let's create a sample project to demonstrate codebrief features:
 
 ```bash
 # Create a sample Python project
-mkdir contextcraft-demo
-cd contextcraft-demo
+mkdir codebrief-demo
+cd codebrief-demo
 
 # Create project structure
 mkdir -p src/myapp tests docs
@@ -50,7 +50,7 @@ def greet(name: str = "World") -> str:
 
 def main():
     """Entry point for the application."""
-    message = greet("ContextCraft")
+    message = greet("codebrief")
     print(message)
 
 if __name__ == "__main__":
@@ -94,7 +94,7 @@ EOF
 cat > README.md << 'EOF'
 # My Demo App
 
-A simple demonstration application for ContextCraft tutorial.
+A simple demonstration application for codebrief tutorial.
 
 ## Features
 
@@ -119,7 +119,7 @@ EOF
 Your project structure should now look like:
 
 ```
-contextcraft-demo/
+codebrief-demo/
 ├── README.md
 ├── pyproject.toml
 ├── src/
@@ -137,13 +137,13 @@ Let's generate a visual representation of our project:
 
 ```bash
 # Basic tree generation
-contextcraft tree
+codebrief tree
 ```
 
 You'll see output like:
 
 ```
-📁 contextcraft-demo/
+📁 codebrief-demo/
 ├── 📄 README.md
 ├── 📄 pyproject.toml
 ├── 📁 src/
@@ -159,7 +159,7 @@ Now let's save it to a file:
 
 ```bash
 # Save tree to file
-contextcraft tree --output project-structure.txt
+codebrief tree --output project-structure.txt
 
 # Check the output
 cat project-structure.txt
@@ -171,7 +171,7 @@ Let's create a comprehensive code context for an LLM:
 
 ```bash
 # Flatten all Python files
-contextcraft flatten . --include "*.py" --output code-context.md
+codebrief flatten . --include "*.py" --output code-context.md
 
 # View the result
 head -20 code-context.md
@@ -194,7 +194,7 @@ def greet(name: str = "World") -> str:
 
 def main():
     """Entry point for the application."""
-    message = greet("ContextCraft")
+    message = greet("codebrief")
     print(message)
 
 if __name__ == "__main__":
@@ -221,7 +221,7 @@ Let's create a more comprehensive context including documentation:
 
 ```bash
 # Include Python files, Markdown, and TOML files
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" \
   --include "*.md" \
   --include "*.toml" \
@@ -237,7 +237,7 @@ Now let's analyze our project dependencies:
 
 ```bash
 # Generate dependency report
-contextcraft deps --output dependencies.md
+codebrief deps --output dependencies.md
 
 # View the dependencies
 cat dependencies.md
@@ -299,7 +299,7 @@ touch __pycache__/main.cpython-39.pyc
 touch temp.log
 
 # Generate tree - these should be excluded
-contextcraft tree
+codebrief tree
 ```
 
 ### Using Configuration
@@ -307,10 +307,10 @@ contextcraft tree
 Set up project configuration in `pyproject.toml`:
 
 ```bash
-# Add ContextCraft configuration
+# Add codebrief configuration
 cat >> pyproject.toml << 'EOF'
 
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_tree = "docs/project-structure.txt"
 default_output_filename_flatten = "docs/codebase-summary.md"
 default_output_filename_deps = "docs/dependencies.md"
@@ -323,9 +323,9 @@ Now you can use commands without specifying output files:
 
 ```bash
 # Uses default output filenames from config
-contextcraft tree      # Creates docs/project-structure.txt
-contextcraft flatten . # Creates docs/codebase-summary.md
-contextcraft deps      # Creates docs/dependencies.md
+codebrief tree      # Creates docs/project-structure.txt
+codebrief flatten . # Creates docs/codebase-summary.md
+codebrief deps      # Creates docs/dependencies.md
 
 # Check that files were created
 ls docs/
@@ -340,16 +340,16 @@ ls docs/
 mkdir -p review
 
 # Get project structure
-contextcraft tree src/ tests/ --output review/structure.txt
+codebrief tree src/ tests/ --output review/structure.txt
 
 # Get source code and tests
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" \
   --exclude "__pycache__/" \
   --output review/code-changes.md
 
 # Get configuration files
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.toml" --include "*.yaml" --include "*.json" \
   --output review/config-files.md
 
@@ -364,16 +364,16 @@ ls review/
 mkdir -p llm-context
 
 # Project overview
-contextcraft tree --output llm-context/structure.txt
+codebrief tree --output llm-context/structure.txt
 
 # All relevant code
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" --include "*.md" \
   --exclude "tests/" \
   --output llm-context/source-code.md
 
 # Dependencies for context
-contextcraft deps --output llm-context/dependencies.md
+codebrief deps --output llm-context/dependencies.md
 
 # Create a combined context file
 cat > llm-context/README.md << 'EOF'
@@ -401,15 +401,15 @@ ls llm-context/
 mkdir -p documentation
 
 # Get all documentation files
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.md" --include "*.rst" \
   --output documentation/all-docs.md
 
 # Get project structure for documentation
-contextcraft tree --output documentation/project-map.txt
+codebrief tree --output documentation/project-map.txt
 
 # Get configuration for setup documentation
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.toml" --include "*.cfg" --include "*.ini" \
   --output documentation/configuration.md
 
@@ -430,7 +430,7 @@ def farewell(name: str = "World") -> str:
 ' >> src/myapp/main.py
 
 # Regenerate context to see the changes
-contextcraft flatten src/ --include "*.py" --output updated-code.md
+codebrief flatten src/ --include "*.py" --output updated-code.md
 
 # Compare with previous version
 diff code-context.md updated-code.md
@@ -440,10 +440,10 @@ diff code-context.md updated-code.md
 
 ```bash
 # Only update the main module context
-contextcraft flatten src/myapp/main.py --output main-module-only.md
+codebrief flatten src/myapp/main.py --output main-module-only.md
 
 # Only update tests
-contextcraft flatten tests/ --include "*.py" --output tests-only.md
+codebrief flatten tests/ --include "*.py" --output tests-only.md
 
 # Combine specific parts
 cat main-module-only.md tests-only.md > focused-context.md
@@ -460,7 +460,7 @@ Create a script to automate your context generation:
 cat > generate-context.sh << 'EOF'
 #!/bin/bash
 
-# ContextCraft automation script
+# codebrief automation script
 echo "Generating comprehensive project context..."
 
 # Create output directory
@@ -468,19 +468,19 @@ mkdir -p context-output
 
 # Generate all contexts
 echo "📁 Generating project structure..."
-contextcraft tree --output context-output/structure.txt
+codebrief tree --output context-output/structure.txt
 
 echo "📄 Generating source code context..."
-contextcraft flatten src/ --include "*.py" --output context-output/source-code.md
+codebrief flatten src/ --include "*.py" --output context-output/source-code.md
 
 echo "🧪 Generating test context..."
-contextcraft flatten tests/ --include "*.py" --output context-output/tests.md
+codebrief flatten tests/ --include "*.py" --output context-output/tests.md
 
 echo "📋 Generating dependencies..."
-contextcraft deps --output context-output/dependencies.md
+codebrief deps --output context-output/dependencies.md
 
 echo "📝 Generating documentation..."
-contextcraft flatten . --include "*.md" --output context-output/docs.md
+codebrief flatten . --include "*.md" --output context-output/docs.md
 
 echo "✅ Context generation complete! Check context-output/ directory"
 ls -la context-output/
@@ -503,8 +503,8 @@ cat > .git/hooks/pre-commit << 'EOF'
 # Auto-generate context on commit
 
 echo "Updating project context..."
-contextcraft tree --output docs/project-structure.txt
-contextcraft flatten . --include "*.py" --include "*.md" --output docs/project-context.md
+codebrief tree --output docs/project-structure.txt
+codebrief flatten . --include "*.py" --include "*.md" --output docs/project-context.md
 
 # Add the generated files to the commit
 git add docs/project-structure.txt docs/project-context.md
@@ -517,11 +517,11 @@ chmod +x .git/hooks/pre-commit
 
 Congratulations! You've learned:
 
-- ✅ How to generate project trees with `contextcraft tree`
-- ✅ How to flatten code for LLM consumption with `contextcraft flatten`
-- ✅ How to analyze dependencies with `contextcraft deps`
+- ✅ How to generate project trees with `codebrief tree`
+- ✅ How to flatten code for LLM consumption with `codebrief flatten`
+- ✅ How to analyze dependencies with `codebrief deps`
 - ✅ How to use `.llmignore` files for fine-grained control
-- ✅ How to configure ContextCraft via `pyproject.toml`
+- ✅ How to configure codebrief via `pyproject.toml`
 - ✅ How to create efficient workflows for different use cases
 - ✅ How to automate context generation with scripts
 
@@ -541,7 +541,7 @@ If you created the demo project for this tutorial:
 ```bash
 # Clean up the demo project
 cd ..
-rm -rf contextcraft-demo
+rm -rf codebrief-demo
 ```
 
 ---

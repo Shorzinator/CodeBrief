@@ -38,7 +38,7 @@ Extract complete Git repository context information.
 
 ```python
 from pathlib import Path
-from contextcraft.tools.git_provider import get_git_context
+from codebrief.tools.git_provider import get_git_context
 
 # Get basic Git context
 context = get_git_context(Path("."))
@@ -61,7 +61,7 @@ context = get_git_context(
 
 ```python
 # This is how the CLI command uses the function
-from contextcraft.tools.git_provider import get_git_context
+from codebrief.tools.git_provider import get_git_context
 
 def git_info_command(
     root_dir: Path,
@@ -154,10 +154,10 @@ The module includes comprehensive test coverage:
 
 ## Configuration Integration
 
-Works seamlessly with ContextCraft's configuration system:
+Works seamlessly with codebrief's configuration system:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_git_info = "git-context.md"
 ```
 

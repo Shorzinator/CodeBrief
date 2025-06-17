@@ -1,6 +1,6 @@
 # Python Projects Examples
 
-Comprehensive examples for using ContextCraft with Python projects, from simple scripts to complex applications.
+Comprehensive examples for using codebrief with Python projects, from simple scripts to complex applications.
 
 ## 🐍 Python Project Types
 
@@ -10,14 +10,14 @@ For single-file or small Python projects:
 
 ```bash
 # Basic context for a simple script
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" \
   --include "*.md" \
   --include "requirements.txt" \
   --output simple-script-context.md
 
 # With Git context
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --flatten . \
   --git-log-count 5 \
@@ -30,12 +30,12 @@ For structured Python packages:
 
 ```bash
 # Complete library context
-contextcraft bundle \
+codebrief bundle \
   --output python-library-context.md \
   --flatten src/ tests/ README.md setup.py pyproject.toml
 
 # Development-focused bundle
-contextcraft bundle \
+codebrief bundle \
   --git-log-count 15 \
   --git-full-diff \
   --flatten src/ tests/ \
@@ -48,13 +48,13 @@ For Python web applications:
 
 ```bash
 # Flask application
-contextcraft bundle \
+codebrief bundle \
   --output flask-app-context.md \
   --flatten app/ templates/ static/ requirements.txt \
   --git-log-count 10
 
 # Django project
-contextcraft bundle \
+codebrief bundle \
   --output django-project-context.md \
   --flatten myproject/ manage.py requirements.txt \
   --git-log-count 12
@@ -66,14 +66,14 @@ For data science and ML projects:
 
 ```bash
 # Data science bundle
-contextcraft bundle \
+codebrief bundle \
   --output data-science-context.md \
   --flatten notebooks/ src/ data/ requirements.txt \
   --exclude-tree \
   --git-log-count 8
 
 # ML model development
-contextcraft bundle \
+codebrief bundle \
   --flatten models/ training/ evaluation/ \
   --git-log-count 10 \
   --output ml-development.md
@@ -95,13 +95,13 @@ PROJECT_NAME=$(basename $(pwd))
 echo "Generating daily context for $PROJECT_NAME..."
 
 # Git activity summary
-contextcraft git-info \
+codebrief git-info \
   --log-count 10 \
   --diff-options "--stat" \
   --output "daily-context/$DATE-git-activity.md"
 
 # Code changes bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --git-log-count 5 \
   --git-full-diff \
@@ -109,7 +109,7 @@ contextcraft bundle \
   --output "daily-context/$DATE-code-changes.md"
 
 # Dependency check
-contextcraft deps \
+codebrief deps \
   --output "daily-context/$DATE-dependencies.md"
 
 echo "Daily context saved to daily-context/"
@@ -121,14 +121,14 @@ Context for testing workflows:
 
 ```bash
 # Test-focused bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --flatten tests/ src/ pytest.ini tox.ini \
   --git-log-count 5 \
   --output testing-context.md
 
 # Quality assurance bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ tests/ .pre-commit-config.yaml pyproject.toml \
   --git-log-count 8 \
   --output qa-context.md
@@ -140,7 +140,7 @@ Prepare comprehensive review materials:
 
 ```bash
 # Pull request bundle
-contextcraft bundle \
+codebrief bundle \
   --output "reviews/pr-$(git branch --show-current).md" \
   --git-log-count 5 \
   --git-full-diff \
@@ -148,7 +148,7 @@ contextcraft bundle \
 
 # Feature review bundle
 FEATURE=$(git branch --show-current | cut -d'/' -f2)
-contextcraft bundle \
+codebrief bundle \
   --flatten "src/*$FEATURE*" "tests/*$FEATURE*" \
   --git-log-count 3 \
   --output "reviews/feature-$FEATURE-review.md"
@@ -162,12 +162,12 @@ For Poetry-managed Python projects:
 
 ```bash
 # Poetry project bundle
-contextcraft bundle \
+codebrief bundle \
   --output poetry-project-context.md \
   --flatten src/ tests/ pyproject.toml poetry.lock README.md
 
 # Development environment context
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ pyproject.toml \
   --git-log-count 10 \
   --output poetry-dev-context.md
@@ -179,12 +179,12 @@ For traditional pip-based projects:
 
 ```bash
 # Traditional Python project
-contextcraft bundle \
+codebrief bundle \
   --output pip-project-context.md \
   --flatten src/ tests/ setup.py requirements.txt MANIFEST.in
 
 # Multiple requirements files
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ requirements/ setup.py \
   --git-log-count 8 \
   --output multi-req-context.md
@@ -196,12 +196,12 @@ For Conda-managed projects:
 
 ```bash
 # Conda project bundle
-contextcraft bundle \
+codebrief bundle \
   --output conda-project-context.md \
   --flatten src/ tests/ environment.yml setup.py
 
 # Data science with Conda
-contextcraft bundle \
+codebrief bundle \
   --flatten notebooks/ src/ environment.yml \
   --exclude-tree \
   --output conda-datascience.md
@@ -213,13 +213,13 @@ contextcraft bundle \
 
 ```bash
 # FastAPI project context
-contextcraft bundle \
+codebrief bundle \
   --output fastapi-context.md \
   --flatten app/ tests/ requirements.txt Dockerfile \
   --git-log-count 10
 
 # API development bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten app/routers/ app/models/ app/schemas/ \
   --git-log-count 5 \
   --output api-development.md
@@ -229,13 +229,13 @@ contextcraft bundle \
 
 ```bash
 # Django project bundle
-contextcraft bundle \
+codebrief bundle \
   --output django-context.md \
   --flatten myproject/ manage.py requirements.txt \
   --git-log-count 12
 
 # Django app-specific context
-contextcraft bundle \
+codebrief bundle \
   --flatten myproject/myapp/ myproject/settings/ \
   --git-log-count 8 \
   --output django-app-context.md
@@ -245,13 +245,13 @@ contextcraft bundle \
 
 ```bash
 # Flask application bundle
-contextcraft bundle \
+codebrief bundle \
   --output flask-context.md \
   --flatten app/ templates/ static/ requirements.txt \
   --git-log-count 10
 
 # Flask blueprint context
-contextcraft bundle \
+codebrief bundle \
   --flatten app/blueprints/ app/models/ \
   --git-log-count 6 \
   --output flask-blueprints.md
@@ -263,13 +263,13 @@ contextcraft bundle \
 
 ```bash
 # Unit testing bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ tests/unit/ pytest.ini \
   --git-log-count 5 \
   --output unit-testing-context.md
 
 # Test coverage analysis
-contextcraft bundle \
+codebrief bundle \
   --flatten tests/ .coveragerc pytest.ini \
   --git-diff-options "--stat" \
   --output coverage-analysis.md
@@ -279,7 +279,7 @@ contextcraft bundle \
 
 ```bash
 # Integration testing context
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ tests/integration/ docker-compose.yml \
   --git-log-count 8 \
   --output integration-testing.md
@@ -289,7 +289,7 @@ contextcraft bundle \
 
 ```bash
 # Performance testing bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ tests/performance/ requirements-dev.txt \
   --git-log-count 6 \
   --output performance-testing.md
@@ -301,13 +301,13 @@ contextcraft bundle \
 
 ```bash
 # Docker deployment context
-contextcraft bundle \
+codebrief bundle \
   --output docker-deployment.md \
   --flatten src/ Dockerfile docker-compose.yml requirements.txt \
   --git-log-count 10
 
 # Multi-stage Docker build
-contextcraft bundle \
+codebrief bundle \
   --flatten Dockerfile* requirements* src/ \
   --git-log-count 5 \
   --output docker-multistage.md
@@ -317,13 +317,13 @@ contextcraft bundle \
 
 ```bash
 # AWS deployment context
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ aws/ requirements.txt serverless.yml \
   --git-log-count 8 \
   --output aws-deployment.md
 
 # Heroku deployment
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ Procfile runtime.txt requirements.txt \
   --git-log-count 6 \
   --output heroku-deployment.md
@@ -335,14 +335,14 @@ contextcraft bundle \
 
 ```bash
 # Notebook project context
-contextcraft bundle \
+codebrief bundle \
   --output notebook-project.md \
   --flatten notebooks/ src/ data/ requirements.txt \
   --exclude-tree \
   --git-log-count 10
 
 # Research notebook bundle
-contextcraft bundle \
+codebrief bundle \
   --flatten notebooks/research/ src/analysis/ \
   --git-log-count 5 \
   --output research-context.md
@@ -352,13 +352,13 @@ contextcraft bundle \
 
 ```bash
 # ML pipeline context
-contextcraft bundle \
+codebrief bundle \
   --output ml-pipeline.md \
   --flatten src/pipeline/ models/ training/ \
   --git-log-count 12
 
 # Model training context
-contextcraft bundle \
+codebrief bundle \
   --flatten training/ models/ config/ \
   --git-log-count 8 \
   --output model-training.md
@@ -370,7 +370,7 @@ contextcraft bundle \
 
 ```toml
 # pyproject.toml for Python projects
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_bundle = "context/python-project-bundle.md"
 default_output_filename_git_info = "context/git-info.md"
 
@@ -436,18 +436,18 @@ global_include_patterns = [
 # ~/.bashrc or ~/.zshrc
 
 # Python development aliases
-alias ccpy='contextcraft bundle --flatten src/ tests/ --git-log-count 10'
-alias cctest='contextcraft bundle --flatten tests/ --exclude-deps --git-log-count 5'
-alias ccdev='contextcraft bundle --git-full-diff --flatten src/'
+alias ccpy='codebrief bundle --flatten src/ tests/ --git-log-count 10'
+alias cctest='codebrief bundle --flatten tests/ --exclude-deps --git-log-count 5'
+alias ccdev='codebrief bundle --git-full-diff --flatten src/'
 
 # Project type aliases
-alias ccflask='contextcraft bundle --flatten app/ templates/ requirements.txt'
-alias ccdjango='contextcraft bundle --flatten myproject/ manage.py requirements.txt'
-alias ccfastapi='contextcraft bundle --flatten app/ requirements.txt'
+alias ccflask='codebrief bundle --flatten app/ templates/ requirements.txt'
+alias ccdjango='codebrief bundle --flatten myproject/ manage.py requirements.txt'
+alias ccfastapi='codebrief bundle --flatten app/ requirements.txt'
 
 # Data science aliases
-alias ccnotebook='contextcraft bundle --flatten notebooks/ src/ --exclude-tree'
-alias ccml='contextcraft bundle --flatten models/ training/ src/'
+alias ccnotebook='codebrief bundle --flatten notebooks/ src/ --exclude-tree'
+alias ccml='codebrief bundle --flatten models/ training/ src/'
 ```
 
 ## 🎯 Best Practices for Python Projects
@@ -456,17 +456,17 @@ alias ccml='contextcraft bundle --flatten models/ training/ src/'
 
 ```bash
 # Well-organized Python project structure
-contextcraft tree --output project-structure.txt
+codebrief tree --output project-structure.txt
 
 # Source code focus
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ \
   --exclude-deps \
   --git-log-count 8 \
   --output source-code-context.md
 
 # Test organization
-contextcraft bundle \
+codebrief bundle \
   --flatten tests/ \
   --exclude-deps \
   --git-log-count 5 \
@@ -477,13 +477,13 @@ contextcraft bundle \
 
 ```bash
 # Documentation bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten docs/ README.md CHANGELOG.md \
   --output documentation-bundle.md
 
 # API documentation context
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ docs/api/ \
   --exclude-deps \
   --output api-docs-context.md
@@ -493,14 +493,14 @@ contextcraft bundle \
 
 ```bash
 # Large Python project optimization
-contextcraft bundle \
+codebrief bundle \
   --exclude-tree \
   --git-log-count 5 \
   --flatten src/core/ \
   --output optimized-python-context.md
 
 # Memory-efficient for huge codebases
-contextcraft bundle \
+codebrief bundle \
   --exclude-files \
   --git-log-count 10 \
   --output metadata-only-python.md
@@ -512,19 +512,19 @@ contextcraft bundle \
 
 ```bash
 # Virtual environment conflicts
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --flatten src/ requirements.txt \
   --output venv-safe-context.md
 
 # Large dependency trees
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --flatten src/ tests/ \
   --output no-deps-context.md
 
 # Binary file handling
-contextcraft bundle \
+codebrief bundle \
   --flatten src/ \
   --git-diff-options "--name-only" \
   --output binary-safe-context.md
@@ -532,4 +532,4 @@ contextcraft bundle \
 
 ---
 
-*These examples demonstrate how to effectively use ContextCraft across different Python project types and development workflows.*
+*These examples demonstrate how to effectively use codebrief across different Python project types and development workflows.*

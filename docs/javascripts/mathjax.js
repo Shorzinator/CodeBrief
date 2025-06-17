@@ -1,4 +1,4 @@
-// MathJax Configuration for ContextCraft Documentation
+// MathJax Configuration for codebrief Documentation
 
 window.MathJax = {
     tex: {
@@ -16,7 +16,7 @@ window.MathJax = {
     startup: {
         ready: function() {
             MathJax.startup.defaultReady();
-            console.log('MathJax is ready for ContextCraft documentation! 📊');
+            console.log('MathJax is ready for codebrief documentation! 📊');
         }
     },
     svg: {

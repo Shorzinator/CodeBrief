@@ -1,9 +1,9 @@
 <div align="center">
 
-# ContextCraft
+# codebrief
 
-[![CI](https://github.com/Shorzinator/ContextCraft/workflows/ContextCraft%20CI/badge.svg)](https://github.com/Shorzinator/ContextCraft/actions)
-[![Coverage](https://img.shields.io/badge/coverage-77%25-yellow)](https://github.com/Shorzinator/ContextCraft)
+[![CI](https://github.com/Shorzinator/codebrief/workflows/codebrief%20CI/badge.svg)](https://github.com/Shorzinator/codebrief/actions)
+[![Coverage](https://img.shields.io/badge/coverage-77%25-yellow)](https://github.com/Shorzinator/codebrief)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -14,11 +14,11 @@
 
 </div>
 
-ContextCraft is a production-ready CLI toolkit that solves the core problem developers face when working with AI assistants: manually preparing context from their projects. Whether you're debugging with ChatGPT, explaining your codebase to Claude, or preparing documentation for any LLM, ContextCraft provides the essential tools to create rich, contextual project summaries in seconds, not minutes.
+codebrief is a production-ready CLI toolkit that solves the core problem developers face when working with AI assistants: manually preparing context from their projects. Whether you're debugging with ChatGPT, explaining your codebase to Claude, or preparing documentation for any LLM, codebrief provides the essential tools to create rich, contextual project summaries in seconds, not minutes.
 
 ## Core Problem Solved
 
-Developers waste 5-10 minutes manually copying files, explaining project structure, and gathering context every time they need AI assistance. ContextCraft reduces this to a single command that takes seconds.
+Developers waste 5-10 minutes manually copying files, explaining project structure, and gathering context every time they need AI assistance. codebrief reduces this to a single command that takes seconds.
 
 ## Essential Features
 
@@ -72,41 +72,41 @@ Developers waste 5-10 minutes manually copying files, explaining project structu
 
 ```bash
 # Install from PyPI
-pip install contextcraft
+pip install codebrief
 
 # Or install with Poetry
-poetry add contextcraft
+poetry add codebrief
 ```
 
 ### Basic Usage
 
 ```bash
 # Generate a directory tree
-contextcraft tree
+codebrief tree
 
 # Save tree to file
-contextcraft tree -o project_structure.txt
+codebrief tree -o project_structure.txt
 
 # Copy tree to clipboard
-contextcraft tree --to-clipboard
+codebrief tree --to-clipboard
 
 # Flatten code files
-contextcraft flatten src/ -o flattened_code.md
+codebrief flatten src/ -o flattened_code.md
 
 # Copy flattened code to clipboard
-contextcraft flatten src/ -c
+codebrief flatten src/ -c
 
 # Analyze dependencies
-contextcraft deps
+codebrief deps
 
 # Get Git context
-contextcraft git-info
+codebrief git-info
 
 # Create a comprehensive bundle
-contextcraft bundle -o project_context.md
+codebrief bundle -o project_context.md
 
 # Copy bundle to clipboard
-contextcraft bundle --to-clipboard
+codebrief bundle --to-clipboard
 ```
 
 ### Configuration
@@ -126,7 +126,7 @@ dist/
 Configure defaults in `pyproject.toml`:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_tree = "project_tree.txt"
 default_output_filename_flatten = "flattened_code.md"
 default_output_filename_deps = "dependencies.md"
@@ -142,16 +142,16 @@ global_exclude_patterns = [
 
 ## Documentation
 
-**[Live Documentation Website](https://shorzinator.github.io/ContextCraft/)**
+**[Live Documentation Website](https://shorzinator.github.io/codebrief/)**
 
 Comprehensive documentation including:
 
-- **[Getting Started](https://shorzinator.github.io/ContextCraft/getting-started/installation/)** - Installation and basic usage
-- **[CLI Commands](https://shorzinator.github.io/ContextCraft/user-guide/cli-commands/)** - Complete command reference
-- **[Configuration](https://shorzinator.github.io/ContextCraft/getting-started/configuration/)** - Advanced configuration options
-- **[API Reference](https://shorzinator.github.io/ContextCraft/reference/)** - Detailed API documentation
-- **[Examples](https://shorzinator.github.io/ContextCraft/examples/)** - Real-world usage examples
-- **[Tutorials](https://shorzinator.github.io/ContextCraft/tutorials/)** - Step-by-step guides
+- **[Getting Started](https://shorzinator.github.io/codebrief/getting-started/installation/)** - Installation and basic usage
+- **[CLI Commands](https://shorzinator.github.io/codebrief/user-guide/cli-commands/)** - Complete command reference
+- **[Configuration](https://shorzinator.github.io/codebrief/getting-started/configuration/)** - Advanced configuration options
+- **[API Reference](https://shorzinator.github.io/codebrief/reference/)** - Detailed API documentation
+- **[Examples](https://shorzinator.github.io/codebrief/examples/)** - Real-world usage examples
+- **[Tutorials](https://shorzinator.github.io/codebrief/tutorials/)** - Step-by-step guides
 
 ## Development
 
@@ -165,8 +165,8 @@ Comprehensive documentation including:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Shorzinator/ContextCraft.git
-cd ContextCraft
+git clone https://github.com/Shorzinator/codebrief.git
+cd codebrief
 
 # Install dependencies
 poetry install --with dev
@@ -178,7 +178,7 @@ poetry run pre-commit install
 poetry run pytest
 
 # Run with coverage
-poetry run pytest --cov=src/contextcraft --cov-report=html
+poetry run pytest --cov=src/codebrief --cov-report=html
 ```
 
 ### Code Quality
@@ -213,7 +213,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Project Status
 
-ContextCraft is actively developed and maintained. Current status:
+codebrief is actively developed and maintained. Current status:
 
 - **Core Tools**: All primary tools implemented and tested
 - **CLI Interface**: Complete command-line interface
@@ -226,7 +226,7 @@ ContextCraft is actively developed and maintained. Current status:
 
 <div align="center">
 
-**[Documentation](https://shorzinator.github.io/ContextCraft/) • [Issues](https://github.com/Shorzinator/ContextCraft/issues) • [Discussions](https://shorzinator.github.io/ContextCraft/community/)**
+**[Documentation](https://shorzinator.github.io/codebrief/) • [Issues](https://github.com/Shorzinator/codebrief/issues) • [Discussions](https://shorzinator.github.io/codebrief/community/)**
 
 Made for the developer community
 

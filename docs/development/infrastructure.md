@@ -1,6 +1,6 @@
 # Project Infrastructure
 
-ContextCraft follows professional development practices with comprehensive project infrastructure for maintainability, security, and community engagement.
+codebrief follows professional development practices with comprehensive project infrastructure for maintainability, security, and community engagement.
 
 ## Overview
 
@@ -193,7 +193,7 @@ According to memory from a previous conversation, we use robust content-based te
 Professional CI/CD pipeline:
 
 ```yaml
-name: ContextCraft CI
+name: codebrief CI
 
 on: [push, pull_request]
 
@@ -270,7 +270,7 @@ Centralized project configuration:
 
 ```toml
 [project]
-name = "contextcraft"
+name = "codebrief"
 version = "0.1.0"
 description = "A powerful CLI toolkit for LLM-ready project context"
 authors = [{name = "Shourya Maheshwari", email = "shorz2905@gmail.com"}]
@@ -278,7 +278,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
 
-[tool.contextcraft]
+[tool.codebrief]
 # Application-specific configuration
 default_output_filename_tree = "project-tree.txt"
 global_exclude_patterns = ["*.log", "*.tmp", "__pycache__/", "node_modules/"]
@@ -292,7 +292,7 @@ target-version = "py39"
 # Testing configuration
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
-addopts = "--cov=contextcraft --cov-report=term-missing"
+addopts = "--cov=codebrief --cov-report=term-missing"
 
 [tool.bandit]
 # Security scanning configuration
@@ -372,4 +372,4 @@ skips = ["B101"]  # Skip assert_used test
 
 ---
 
-This infrastructure ensures ContextCraft maintains professional standards for security, quality, documentation, and community engagement while providing a solid foundation for future growth and enterprise adoption.
+This infrastructure ensures codebrief maintains professional standards for security, quality, documentation, and community engagement while providing a solid foundation for future growth and enterprise adoption.

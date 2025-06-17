@@ -1,6 +1,6 @@
-# <center> ContextCraft Code of Conduct: The Art of Awesome Collaboration</center>
+# <center> codebrief Code of Conduct: The Art of Awesome Collaboration</center>
 
-Welcome to ContextCraft! We're thrilled you're here and excited to see what amazing things we can build together. To ensure our community is a fantastic place for everyone, we've put together a few guidelines. Think of them less as "rules" and more as "recipes for a delicious collaboration stew."
+Welcome to codebrief! We're thrilled you're here and excited to see what amazing things we can build together. To ensure our community is a fantastic place for everyone, we've put together a few guidelines. Think of them less as "rules" and more as "recipes for a delicious collaboration stew."
 
 ## Our Pledge: Crafting a Great Experience
 
@@ -40,7 +40,7 @@ Project maintainers have the right and responsibility to remove, edit, or reject
 
 ## Scope: Where Does This Culinary Code Apply?
 
-This Code of Conduct applies within all project spaces (GitHub repository, issue tracker, pull requests, any official communication channels like Slack or Discord if they exist), and it also applies when an individual is representing the project or its community in public spaces. Representing ContextCraft might mean using an official project email address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Let's make ContextCraft look good everywhere!
+This Code of Conduct applies within all project spaces (GitHub repository, issue tracker, pull requests, any official communication channels like Slack or Discord if they exist), and it also applies when an individual is representing the project or its community in public spaces. Representing codebrief might mean using an official project email address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Let's make codebrief look good everywhere!
 
 ## Enforcement: When the Soufflé Falls Flat
 

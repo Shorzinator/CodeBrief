@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `bundler` module provides comprehensive context aggregation functionality, combining multiple ContextCraft tools into structured, well-organized bundles. It orchestrates the execution of tree generation, Git context extraction, dependency analysis, and file flattening to create comprehensive project context documents.
+The `bundler` module provides comprehensive context aggregation functionality, combining multiple codebrief tools into structured, well-organized bundles. It orchestrates the execution of tree generation, Git context extraction, dependency analysis, and file flattening to create comprehensive project context documents.
 
 ## Key Features
 
@@ -90,7 +90,7 @@ Generate flattened files content for the bundle.
 
 ```python
 from pathlib import Path
-from contextcraft.tools.bundler import create_bundle
+from codebrief.tools.bundler import create_bundle
 
 # Create complete bundle
 create_bundle(
@@ -117,7 +117,7 @@ create_bundle(
 
 ```python
 # This is how the CLI command uses the function
-from contextcraft.tools.bundler import create_bundle
+from codebrief.tools.bundler import create_bundle
 
 def bundle_command(
     root_dir: Path,
@@ -150,19 +150,19 @@ def bundle_command(
 The bundler creates well-organized Markdown documents:
 
 ```markdown
-# ContextCraft Bundle
+# codebrief Bundle
 
 ## Table of Contents
 - [Directory Tree](#directory-tree)
 - [Git Context](#git-context)
 - [Dependencies](#dependencies)
-- [Files: src/contextcraft/tools](#files-srccontextcrafttools)
+- [Files: src/codebrief/tools](#files-srccodebrieftools)
 
 ## Directory Tree
 📁 my-project/
 ├── 📄 README.md
 ├── 📁 src/
-│   └── 📁 contextcraft/
+│   └── 📁 codebrief/
 └── 📁 tests/
 
 ## Git Context
@@ -182,11 +182,11 @@ The bundler creates well-organized Markdown documents:
 - typer: ^0.9.0
 - rich: ^13.0.0
 
-## Files: src/contextcraft/tools
-# --- File: src/contextcraft/tools/bundler.py ---
+## Files: src/codebrief/tools
+# --- File: src/codebrief/tools/bundler.py ---
 [File contents...]
 
-# --- File: src/contextcraft/tools/git_provider.py ---
+# --- File: src/codebrief/tools/git_provider.py ---
 [File contents...]
 ```
 
@@ -245,10 +245,10 @@ create_bundle(
 
 ## Configuration Integration
 
-Works seamlessly with ContextCraft's configuration system:
+Works seamlessly with codebrief's configuration system:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_bundle = "project-bundle.md"
 global_exclude_patterns = ["*.pyc", "__pycache__/", ".venv/"]
 ```
@@ -275,11 +275,11 @@ The module includes comprehensive test coverage:
 - **pathlib**: For path handling
 - **typing**: For type annotations
 - **io.StringIO**: For output capture and manipulation
-- **contextcraft.tools.tree_generator**: Directory tree generation
-- **contextcraft.tools.git_provider**: Git context extraction
-- **contextcraft.tools.dependency_lister**: Dependency analysis
-- **contextcraft.tools.flattener**: File content aggregation
-- **contextcraft.utils.config_manager**: Configuration management
+- **codebrief.tools.tree_generator**: Directory tree generation
+- **codebrief.tools.git_provider**: Git context extraction
+- **codebrief.tools.dependency_lister**: Dependency analysis
+- **codebrief.tools.flattener**: File content aggregation
+- **codebrief.utils.config_manager**: Configuration management
 
 ## Related Modules
 

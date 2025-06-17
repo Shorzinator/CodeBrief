@@ -277,7 +277,7 @@ CodeBrief is built with modern Python best practices:
 
     Found a bug or have a feature request? Open an issue with our detailed templates.
 
-    [:octicons-arrow-right-24: Report Issues](https://github.com/Shorzinator/ContextCraft/issues)
+    [:octicons-arrow-right-24: Report Issues](https://github.com/Shorzinator/codebrief/issues)
 
 -   **Discussions**
 
@@ -285,7 +285,7 @@ CodeBrief is built with modern Python best practices:
 
     Join the community discussion for questions, ideas, and collaboration.
 
-    [:octicons-arrow-right-24: Join Discussion](https://github.com/Shorzinator/ContextCraft/discussions)
+    [:octicons-arrow-right-24: Join Discussion](https://github.com/Shorzinator/codebrief/discussions)
 
 -   **Security**
 
@@ -293,7 +293,7 @@ CodeBrief is built with modern Python best practices:
 
     Report security vulnerabilities through our responsible disclosure process.
 
-    [:octicons-arrow-right-24: Security Policy](https://github.com/Shorzinator/ContextCraft/security)
+    [:octicons-arrow-right-24: Security Policy](https://github.com/Shorzinator/codebrief/security)
 
 -   **Contributing**
 
@@ -312,7 +312,7 @@ CodeBrief is built with modern Python best practices:
 - **[Configuration Guide](getting-started/configuration.md)** - Advanced setup and customization
 - **[Bundle Workflows](examples/bundle-workflows.md)** - Real-world usage examples
 - **[Contributing Guidelines](development/contributing.md)** - Join the development community
-- **[Security Policy](https://github.com/Shorzinator/ContextCraft/blob/main/SECURITY.md)** - Report vulnerabilities responsibly
+- **[Security Policy](https://github.com/Shorzinator/codebrief/blob/main/SECURITY.md)** - Report vulnerabilities responsibly
 
 ---
 

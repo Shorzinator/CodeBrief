@@ -1,6 +1,6 @@
 # Advanced Workflows
 
-Master ContextCraft with sophisticated workflows, automation patterns, and integration strategies for professional development environments.
+Master codebrief with sophisticated workflows, automation patterns, and integration strategies for professional development environments.
 
 ## Overview
 
@@ -34,30 +34,30 @@ mkdir -p "$OUTPUT_DIR"
 echo "🔄 Generating comprehensive project context..."
 
 # Core context files
-contextcraft bundle \
+codebrief bundle \
   --output "$OUTPUT_DIR/complete-context-$TIMESTAMP.md" \
   "$PROJECT_ROOT"
 
-contextcraft tree \
+codebrief tree \
   --output "$OUTPUT_DIR/structure-$TIMESTAMP.txt" \
   "$PROJECT_ROOT"
 
-contextcraft deps \
+codebrief deps \
   --output "$OUTPUT_DIR/dependencies-$TIMESTAMP.md" \
   "$PROJECT_ROOT"
 
-contextcraft git-info \
+codebrief git-info \
   --log-count 10 \
   --output "$OUTPUT_DIR/git-context-$TIMESTAMP.md" \
   "$PROJECT_ROOT"
 
 # Specialized contexts
-contextcraft flatten "$PROJECT_ROOT/src" \
+codebrief flatten "$PROJECT_ROOT/src" \
   --include "*.py" \
   --exclude "*test*" "*__pycache__*" \
   --output "$OUTPUT_DIR/source-code-$TIMESTAMP.md"
 
-contextcraft flatten "$PROJECT_ROOT" \
+codebrief flatten "$PROJECT_ROOT" \
   --include "*.md" "*.rst" "*.txt" \
   --exclude "**/node_modules/**" "**/venv/**" \
   --output "$OUTPUT_DIR/documentation-$TIMESTAMP.md"
@@ -81,16 +81,16 @@ TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
 context:
 	@echo "Generating comprehensive project context..."
 	@mkdir -p $(CONTEXT_DIR)
-	poetry run contextcraft bundle --output $(CONTEXT_DIR)/bundle-$(TIMESTAMP).md
-	poetry run contextcraft tree --output $(CONTEXT_DIR)/tree-$(TIMESTAMP).txt
-	poetry run contextcraft deps --output $(CONTEXT_DIR)/deps-$(TIMESTAMP).md
-	poetry run contextcraft git-info --output $(CONTEXT_DIR)/git-$(TIMESTAMP).md
+	poetry run codebrief bundle --output $(CONTEXT_DIR)/bundle-$(TIMESTAMP).md
+	poetry run codebrief tree --output $(CONTEXT_DIR)/tree-$(TIMESTAMP).txt
+	poetry run codebrief deps --output $(CONTEXT_DIR)/deps-$(TIMESTAMP).md
+	poetry run codebrief git-info --output $(CONTEXT_DIR)/git-$(TIMESTAMP).md
 	@echo "Context files generated in $(CONTEXT_DIR)/"
 
 # Development-focused context
 context-dev:
 	@mkdir -p $(CONTEXT_DIR)
-	poetry run contextcraft bundle \
+	poetry run codebrief bundle \
 		--exclude-deps \
 		--git-full-diff \
 		--flatten src/ tests/ \
@@ -99,7 +99,7 @@ context-dev:
 # Code review context
 context-review:
 	@mkdir -p $(CONTEXT_DIR)
-	poetry run contextcraft bundle \
+	poetry run codebrief bundle \
 		--git-log-count 5 \
 		--git-full-diff \
 		--output $(CONTEXT_DIR)/review-context-$(TIMESTAMP).md
@@ -137,10 +137,10 @@ class ContextGenerator:
         """Create output directory if it doesn't exist."""
         self.output_dir.mkdir(exist_ok=True)
 
-    def run_contextcraft(self, command: List[str], output_file: str) -> bool:
-        """Run a contextcraft command and save output."""
+    def run_codebrief(self, command: List[str], output_file: str) -> bool:
+        """Run a codebrief command and save output."""
         try:
-            full_command = ["poetry", "run", "contextcraft"] + command + [
+            full_command = ["poetry", "run", "codebrief"] + command + [
                 "--output", str(self.output_dir / output_file)
             ]
 
@@ -167,26 +167,26 @@ class ContextGenerator:
 
         for command, output_file in contexts:
             print(f"Generating {output_file}...")
-            self.run_contextcraft(command, output_file)
+            self.run_codebrief(command, output_file)
 
     def generate_specialized_context(self):
         """Generate specialized context files."""
         # Source code only
-        self.run_contextcraft([
+        self.run_codebrief([
             "flatten", "src/",
             "--include", "*.py",
             "--exclude", "*test*", "*__pycache__*"
         ], f"source-code-{self.timestamp}.md")
 
         # Documentation only
-        self.run_contextcraft([
+        self.run_codebrief([
             "flatten", ".",
             "--include", "*.md", "*.rst", "*.txt",
             "--exclude", "**/node_modules/**", "**/venv/**"
         ], f"documentation-{self.timestamp}.md")
 
         # Tests only
-        self.run_contextcraft([
+        self.run_codebrief([
             "flatten", "tests/",
             "--include", "*.py"
         ], f"tests-{self.timestamp}.md")
@@ -210,7 +210,7 @@ class ContextGenerator:
 
         for bundle_type, config in bundles.items():
             print(f"Generating {bundle_type} bundle...")
-            self.run_contextcraft(
+            self.run_codebrief(
                 ["bundle"] + config["args"],
                 config["filename"]
             )
@@ -274,7 +274,7 @@ class ContextGenerator:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Advanced ContextCraft automation")
+    parser = argparse.ArgumentParser(description="Advanced codebrief automation")
     parser.add_argument("--project-root", default=".", help="Project root directory")
     parser.add_argument("--output-dir", default="context-outputs", help="Output directory")
 
@@ -332,7 +332,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Install ContextCraft
+      - name: Install codebrief
         run: poetry install --no-interaction
 
       - name: Generate Context Files
@@ -340,22 +340,22 @@ jobs:
           mkdir -p context-outputs
 
           # Generate comprehensive bundle
-          poetry run contextcraft bundle \
+          poetry run codebrief bundle \
             --output context-outputs/project-bundle.md
 
           # Generate focused contexts
-          poetry run contextcraft tree \
+          poetry run codebrief tree \
             --output context-outputs/project-structure.txt
 
-          poetry run contextcraft deps \
+          poetry run codebrief deps \
             --output context-outputs/dependencies.md
 
-          poetry run contextcraft git-info \
+          poetry run codebrief git-info \
             --log-count 10 \
             --output context-outputs/git-context.md
 
           # Generate specialized bundles
-          poetry run contextcraft bundle \
+          poetry run codebrief bundle \
             --exclude-deps \
             --git-full-diff \
             --flatten src/ tests/ \
@@ -414,14 +414,14 @@ generate-context:
     - mkdir -p $CONTEXT_DIR
 
     # Generate context files
-    - poetry run contextcraft bundle --output $CONTEXT_DIR/project-bundle.md
-    - poetry run contextcraft tree --output $CONTEXT_DIR/structure.txt
-    - poetry run contextcraft deps --output $CONTEXT_DIR/dependencies.md
-    - poetry run contextcraft git-info --log-count 15 --output $CONTEXT_DIR/git-context.md
+    - poetry run codebrief bundle --output $CONTEXT_DIR/project-bundle.md
+    - poetry run codebrief tree --output $CONTEXT_DIR/structure.txt
+    - poetry run codebrief deps --output $CONTEXT_DIR/dependencies.md
+    - poetry run codebrief git-info --log-count 15 --output $CONTEXT_DIR/git-context.md
 
     # Generate specialized contexts
-    - poetry run contextcraft flatten src/ --include "*.py" --output $CONTEXT_DIR/source-code.md
-    - poetry run contextcraft bundle --exclude-deps --git-full-diff --output $CONTEXT_DIR/debug-context.md
+    - poetry run codebrief flatten src/ --include "*.py" --output $CONTEXT_DIR/source-code.md
+    - poetry run codebrief bundle --exclude-deps --git-full-diff --output $CONTEXT_DIR/debug-context.md
 
   artifacts:
     paths:
@@ -492,25 +492,25 @@ pipeline {
                 stage('Bundle Context') {
                     steps {
                         sh "mkdir -p ${CONTEXT_DIR}"
-                        sh "poetry run contextcraft bundle --output ${CONTEXT_DIR}/project-bundle.md"
+                        sh "poetry run codebrief bundle --output ${CONTEXT_DIR}/project-bundle.md"
                     }
                 }
 
                 stage('Structure Context') {
                     steps {
-                        sh "poetry run contextcraft tree --output ${CONTEXT_DIR}/structure.txt"
+                        sh "poetry run codebrief tree --output ${CONTEXT_DIR}/structure.txt"
                     }
                 }
 
                 stage('Dependencies Context') {
                     steps {
-                        sh "poetry run contextcraft deps --output ${CONTEXT_DIR}/dependencies.md"
+                        sh "poetry run codebrief deps --output ${CONTEXT_DIR}/dependencies.md"
                     }
                 }
 
                 stage('Git Context') {
                     steps {
-                        sh "poetry run contextcraft git-info --log-count 10 --output ${CONTEXT_DIR}/git-context.md"
+                        sh "poetry run codebrief git-info --log-count 10 --output ${CONTEXT_DIR}/git-context.md"
                     }
                 }
             }
@@ -559,31 +559,31 @@ echo "🔄 Optimizing context generation for large project..."
 mkdir -p "$OUTPUT_DIR/focused"
 
 # Core architecture (exclude tests and build artifacts)
-contextcraft tree \
+codebrief tree \
   --ignore "tests/" "build/" "dist/" "node_modules/" "__pycache__/" \
   --output "$OUTPUT_DIR/focused/core-structure.txt" \
   "$PROJECT_ROOT"
 
 # Main source code only (exclude tests, docs, configs)
-contextcraft flatten "$PROJECT_ROOT/src" \
+codebrief flatten "$PROJECT_ROOT/src" \
   --include "*.py" "*.js" "*.ts" "*.go" "*.rs" \
   --exclude "*test*" "*spec*" "*__pycache__*" \
   --output "$OUTPUT_DIR/focused/main-source.md"
 
 # Recent changes only (last 5 commits)
-contextcraft git-info \
+codebrief git-info \
   --log-count 5 \
   --diff-options "--stat" \
   --output "$OUTPUT_DIR/focused/recent-changes.md" \
   "$PROJECT_ROOT"
 
 # Critical dependencies only
-contextcraft deps \
+codebrief deps \
   --output "$OUTPUT_DIR/focused/dependencies.md" \
   "$PROJECT_ROOT"
 
 # Create a minimal bundle
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten "$PROJECT_ROOT/src/core" "$PROJECT_ROOT/src/main" \
   --output "$OUTPUT_DIR/focused/minimal-bundle.md" \
@@ -613,11 +613,11 @@ class ParallelContextGenerator:
         self.output_dir.mkdir(exist_ok=True)
 
     def run_command(self, command_config: Tuple[List[str], str]) -> Tuple[bool, str]:
-        """Run a single contextcraft command."""
+        """Run a single codebrief command."""
         command, output_file = command_config
 
         try:
-            full_command = ["poetry", "run", "contextcraft"] + command + [
+            full_command = ["poetry", "run", "codebrief"] + command + [
                 "--output", str(self.output_dir / output_file)
             ]
 
@@ -674,7 +674,7 @@ Create reusable templates for common scenarios:
 #!/bin/bash
 # Code Review Context Template
 
-contextcraft bundle \
+codebrief bundle \
   --output "review-context.md" \
   --git-log-count 5 \
   --git-full-diff \
@@ -692,18 +692,18 @@ echo "🔗 Share this with reviewers or paste into LLM for analysis"
 PROJECT_PATH="${1:-.}"
 ISSUE_AREA="${2:-src/}"
 
-contextcraft git-info \
+codebrief git-info \
   --full-diff \
   --diff-options "--stat" \
   --output "debug-git-context.md" \
   "$PROJECT_PATH"
 
-contextcraft flatten "$ISSUE_AREA" \
+codebrief flatten "$ISSUE_AREA" \
   --include "*.py" "*.js" "*.ts" \
   --exclude "*test*" \
   --output "debug-code-context.md"
 
-contextcraft bundle \
+codebrief bundle \
   --exclude-deps \
   --git-full-diff \
   --flatten "$ISSUE_AREA" \
@@ -719,16 +719,16 @@ echo "Files: debug-git-context.md, debug-code-context.md, debug-bundle.md"
 #!/bin/bash
 # Architecture Analysis Template
 
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten src/ docs/ \
   --output "architecture-context.md"
 
-contextcraft tree \
+codebrief tree \
   --ignore "tests/" "build/" "__pycache__/" \
   --output "architecture-structure.txt"
 
-contextcraft deps \
+codebrief deps \
   --output "architecture-dependencies.md"
 
 echo "🏗️ Architecture context generated"
@@ -738,23 +738,23 @@ echo "Files: architecture-context.md, architecture-structure.txt, architecture-d
 ### Configuration Templates
 
 ```toml
-# .contextcraft/templates/minimal.toml
-[tool.contextcraft]
+# .codebrief/templates/minimal.toml
+[tool.codebrief]
 default_output_filename_bundle = "minimal-bundle.md"
 global_exclude_patterns = [
     "*.log", "*.tmp", "__pycache__/", "node_modules/",
     "build/", "dist/", ".git/", ".venv/"
 ]
 
-[tool.contextcraft.bundle]
+[tool.codebrief.bundle]
 exclude_deps = true
 exclude_git = true
 flatten_paths = ["src/core/"]
 ```
 
 ```toml
-# .contextcraft/templates/comprehensive.toml
-[tool.contextcraft]
+# .codebrief/templates/comprehensive.toml
+[tool.codebrief]
 default_output_filename_bundle = "comprehensive-bundle.md"
 default_output_filename_tree = "full-structure.txt"
 default_output_filename_deps = "all-dependencies.md"
@@ -765,7 +765,7 @@ global_exclude_patterns = [
     "node_modules/", ".git/"
 ]
 
-[tool.contextcraft.bundle]
+[tool.codebrief.bundle]
 git_log_count = 15
 git_full_diff = true
 flatten_paths = ["src/", "tests/", "docs/"]
@@ -786,13 +786,13 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 case "$CONTEXT_TYPE" in
   "onboarding")
-    contextcraft bundle \
+    codebrief bundle \
       --output "${OUTPUT_PREFIX}-onboarding-${TIMESTAMP}.md" \
       --flatten src/ docs/ README.md
     ;;
 
   "review")
-    contextcraft bundle \
+    codebrief bundle \
       --output "${OUTPUT_PREFIX}-review-${TIMESTAMP}.md" \
       --git-log-count 10 \
       --git-full-diff \
@@ -800,14 +800,14 @@ case "$CONTEXT_TYPE" in
     ;;
 
   "architecture")
-    contextcraft bundle \
+    codebrief bundle \
       --output "${OUTPUT_PREFIX}-architecture-${TIMESTAMP}.md" \
       --exclude-git \
       --flatten src/ docs/architecture/
     ;;
 
   "debug")
-    contextcraft bundle \
+    codebrief bundle \
       --output "${OUTPUT_PREFIX}-debug-${TIMESTAMP}.md" \
       --git-full-diff \
       --exclude-deps \
@@ -815,7 +815,7 @@ case "$CONTEXT_TYPE" in
     ;;
 
   *)
-    contextcraft bundle \
+    codebrief bundle \
       --output "${OUTPUT_PREFIX}-standard-${TIMESTAMP}.md"
     ;;
 esac
@@ -831,17 +831,17 @@ echo "✅ Team context ($CONTEXT_TYPE) generated: ${OUTPUT_PREFIX}-${CONTEXT_TYP
 # Automatically update documentation with fresh context
 
 # Generate fresh context for documentation
-contextcraft tree --output docs/project-structure.txt
-contextcraft deps --output docs/dependencies.md
+codebrief tree --output docs/project-structure.txt
+codebrief deps --output docs/dependencies.md
 
 # Update architecture documentation
-contextcraft bundle \
+codebrief bundle \
   --exclude-git \
   --flatten src/core/ src/api/ \
   --output docs/architecture-context.md
 
 # Generate API context
-contextcraft flatten src/api/ \
+codebrief flatten src/api/ \
   --include "*.py" \
   --exclude "*test*" \
   --output docs/api-context.md
@@ -926,7 +926,7 @@ class ContextMetrics:
 
     def get_performance_report(self) -> str:
         """Generate a performance report."""
-        report = ["📊 ContextCraft Performance Report", "=" * 40]
+        report = ["📊 codebrief Performance Report", "=" * 40]
 
         report.append(f"Total generations: {self.metrics['total_generations']}")
         report.append(f"Commands used: {len(self.metrics['command_usage'])}")
@@ -950,14 +950,14 @@ class ContextMetrics:
         return "\n".join(report)
 
 # Usage wrapper
-def timed_contextcraft_run(command: str, metrics: ContextMetrics):
-    """Wrapper to time contextcraft commands and record metrics."""
+def timed_codebrief_run(command: str, metrics: ContextMetrics):
+    """Wrapper to time codebrief commands and record metrics."""
     import subprocess
 
     start_time = time.time()
     try:
         result = subprocess.run(
-            ["poetry", "run", "contextcraft"] + command.split(),
+            ["poetry", "run", "codebrief"] + command.split(),
             capture_output=True,
             text=True,
             check=True
@@ -982,4 +982,4 @@ if __name__ == "__main__":
 - **[CI/CD Integration Tutorial](cicd-integration.md)** - Detailed CI/CD setup
 - **[LLM Integration Guide](llm-integration.md)** - AI-specific workflows
 - **[Configuration Reference](../getting-started/configuration.md)** - Advanced configuration
-- **[Contributing](../development/contributing.md)** - Help improve ContextCraft
+- **[Contributing](../development/contributing.md)** - Help improve codebrief

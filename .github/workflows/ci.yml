@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-# GitHub Actions CI Workflow for the ContextCraft project.
+# GitHub Actions CI Workflow for the CodeBrief project.
 #
 # This workflow automates the process of linting, type checking, security scanning,
 # and running tests for the project on every push and pull request to the
@@ -8,7 +8,7 @@
 # It ensures code quality and catches potential issues early in the development cycle.
 # The workflow uses Poetry for dependency management and caching to speed up builds.
 
-name: ContextCraft CI
+name: CodeBrief CI
 
 # Controls when the workflow will run
 on:
@@ -64,17 +64,7 @@ jobs:
 
       - name: Install dependencies with Poetry
         # Installs project dependencies using Poetry.
-        # Runs only if the cache was not hit (i.e., if dependencies changed).
-        # Includes development dependencies needed for linting, testing, etc.
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --with dev
-
-      - name: Activate virtual environment and install project (if not done by poetry install)
-        # Ensure the project itself is installed in editable mode for tools like pytest to find it.
-        # `poetry install --with dev` (without --no-root) should handle this.
-        # If you used --no-root above, you might need: poetry install --with dev
-        # For clarity, let's ensure a full install if cache wasn't hit.
-        # The previous step handles cache miss. This is just to ensure project is installed.
+        # Always install dependencies to ensure dev tools like bandit are available
         run: poetry install --no-interaction --with dev
 
       - name: Run Ruff (Linting and Formatting Check)
@@ -91,7 +81,7 @@ jobs:
       #   # Uses the configuration from pyproject.toml.
       #   # Run from src directory to avoid module path conflicts
       #   run: |
-      #     cd src && poetry run mypy contextcraft
+      #     cd src && poetry run mypy codebrief
 
       - name: Run Bandit (Security Linting)
         # Runs Bandit to check for common security vulnerabilities.
@@ -106,7 +96,7 @@ jobs:
         # This step will run even if no tests are written yet (it will pass with 0 tests).
         run: |
           poetry run pytest \
-            --cov=src/contextcraft \
+            --cov=src/codebrief \
             --cov-report=xml \
             --cov-report=term-missing tests/
           # The --cov-report=xml is useful for uploading coverage to services like Codecov.

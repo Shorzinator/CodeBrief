@@ -1,10 +1,10 @@
 # CLI Commands
 
-Complete reference for all ContextCraft commands, options, and usage patterns.
+Complete reference for all codebrief commands, options, and usage patterns.
 
 ## 📋 Command Overview
 
-ContextCraft provides six main commands for different types of context generation:
+codebrief provides six main commands for different types of context generation:
 
 | Command | Purpose | Output Format |
 |---------|---------|---------------|
@@ -23,13 +23,13 @@ Generate visual representations of your project structure.
 
 ```bash
 # Generate tree for current directory
-contextcraft tree
+codebrief tree
 
 # Generate tree for specific directory
-contextcraft tree /path/to/project
+codebrief tree /path/to/project
 
 # Save tree to file
-contextcraft tree --output project-structure.txt
+codebrief tree --output project-structure.txt
 ```
 
 ### Options
@@ -46,7 +46,7 @@ contextcraft tree --output project-structure.txt
 === "Basic Tree"
 
     ```bash
-    contextcraft tree
+    codebrief tree
     ```
 
     Output:
@@ -66,22 +66,22 @@ contextcraft tree --output project-structure.txt
 === "With Ignores"
 
     ```bash
-    contextcraft tree --ignore "*.pyc" --ignore "__pycache__"
+    codebrief tree --ignore "*.pyc" --ignore "__pycache__"
     ```
 
 === "Save to File"
 
     ```bash
-    contextcraft tree --output docs/project-structure.txt
+    codebrief tree --output docs/project-structure.txt
     ```
 
 === "Copy to Clipboard"
 
     ```bash
     # Copy tree output directly to clipboard
-    contextcraft tree --to-clipboard
+    codebrief tree --to-clipboard
     # or use short form
-    contextcraft tree -c
+    codebrief tree -c
     ```
 
 ### Integration with .llmignore
@@ -97,7 +97,7 @@ __pycache__/
 
 ```bash
 # Automatically excludes patterns from .llmignore
-contextcraft tree
+codebrief tree
 ```
 
 ### Configuration Integration
@@ -105,14 +105,14 @@ contextcraft tree
 Use `pyproject.toml` for default settings:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_tree = "docs/structure.txt"
 global_exclude_patterns = ["*.log", "tmp/"]
 ```
 
 ```bash
 # Uses configuration defaults
-contextcraft tree  # Creates docs/structure.txt
+codebrief tree  # Creates docs/structure.txt
 ```
 
 ## 📄 flatten - Code Flattening
@@ -123,13 +123,13 @@ Concatenate multiple files into a single, LLM-friendly document.
 
 ```bash
 # Flatten all default file types
-contextcraft flatten
+codebrief flatten
 
 # Flatten specific directory
-contextcraft flatten src/
+codebrief flatten src/
 
 # Flatten with custom patterns
-contextcraft flatten . --include "*.py" --include "*.md"
+codebrief flatten . --include "*.py" --include "*.md"
 ```
 
 ### Options
@@ -147,7 +147,7 @@ contextcraft flatten . --include "*.py" --include "*.md"
 === "Python Project"
 
     ```bash
-    contextcraft flatten . \
+    codebrief flatten . \
       --include "*.py" \
       --include "*.md" \
       --include "*.toml" \
@@ -157,7 +157,7 @@ contextcraft flatten . --include "*.py" --include "*.md"
 === "Web Project"
 
     ```bash
-    contextcraft flatten . \
+    codebrief flatten . \
       --include "*.js" \
       --include "*.ts" \
       --include "*.html" \
@@ -171,13 +171,13 @@ contextcraft flatten . --include "*.py" --include "*.md"
 
     ```bash
     # Only source code
-    contextcraft flatten src/ --output source-only.md
+    codebrief flatten src/ --output source-only.md
 
     # Only tests
-    contextcraft flatten tests/ --include "*.py" --output tests-only.md
+    codebrief flatten tests/ --include "*.py" --output tests-only.md
 
     # Copy flattened code to clipboard
-    contextcraft flatten src/ --to-clipboard
+    codebrief flatten src/ --to-clipboard
     ```
 
 ### Output Format
@@ -215,10 +215,10 @@ def test_main():
 
 ### Binary File Handling
 
-ContextCraft gracefully handles binary files:
+codebrief gracefully handles binary files:
 
 ```bash
-contextcraft flatten . --include "*"
+codebrief flatten . --include "*"
 ```
 
 Output includes:
@@ -237,10 +237,10 @@ Analyze and document project dependencies across multiple languages.
 
 ```bash
 # Analyze dependencies in current project
-contextcraft deps
+codebrief deps
 
 # Save dependency report
-contextcraft deps --output dependencies.md
+codebrief deps --output dependencies.md
 ```
 
 ### Options
@@ -264,7 +264,7 @@ contextcraft deps --output dependencies.md
 === "Python Project"
 
     ```bash
-    contextcraft deps --output python-deps.md
+    codebrief deps --output python-deps.md
     ```
 
     Output:
@@ -287,7 +287,7 @@ contextcraft deps --output dependencies.md
 === "Node.js Project"
 
     ```bash
-    contextcraft deps
+    codebrief deps
     ```
 
     Output:
@@ -308,7 +308,7 @@ contextcraft deps --output dependencies.md
 === "Multi-Language Project"
 
     ```bash
-    contextcraft deps --output all-deps.md
+    codebrief deps --output all-deps.md
     ```
 
     Output includes both Python and Node.js dependencies.
@@ -321,13 +321,13 @@ Extract comprehensive Git repository information for context generation.
 
 ```bash
 # Generate Git context for current directory
-contextcraft git-info
+codebrief git-info
 
 # Generate Git context for specific repository
-contextcraft git-info /path/to/repo
+codebrief git-info /path/to/repo
 
 # Save Git context to file
-contextcraft git-info --output git-context.md
+codebrief git-info --output git-context.md
 ```
 
 ### Options
@@ -346,7 +346,7 @@ contextcraft git-info --output git-context.md
 === "Basic Git Info"
 
     ```bash
-    contextcraft git-info
+    codebrief git-info
     ```
 
     Output:
@@ -370,7 +370,7 @@ contextcraft git-info --output git-context.md
 === "With Full Diff"
 
     ```bash
-    contextcraft git-info --full-diff --log-count 5
+    codebrief git-info --full-diff --log-count 5
     ```
 
     Includes complete diff of uncommitted changes.
@@ -378,7 +378,7 @@ contextcraft git-info --output git-context.md
 === "Custom Diff Options"
 
     ```bash
-    contextcraft git-info --diff-options "--stat --color=never"
+    codebrief git-info --diff-options "--stat --color=never"
     ```
 
     Uses custom git diff options for change summary.
@@ -395,13 +395,13 @@ The git-info command gracefully handles various scenarios:
 ### Configuration Integration
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_git_info = "docs/git-context.md"
 ```
 
 ```bash
 # Uses configuration default
-contextcraft git-info  # Creates docs/git-context.md
+codebrief git-info  # Creates docs/git-context.md
 ```
 
 ## 📦 bundle - Comprehensive Context Bundling
@@ -412,13 +412,13 @@ Create structured bundles combining multiple context tools for comprehensive pro
 
 ```bash
 # Create complete project bundle
-contextcraft bundle
+codebrief bundle
 
 # Create bundle for specific directory
-contextcraft bundle /path/to/project
+codebrief bundle /path/to/project
 
 # Save bundle to file
-contextcraft bundle --output project-bundle.md
+codebrief bundle --output project-bundle.md
 ```
 
 ### Options
@@ -442,7 +442,7 @@ contextcraft bundle --output project-bundle.md
 === "Complete Bundle"
 
     ```bash
-    contextcraft bundle --output complete-context.md
+    codebrief bundle --output complete-context.md
     ```
 
     Creates a comprehensive bundle with all sections:
@@ -455,7 +455,7 @@ contextcraft bundle --output project-bundle.md
 === "Code Review Bundle"
 
     ```bash
-    contextcraft bundle \
+    codebrief bundle \
       --exclude-deps \
       --flatten src/ tests/ \
       --git-log-count 5 \
@@ -467,7 +467,7 @@ contextcraft bundle --output project-bundle.md
 === "Documentation Bundle"
 
     ```bash
-    contextcraft bundle \
+    codebrief bundle \
       --exclude-git \
       --flatten docs/ README.md \
       --output docs-bundle.md
@@ -479,10 +479,10 @@ contextcraft bundle --output project-bundle.md
 
     ```bash
     # Copy comprehensive bundle directly to clipboard
-    contextcraft bundle --to-clipboard
+    codebrief bundle --to-clipboard
 
     # Copy focused bundle to clipboard
-    contextcraft bundle --flatten src/ -c
+    codebrief bundle --flatten src/ -c
     ```
 
 ### Bundle Structure
@@ -490,13 +490,13 @@ contextcraft bundle --output project-bundle.md
 The bundle command creates well-organized output:
 
 ```markdown
-# ContextCraft Bundle
+# codebrief Bundle
 
 ## Table of Contents
 - [Directory Tree](#directory-tree)
 - [Git Context](#git-context)
 - [Dependencies](#dependencies)
-- [Files: src/contextcraft/tools](#files-srccontextcrafttools)
+- [Files: src/codebrief/tools](#files-srccodebrieftools)
 
 ## Directory Tree
 📁 my-project/
@@ -513,22 +513,22 @@ The bundle command creates well-organized output:
 - typer: ^0.9.0
 - rich: ^13.0.0
 
-## Files: src/contextcraft/tools
-# --- File: src/contextcraft/tools/bundler.py ---
+## Files: src/codebrief/tools
+# --- File: src/codebrief/tools/bundler.py ---
 [File contents...]
 ```
 
 ### Advanced Configuration
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_bundle = "context-bundle.md"
 global_exclude_patterns = ["*.pyc", "__pycache__/"]
 ```
 
 ### Integration with Other Tools
 
-The bundle command leverages all other ContextCraft tools:
+The bundle command leverages all other codebrief tools:
 
 - **tree**: For directory structure
 - **git-info**: For Git context
@@ -543,10 +543,10 @@ A simple example command for testing and demonstration.
 
 ```bash
 # Default greeting
-contextcraft hello
+codebrief hello
 
 # Custom name
-contextcraft hello --name "Developer"
+codebrief hello --name "Developer"
 ```
 
 ### Options
@@ -560,27 +560,27 @@ contextcraft hello --name "Developer"
 
 ```bash
 # Default
-contextcraft hello
-# Output: Hello World from ContextCraft!
+codebrief hello
+# Output: Hello World from codebrief!
 
 # Custom name
-contextcraft hello --name "Alice"
-# Output: Hello Alice from ContextCraft!
+codebrief hello --name "Alice"
+# Output: Hello Alice from codebrief!
 ```
 
 ## 📋 Clipboard Integration
 
-All ContextCraft commands support clipboard functionality through the `--to-clipboard` or `-c` flag:
+All codebrief commands support clipboard functionality through the `--to-clipboard` or `-c` flag:
 
 ### Usage
 
 ```bash
 # Copy any command output to clipboard
-contextcraft tree --to-clipboard
-contextcraft flatten . -c
-contextcraft deps --to-clipboard
-contextcraft git-info -c
-contextcraft bundle --to-clipboard
+codebrief tree --to-clipboard
+codebrief flatten . -c
+codebrief deps --to-clipboard
+codebrief git-info -c
+codebrief bundle --to-clipboard
 ```
 
 ### Features
@@ -594,21 +594,21 @@ contextcraft bundle --to-clipboard
 
 ```bash
 # ✅ Valid - copy to clipboard
-contextcraft tree -c
+codebrief tree -c
 
 # ❌ Invalid - cannot use both clipboard and file output
-contextcraft tree -c --output file.txt
+codebrief tree -c --output file.txt
 
 # ✅ Valid - save to file (no clipboard)
-contextcraft tree --output file.txt
+codebrief tree --output file.txt
 ```
 
 ### Error Handling
 
-When clipboard access fails, ContextCraft provides helpful feedback:
+When clipboard access fails, codebrief provides helpful feedback:
 
 ```bash
-contextcraft tree -c
+codebrief tree -c
 # Success: 📋 Output successfully copied to clipboard!
 
 # If clipboard access fails:
@@ -623,17 +623,17 @@ These options work with all commands:
 
 ```bash
 # Show general help
-contextcraft --help
+codebrief --help
 
 # Show version
-contextcraft --version
+codebrief --version
 
 # Command-specific help
-contextcraft tree --help
-contextcraft flatten --help
-contextcraft deps --help
-contextcraft git-info --help
-contextcraft bundle --help
+codebrief tree --help
+codebrief flatten --help
+codebrief deps --help
+codebrief git-info --help
+codebrief bundle --help
 ```
 
 ### Environment Variables
@@ -642,12 +642,12 @@ Set global behavior via environment variables:
 
 ```bash
 # Debug mode
-export CONTEXTCRAFT_DEBUG=1
-contextcraft tree
+export codebrief_DEBUG=1
+codebrief tree
 
 # Custom output directory
-export CONTEXTCRAFT_OUTPUT_DIR=~/contextcraft-outputs
-contextcraft flatten . --output code.md  # Saves to ~/contextcraft-outputs/code.md
+export codebrief_OUTPUT_DIR=~/codebrief-outputs
+codebrief flatten . --output code.md  # Saves to ~/codebrief-outputs/code.md
 ```
 
 ## 🎯 Command Combinations
@@ -658,13 +658,13 @@ Generate complete project context:
 
 ```bash
 # Option 1: Use the bundle command (recommended)
-contextcraft bundle --output complete-project-context.md
+codebrief bundle --output complete-project-context.md
 
 # Option 2: Generate individual components
-contextcraft tree --output docs/structure.txt
-contextcraft git-info --output docs/git-context.md
-contextcraft deps --output docs/dependencies.md
-contextcraft flatten . \
+codebrief tree --output docs/structure.txt
+codebrief git-info --output docs/git-context.md
+codebrief deps --output docs/dependencies.md
+codebrief flatten . \
   --include "*.py" --include "*.md" --include "*.toml" \
   --output docs/codebase.md
 ```
@@ -675,61 +675,61 @@ contextcraft flatten . \
 
     ```bash
     # Focus on source code
-    contextcraft flatten src/ tests/ --output review-context.md
+    codebrief flatten src/ tests/ --output review-context.md
 
     # Include project structure
-    contextcraft tree src/ tests/ --output review-structure.txt
+    codebrief tree src/ tests/ --output review-structure.txt
 
     # Quick clipboard sharing for review
-    contextcraft bundle --flatten src/ tests/ --exclude-deps -c
+    codebrief bundle --flatten src/ tests/ --exclude-deps -c
     ```
 
 === "For Documentation"
 
     ```bash
     # Include documentation and config
-    contextcraft flatten . \
+    codebrief flatten . \
       --include "*.md" --include "*.rst" --include "*.toml" \
       --output docs-context.md
 
     # Copy docs to clipboard for sharing
-    contextcraft flatten docs/ --include "*.md" -c
+    codebrief flatten docs/ --include "*.md" -c
     ```
 
 === "For Debugging"
 
     ```bash
     # Include logs and config (temporarily)
-    contextcraft flatten . \
+    codebrief flatten . \
       --include "*.py" --include "*.log" --include "*.json" \
       --output debug-context.md
 
     # Quick debug context to clipboard
-    contextcraft bundle --flatten src/ --git-full-diff -c
+    codebrief bundle --flatten src/ --git-full-diff -c
     ```
 
 === "For Quick LLM Sharing"
 
     ```bash
     # Everything to clipboard for AI assistance
-    contextcraft bundle -c
+    codebrief bundle -c
 
     # Just source code and structure
-    contextcraft flatten src/ -c && contextcraft tree -c
+    codebrief flatten src/ -c && codebrief tree -c
 
     # Git context and recent changes
-    contextcraft git-info --full-diff -c
+    codebrief git-info --full-diff -c
     ```
 
 ## 🚨 Error Handling
 
-ContextCraft provides helpful error messages:
+codebrief provides helpful error messages:
 
 ### Common Errors and Solutions
 
 !!! error "Directory Not Found"
     ```bash
-    contextcraft tree /nonexistent
+    codebrief tree /nonexistent
     # Error: Invalid value for 'ROOT_DIR': Directory '/nonexistent' does not exist.
     ```
 
@@ -737,7 +737,7 @@ ContextCraft provides helpful error messages:
 
 !!! error "Permission Denied"
     ```bash
-    contextcraft flatten / --output /etc/output.md
+    codebrief flatten / --output /etc/output.md
     # Error: Permission denied when writing to '/etc/output.md'
     ```
 
@@ -746,7 +746,7 @@ ContextCraft provides helpful error messages:
 !!! error "Configuration Error"
     ```bash
     # With invalid pyproject.toml
-    contextcraft tree
+    codebrief tree
     # Warning: Expected list for 'global_exclude_patterns', got str. Using default.
     ```
 
@@ -754,10 +754,10 @@ ContextCraft provides helpful error messages:
 
 ### Rich Error Output
 
-ContextCraft uses Rich for beautiful error messages:
+codebrief uses Rich for beautiful error messages:
 
 ```bash
-contextcraft flatten /nonexistent
+codebrief flatten /nonexistent
 ```
 
 Shows colorized, well-formatted error with context and suggestions.
@@ -768,15 +768,15 @@ Shows colorized, well-formatted error with context and suggestions.
 
 ```bash
 # Show detailed processing information
-contextcraft tree --verbose
-contextcraft flatten . --verbose --include "*.py"
+codebrief tree --verbose
+codebrief flatten . --verbose --include "*.py"
 ```
 
 ### Dry Run (Future Feature)
 
 ```bash
 # See what would be processed without actually doing it
-contextcraft flatten . --dry-run --include "*.py"
+codebrief flatten . --dry-run --include "*.py"
 ```
 
 ## 📚 Next Steps

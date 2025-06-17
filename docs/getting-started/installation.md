@@ -1,6 +1,6 @@
 # Installation
 
-Get ContextCraft up and running on your system in just a few minutes!
+Get codebrief up and running on your system in just a few minutes!
 
 ## Prerequisites
 
@@ -50,12 +50,12 @@ Visit [Python.org](https://www.python.org/downloads/) for Python installation an
 
 ### 🚀 Quick Install (Recommended)
 
-The fastest way to get started with ContextCraft:
+The fastest way to get started with codebrief:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Shorzinator/ContextCraft.git
-cd ContextCraft
+git clone https://github.com/Shorzinator/codebrief.git
+cd codebrief
 
 # Install with Poetry
 poetry install
@@ -64,24 +64,24 @@ poetry install
 poetry shell
 
 # Verify installation
-contextcraft --version
+codebrief --version
 ```
 
 ### 📦 PyPI Installation
 
 
 ```bash
-pip install contextcraft
+pip install codebrief
 ```
 
 ### 🛠️ Development Installation
 
-For contributors and developers who want to work on ContextCraft itself:
+For contributors and developers who want to work on codebrief itself:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/ContextCraft.git
-cd ContextCraft
+git clone https://github.com/YOUR_USERNAME/codebrief.git
+cd codebrief
 
 # Install with development dependencies
 poetry install --with dev
@@ -98,27 +98,27 @@ poetry shell
 
 ## Verification
 
-After installation, verify that ContextCraft is working correctly:
+After installation, verify that codebrief is working correctly:
 
 ### Basic Verification
 
 ```bash
 # Check version
-contextcraft --version
+codebrief --version
 
 # View help
-contextcraft --help
+codebrief --help
 
 # Test tree generation
-contextcraft tree --help
+codebrief tree --help
 ```
 
 ### Comprehensive Test
 
 ```bash
 # Create a test directory
-mkdir contextcraft-test
-cd contextcraft-test
+mkdir codebrief-test
+cd codebrief-test
 
 # Create some test files
 echo "print('Hello, World!')" > hello.py
@@ -127,28 +127,28 @@ mkdir src
 echo "def main(): pass" > src/main.py
 
 # Test all commands
-contextcraft tree
-contextcraft flatten . --include "*.py"
-contextcraft deps
+codebrief tree
+codebrief flatten . --include "*.py"
+codebrief deps
 
 # Clean up
 cd ..
-rm -rf contextcraft-test
+rm -rf codebrief-test
 ```
 
 ### Environment Variables
 
-Configure ContextCraft behavior with environment variables:
+Configure codebrief behavior with environment variables:
 
 ```bash
 # Set default output directory
-export CONTEXTCRAFT_OUTPUT_DIR=~/context-outputs
+export codebrief_OUTPUT_DIR=~/context-outputs
 
 # Enable debug mode
-export CONTEXTCRAFT_DEBUG=1
+export codebrief_DEBUG=1
 
 # Set default config file location
-export CONTEXTCRAFT_CONFIG=~/.contextcraft.toml
+export codebrief_CONFIG=~/.codebrief.toml
 ```
 
 ## Troubleshooting
@@ -156,13 +156,13 @@ export CONTEXTCRAFT_CONFIG=~/.contextcraft.toml
 ### Common Issues
 
 !!! warning "Python Version Issues"
-    **Problem**: `contextcraft: command not found` after installation
+    **Problem**: `codebrief: command not found` after installation
 
     **Solution**: Ensure you're in the Poetry virtual environment:
     ```bash
     poetry shell
     # or use
-    poetry run contextcraft --version
+    poetry run codebrief --version
     ```
 
 !!! warning "Permission Errors"
@@ -174,7 +174,7 @@ export CONTEXTCRAFT_CONFIG=~/.contextcraft.toml
     ```
 
 !!! warning "Import Errors"
-    **Problem**: `ModuleNotFoundError` when running ContextCraft
+    **Problem**: `ModuleNotFoundError` when running codebrief
 
     **Solution**: Reinstall dependencies:
     ```bash
@@ -186,12 +186,12 @@ export CONTEXTCRAFT_CONFIG=~/.contextcraft.toml
 If you encounter issues:
 
 1. Check the [Troubleshooting Guide](../help/troubleshooting.md)
-2. Search [existing issues](https://github.com/YOUR_USERNAME/ContextCraft/issues)
-3. Create a [new issue](https://github.com/YOUR_USERNAME/ContextCraft/issues/new) if needed
+2. Search [existing issues](https://github.com/YOUR_USERNAME/codebrief/issues)
+3. Create a [new issue](https://github.com/YOUR_USERNAME/codebrief/issues/new) if needed
 
 ## Next Steps
 
-Now that ContextCraft is installed:
+Now that codebrief is installed:
 
 - 📚 Read the [Quick Start Guide](quick-start.md)
 - ⚙️ Set up [Configuration](configuration.md)

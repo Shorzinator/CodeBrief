@@ -61,7 +61,7 @@ def test_load_config_pyproject_not_found():
 
 
 def test_load_config_section_not_found():
-    """Test loading config when [tool.contextcraft] section is missing."""
+    """Test loading config when [tool.codebrief] section is missing."""
     with tempfile.TemporaryDirectory() as tmpdir:
         project_root = Path(tmpdir)
         # Create pyproject.toml without the relevant section
@@ -71,7 +71,7 @@ def test_load_config_section_not_found():
 
 
 def test_load_config_empty_section():
-    """Test loading config when [tool.contextcraft] section is empty."""
+    """Test loading config when [tool.codebrief] section is empty."""
     with tempfile.TemporaryDirectory() as tmpdir:
         project_root = Path(tmpdir)
         create_pyproject_toml(

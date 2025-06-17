@@ -1,6 +1,6 @@
 # Quick Start
 
-Get up and running with ContextCraft in under 5 minutes! This guide will walk you through the most common use cases and essential commands.
+Get up and running with codebrief in under 5 minutes! This guide will walk you through the most common use cases and essential commands.
 
 ## 🎯 Your First Context
 
@@ -10,10 +10,10 @@ Let's generate your first project context using a real example:
 
 ```bash
 # Generate a simple directory tree
-contextcraft tree
+codebrief tree
 
 # Save tree to a file
-contextcraft tree --output project-structure.txt
+codebrief tree --output project-structure.txt
 ```
 
 This creates a visual representation of your project structure:
@@ -32,10 +32,10 @@ This creates a visual representation of your project structure:
 
 ```bash
 # Flatten all Python files
-contextcraft flatten . --include "*.py" --output code-context.md
+codebrief flatten . --include "*.py" --output code-context.md
 
 # Flatten specific directory
-contextcraft flatten src/ --output src-code.md
+codebrief flatten src/ --output src-code.md
 ```
 
 This creates a single file containing all your code with clear separators:
@@ -62,7 +62,7 @@ def test_hello_world():
 
 ```bash
 # Analyze project dependencies
-contextcraft deps --output dependencies.md
+codebrief deps --output dependencies.md
 ```
 
 This generates a comprehensive dependency report:
@@ -88,13 +88,13 @@ This generates a comprehensive dependency report:
 
 ```bash
 # Include only specific file types
-contextcraft flatten . --include "*.py" --include "*.md" --include "*.toml"
+codebrief flatten . --include "*.py" --include "*.md" --include "*.toml"
 
 # Exclude certain patterns
-contextcraft flatten . --exclude "*.log" --exclude "__pycache__/" --exclude ".git/"
+codebrief flatten . --exclude "*.log" --exclude "__pycache__/" --exclude ".git/"
 
 # Combine both
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" --include "*.md" \
   --exclude "tests/" --exclude ".venv/"
 ```
@@ -119,12 +119,12 @@ node_modules/
 !package.json
 ```
 
-Now all ContextCraft commands will respect these ignore patterns:
+Now all codebrief commands will respect these ignore patterns:
 
 ```bash
 # This will automatically exclude files matching .llmignore patterns
-contextcraft tree
-contextcraft flatten .
+codebrief tree
+codebrief flatten .
 ```
 
 ## ⚙️ Configuration
@@ -134,7 +134,7 @@ contextcraft flatten .
 Create a `pyproject.toml` configuration section:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_tree = "project-tree.txt"
 default_output_filename_flatten = "project-code.md"
 default_output_filename_deps = "project-deps.md"
@@ -146,9 +146,9 @@ Now you can run commands without specifying output files:
 
 ```bash
 # Uses default output filenames from config
-contextcraft tree      # Creates project-tree.txt
-contextcraft flatten . # Creates project-code.md
-contextcraft deps      # Creates project-deps.md
+codebrief tree      # Creates project-tree.txt
+codebrief flatten . # Creates project-code.md
+codebrief deps      # Creates project-deps.md
 ```
 
 ## 🚀 Common Workflows
@@ -159,9 +159,9 @@ When you need to share your project with ChatGPT or Claude for debugging:
 
 ```bash
 # Create comprehensive context
-contextcraft tree --output structure.txt
-contextcraft flatten src/ --include "*.py" --output code.md
-contextcraft deps --output deps.md
+codebrief tree --output structure.txt
+codebrief flatten src/ --include "*.py" --output code.md
+codebrief deps --output deps.md
 
 # Now copy the contents to your LLM chat
 ```
@@ -172,14 +172,14 @@ Prepare context for code reviews:
 
 ```bash
 # Focus on source code and tests
-contextcraft flatten . \
+codebrief flatten . \
   --include "*.py" \
   --exclude "__pycache__/" \
   --exclude ".venv/" \
   --output review-context.md
 
 # Include project structure
-contextcraft tree --output project-overview.txt
+codebrief tree --output project-overview.txt
 ```
 
 ### Workflow 3: Documentation Generation
@@ -188,11 +188,11 @@ Generate project documentation:
 
 ```bash
 # Create comprehensive project summary
-contextcraft tree --output docs/project-structure.txt
-contextcraft flatten . \
+codebrief tree --output docs/project-structure.txt
+codebrief flatten . \
   --include "*.py" --include "*.md" --include "*.toml" \
   --output docs/codebase-summary.md
-contextcraft deps --output docs/dependencies.md
+codebrief deps --output docs/dependencies.md
 ```
 
 ## 🎯 Pro Tips
@@ -200,30 +200,30 @@ contextcraft deps --output docs/dependencies.md
 !!! tip "Combine with Other Tools"
     ```bash
     # Combine with grep for specific searches
-    contextcraft flatten . --include "*.py" | grep -n "TODO"
+    codebrief flatten . --include "*.py" | grep -n "TODO"
 
     # Count lines of code
-    contextcraft flatten . --include "*.py" | wc -l
+    codebrief flatten . --include "*.py" | wc -l
 
     # Use with clipboard (macOS)
-    contextcraft tree | pbcopy
+    codebrief tree | pbcopy
     ```
 
 !!! tip "Large Codebases"
     For large projects, be selective:
     ```bash
     # Focus on specific directories
-    contextcraft flatten src/core/ src/api/ --output core-api.md
+    codebrief flatten src/core/ src/api/ --output core-api.md
 
     # Use more specific include patterns
-    contextcraft flatten . --include "src/**/*.py" --include "tests/**/*.py"
+    codebrief flatten . --include "src/**/*.py" --include "tests/**/*.py"
     ```
 
 !!! tip "CI/CD Integration"
     ```bash
     # Generate context for CI pipelines
-    contextcraft tree --output artifacts/project-structure.txt
-    contextcraft deps --output artifacts/dependencies.md
+    codebrief tree --output artifacts/project-structure.txt
+    codebrief deps --output artifacts/dependencies.md
     ```
 
 ## 🔍 Exploring Your Output
@@ -271,9 +271,9 @@ Now that you've mastered the basics:
 
 - 📖 Read the [User Guide](../user-guide/cli-commands.md)
 - ❓ Check the [FAQ](../help/faq.md)
-- 🐛 Report issues on [GitHub](https://github.com/YOUR_USERNAME/ContextCraft/issues)
+- 🐛 Report issues on [GitHub](https://github.com/YOUR_USERNAME/codebrief/issues)
 - 💬 Get [Support](../help/support.md)
 
 ---
 
-*Ready to become a ContextCraft power user? Continue to the [User Guide](../user-guide/cli-commands.md)!*
+*Ready to become a codebrief power user? Continue to the [User Guide](../user-guide/cli-commands.md)!*

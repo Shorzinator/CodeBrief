@@ -1,25 +1,25 @@
 # Support
 
-Get help with ContextCraft through multiple channels and resources.
+Get help with codebrief through multiple channels and resources.
 
 ## Community Support
 
 ### GitHub Issues
 The primary channel for bug reports, feature requests, and technical support.
 
-- **Bug Reports**: [Create an issue](https://github.com/Shorzinator/ContextCraft/issues/new?template=bug_report.md)
-- **Feature Requests**: [Request a feature](https://github.com/Shorzinator/ContextCraft/issues/new?template=feature_request.md)
-- **Questions**: [Ask a question](https://github.com/Shorzinator/ContextCraft/issues/new?template=question.md)
+- **Bug Reports**: [Create an issue](https://github.com/Shorzinator/codebrief/issues/new?template=bug_report.md)
+- **Feature Requests**: [Request a feature](https://github.com/Shorzinator/codebrief/issues/new?template=feature_request.md)
+- **Questions**: [Ask a question](https://github.com/Shorzinator/codebrief/issues/new?template=question.md)
 
 ### GitHub Discussions
 Community forum for questions, ideas, and general discussion.
 
 - **Q&A**: Get help from the community
 - **Ideas**: Share and discuss new ideas
-- **General**: General discussion about ContextCraft
-- **Show and Tell**: Share your ContextCraft workflows
+- **General**: General discussion about codebrief
+- **Show and Tell**: Share your codebrief workflows
 
-[Join the Discussion](https://github.com/Shorzinator/ContextCraft/discussions)
+[Join the Discussion](https://github.com/Shorzinator/codebrief/discussions)
 
 ## Documentation Resources
 
@@ -53,9 +53,9 @@ uname -a                      # Operating system
 python --version             # Python version
 poetry --version             # Poetry version (if using)
 
-# ContextCraft Information
-contextcraft --version       # ContextCraft version
-poetry show contextcraft     # Installation details
+# codebrief Information
+codebrief --version       # codebrief version
+poetry show codebrief     # Installation details
 
 # Error Context
 # Include the full command that failed
@@ -63,7 +63,7 @@ poetry show contextcraft     # Installation details
 # Include relevant configuration
 ```
 
-**Use our Bug Report Template**: [Create Bug Report](https://github.com/Shorzinator/ContextCraft/issues/new?template=bug_report.md)
+**Use our Bug Report Template**: [Create Bug Report](https://github.com/Shorzinator/codebrief/issues/new?template=bug_report.md)
 
 ### Feature Requests
 When requesting features:
@@ -73,18 +73,18 @@ When requesting features:
 3. **Consider Alternatives**: Mention workarounds you've tried
 4. **Impact Assessment**: Who would benefit from this feature?
 
-**Use our Feature Request Template**: [Request Feature](https://github.com/Shorzinator/ContextCraft/issues/new?template=feature_request.md)
+**Use our Feature Request Template**: [Request Feature](https://github.com/Shorzinator/codebrief/issues/new?template=feature_request.md)
 
 ## Security Issues
 
 For security-related issues, please follow our responsible disclosure process:
 
 1. **Do NOT create public issues** for security vulnerabilities
-2. **Review our Security Policy**: [Security Policy](https://github.com/Shorzinator/ContextCraft/security/policy)
+2. **Review our Security Policy**: [Security Policy](https://github.com/Shorzinator/codebrief/security/policy)
 3. **Report Privately**: Use GitHub's private reporting feature
 4. **Provide Details**: Include reproduction steps and impact assessment
 
-[Report Security Issue](https://github.com/Shorzinator/ContextCraft/security/advisories/new)
+[Report Security Issue](https://github.com/Shorzinator/codebrief/security/advisories/new)
 
 ## Contributing
 
@@ -103,7 +103,7 @@ For security-related issues, please follow our responsible disclosure process:
 - **Answer Questions**: Help other users in discussions
 - **Share Workflows**: Contribute examples and patterns
 - **Test Features**: Try beta features and provide feedback
-- **Spread the Word**: Share ContextCraft with others
+- **Spread the Word**: Share codebrief with others
 
 ## Professional Support
 
@@ -115,12 +115,12 @@ For organizations requiring dedicated support:
 - **Integration Assistance**: Help with team adoption
 - **Training and Onboarding**: Team training sessions
 
-Contact us through [GitHub Issues](https://github.com/Shorzinator/ContextCraft/issues) with the `[Enterprise]` tag.
+Contact us through [GitHub Issues](https://github.com/Shorzinator/codebrief/issues) with the `[Enterprise]` tag.
 
 ### Consulting Services
 Available for:
 
-- **Workflow Optimization**: Optimize your ContextCraft usage
+- **Workflow Optimization**: Optimize your codebrief usage
 - **Custom Integration**: Integrate with your existing tools
 - **Team Training**: Comprehensive team onboarding
 - **Process Implementation**: Establish team-wide practices
@@ -179,14 +179,14 @@ Available for:
 ## Status and Updates
 
 ### Project Status
-- **Current Version**: Check [releases](https://github.com/Shorzinator/ContextCraft/releases)
-- **Development Progress**: See [project boards](https://github.com/Shorzinator/ContextCraft/projects)
-- **Roadmap**: Review [planned features](https://github.com/Shorzinator/ContextCraft/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+- **Current Version**: Check [releases](https://github.com/Shorzinator/codebrief/releases)
+- **Development Progress**: See [project boards](https://github.com/Shorzinator/codebrief/projects)
+- **Roadmap**: Review [planned features](https://github.com/Shorzinator/codebrief/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 
 ### Announcements
 - **Major Updates**: Watch the repository for notifications
-- **Breaking Changes**: Check [CHANGELOG.md](https://github.com/Shorzinator/ContextCraft/blob/main/CHANGELOG.md)
-- **Security Updates**: Monitor [security advisories](https://github.com/Shorzinator/ContextCraft/security/advisories)
+- **Breaking Changes**: Check [CHANGELOG.md](https://github.com/Shorzinator/codebrief/blob/main/CHANGELOG.md)
+- **Security Updates**: Monitor [security advisories](https://github.com/Shorzinator/codebrief/security/advisories)
 
 ## Contact Information
 
@@ -201,7 +201,7 @@ Available for:
 ## Acknowledgments
 
 ### Contributors
-Special thanks to all [contributors](https://github.com/Shorzinator/ContextCraft/graphs/contributors) who help make ContextCraft better.
+Special thanks to all [contributors](https://github.com/Shorzinator/codebrief/graphs/contributors) who help make codebrief better.
 
 ### Community
 Thank you to everyone who:
@@ -213,4 +213,4 @@ Thank you to everyone who:
 
 ---
 
-**Need immediate help?** Start with our [Troubleshooting Guide](troubleshooting.md) or [FAQ](faq.md), then reach out through [GitHub Issues](https://github.com/Shorzinator/ContextCraft/issues) if you need further assistance.
+**Need immediate help?** Start with our [Troubleshooting Guide](troubleshooting.md) or [FAQ](faq.md), then reach out through [GitHub Issues](https://github.com/Shorzinator/codebrief/issues) if you need further assistance.

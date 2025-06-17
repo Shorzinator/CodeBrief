@@ -1,12 +1,12 @@
 # .github/pages-config.yml
-# GitHub Pages configuration for ContextCraft documentation
+# GitHub Pages configuration for codebrief documentation
 
 # Site metadata
 site:
-  name: "ContextCraft Documentation"
+  name: "codebrief Documentation"
   description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
-  url: "https://Shorzinator.github.io/ContextCraft"
-  baseurl: "/ContextCraft"
+  url: "https://Shorzinator.github.io/CodeBrief"
+  baseurl: "/CodeBrief"
 
 # Build configuration
 build:

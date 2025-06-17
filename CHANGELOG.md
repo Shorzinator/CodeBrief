@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial release of ContextCraft CLI toolkit
+- Initial release of codebrief CLI toolkit
 - Core functionality for project context generation
 
 ### Changed
@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Notes
 
 ### Version 0.1.0
-This is the initial release of ContextCraft, a powerful CLI toolkit designed to generate comprehensive project context for Large Language Models (LLMs).
+This is the initial release of codebrief, a powerful CLI toolkit designed to generate comprehensive project context for Large Language Models (LLMs).
 
 **Key Features:**
 - Complete project analysis and documentation generation
@@ -72,12 +72,12 @@ This is the initial release of ContextCraft, a powerful CLI toolkit designed to 
 
 **Getting Started:**
 ```bash
-pip install contextcraft
-contextcraft --help
+pip install codebrief
+codebrief --help
 ```
 
-**Documentation:** [https://contextcraft.readthedocs.io](https://contextcraft.readthedocs.io)
+**Documentation:** [https://codebrief.readthedocs.io](https://codebrief.readthedocs.io)
 
 ---
 
-For detailed information about each release, see the [GitHub Releases](https://github.com/Shorzinator/ContextCraft/releases) page.
+For detailed information about each release, see the [GitHub Releases](https://github.com/Shorzinator/codebrief/releases) page.

@@ -68,7 +68,7 @@ The dependency lister tool analyzes project dependency files across multiple pro
 
 ```python
 from pathlib import Path
-from contextcraft.tools.dependency_lister import list_dependencies_logic
+from codebrief.tools.dependency_lister import list_dependencies_logic
 
 # Analyze current directory
 list_dependencies_logic(
@@ -86,7 +86,7 @@ list_dependencies_logic(
 ### Programmatic Access
 
 ```python
-from contextcraft.tools.dependency_lister import (
+from codebrief.tools.dependency_lister import (
     find_dependency_files,
     parse_python_dependencies,
     parse_nodejs_dependencies
@@ -167,10 +167,10 @@ The dependency lister generates structured Markdown output:
 
 ## Configuration Integration
 
-The dependency lister integrates with ContextCraft's configuration system:
+The dependency lister integrates with codebrief's configuration system:
 
 ```toml
-[tool.contextcraft]
+[tool.codebrief]
 default_output_filename_deps = "docs/dependencies.md"
 ```
 
@@ -228,11 +228,11 @@ except ParseError as e:
 ```yaml
 # GitHub Actions
 - name: Generate dependency report
-  run: poetry run contextcraft deps --output artifacts/dependencies.md
+  run: poetry run codebrief deps --output artifacts/dependencies.md
 
 - name: Check for security issues
   run: |
-    poetry run contextcraft deps --output deps.md
+    poetry run codebrief deps --output deps.md
     # Use output for security scanning
 ```
 
@@ -240,16 +240,16 @@ except ParseError as e:
 
 ```bash
 # Regular dependency analysis
-contextcraft deps --output docs/dependencies.md
+codebrief deps --output docs/dependencies.md
 
 # Include in project documentation
 cat docs/dependencies.md >> docs/project-overview.md
 
 # Compare dependencies between branches
 git checkout main
-contextcraft deps --output main-deps.md
+codebrief deps --output main-deps.md
 git checkout feature-branch
-contextcraft deps --output feature-deps.md
+codebrief deps --output feature-deps.md
 diff main-deps.md feature-deps.md
 ```
 

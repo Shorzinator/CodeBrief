@@ -35,11 +35,11 @@ repos:
   #   rev: v1.8.0 # Or latest
   #   hooks:
   #     - id: mypy
-  #       args: ["contextcraft"]
+  #       args: ["codebrief"]
   #       pass_filenames: false
   #       # Run from src directory to avoid module path conflicts
   #       language: system
-  #       entry: bash -c 'cd src && mypy contextcraft'
+  #       entry: bash -c 'cd src && mypy codebrief'
 
   # Bandit: Security linter for Python
   - repo: https://github.com/PyCQA/bandit

@@ -1,6 +1,6 @@
-# Contributing to ContextCraft
+# Contributing to codebrief
 
-Thank you for your interest in contributing to ContextCraft! We welcome contributions from developers of all skill levels. This guide will help you get started with contributing to our project.
+Thank you for your interest in contributing to codebrief! We welcome contributions from developers of all skill levels. This guide will help you get started with contributing to our project.
 
 ## 📋 Table of Contents
 
@@ -18,13 +18,13 @@ Thank you for your interest in contributing to ContextCraft! We welcome contribu
 
 ## 📜 Code of Conduct
 
-This project and everyone participating in it is governed by our [Code of Conduct](https://github.com/Shorzinator/ContextCraft/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+This project and everyone participating in it is governed by our [Code of Conduct](https://github.com/Shorzinator/codebrief/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Python 3.9+**: ContextCraft requires Python 3.9 or higher
+- **Python 3.9+**: codebrief requires Python 3.9 or higher
 - **Poetry**: For dependency management and virtual environments
 - **Git**: For version control
 - **Pre-commit**: For automated code quality checks
@@ -34,8 +34,8 @@ This project and everyone participating in it is governed by our [Code of Conduc
 1. **Fork and Clone the Repository**
    ```bash
    # Fork the repository on GitHub, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/ContextCraft.git
-   cd ContextCraft
+   git clone https://github.com/YOUR_USERNAME/codebrief.git
+   cd codebrief
    ```
 
 2. **Install Dependencies**
@@ -56,7 +56,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
    poetry run pytest
 
    # Run the CLI to verify installation
-   poetry run contextcraft --help
+   poetry run codebrief --help
    ```
 
 ## 🤝 How to Contribute
@@ -74,26 +74,26 @@ We welcome several types of contributions:
 
 ## 🐛 Reporting Bugs
 
-Before creating a bug report, please check the [existing issues](https://github.com/Shorzinator/ContextCraft/issues) to avoid duplicates.
+Before creating a bug report, please check the [existing issues](https://github.com/Shorzinator/codebrief/issues) to avoid duplicates.
 
 ### Bug Report Template
 
-When reporting bugs, please use our [issue template](https://github.com/Shorzinator/ContextCraft/blob/main/.github/ISSUE_TEMPLATE.md) and include:
+When reporting bugs, please use our [issue template](https://github.com/Shorzinator/codebrief/blob/main/.github/ISSUE_TEMPLATE.md) and include:
 
 - **Clear Description**: What happened vs. what you expected
 - **Reproduction Steps**: Detailed steps to reproduce the issue
-- **Environment**: OS, Python version, ContextCraft version
+- **Environment**: OS, Python version, codebrief version
 - **Error Messages**: Full error messages and stack traces
 - **Sample Files**: Minimal example files if relevant
 
 **Example:**
 ```markdown
 **Bug Description**
-The `contextcraft tree` command crashes when encountering symlinks.
+The `codebrief tree` command crashes when encountering symlinks.
 
 **Steps to Reproduce**
 1. Create a symlink: `ln -s /path/to/target symlink`
-2. Run: `contextcraft tree`
+2. Run: `codebrief tree`
 3. Observe the error
 
 **Expected Behavior**
@@ -102,12 +102,12 @@ The command should handle symlinks gracefully.
 **Environment**
 - OS: macOS 14.0
 - Python: 3.11.5
-- ContextCraft: 0.1.0
+- codebrief: 0.1.0
 ```
 
 ## ✨ Requesting Features
 
-We love feature requests! Please check [existing feature requests](https://github.com/Shorzinator/ContextCraft/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) first.
+We love feature requests! Please check [existing feature requests](https://github.com/Shorzinator/codebrief/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) first.
 
 ### Feature Request Guidelines
 
@@ -139,7 +139,7 @@ We love feature requests! Please check [existing feature requests](https://githu
    poetry run pytest
 
    # Run with coverage
-   poetry run pytest --cov=src/contextcraft --cov-report=html
+   poetry run pytest --cov=src/codebrief --cov-report=html
 
    # Run pre-commit checks
    poetry run pre-commit run --all-files
@@ -254,7 +254,7 @@ poetry run pytest
 poetry run pytest tests/tools/test_tree_generator.py
 
 # Run with coverage
-poetry run pytest --cov=src/contextcraft --cov-report=html
+poetry run pytest --cov=src/codebrief --cov-report=html
 
 # Run tests matching a pattern
 poetry run pytest -k "test_tree"
@@ -279,7 +279,7 @@ poetry run pytest -k "test_tree"
 
 ### PR Template
 
-We provide a [PR template](https://github.com/Shorzinator/ContextCraft/blob/main/.github/PULL_REQUEST_TEMPLATE.md) that includes:
+We provide a [PR template](https://github.com/Shorzinator/codebrief/blob/main/.github/PULL_REQUEST_TEMPLATE.md) that includes:
 
 - Description of changes
 - Type of change (bug fix, feature, etc.)
@@ -331,4 +331,4 @@ Contributors are recognized in:
 - GitHub contributors page
 - Release notes for major features
 
-Thank you for contributing to ContextCraft! Your efforts help make this tool better for the entire developer community. 🚀
+Thank you for contributing to codebrief! Your efforts help make this tool better for the entire developer community. 🚀

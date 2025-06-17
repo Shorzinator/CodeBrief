@@ -1,12 +1,12 @@
 # CLI Usage
 
-ContextCraft provides several commands to help you generate project context.
+codebrief provides several commands to help you generate project context.
 You can always get help for the main application or a specific command
 by using the `--help` flag.
 
 ```bash
-contextcraft --help
-contextcraft <command> --help
+codebrief --help
+codebrief <command> --help
 ```
 
 ## `tree` Command
@@ -14,7 +14,7 @@ contextcraft <command> --help
 Generates a directory tree structure.
 
 ```bash
-contextcraft tree [ROOT_DIR] [OPTIONS]
+codebrief tree [ROOT_DIR] [OPTIONS]
 ```
 
 **Key Options:**
@@ -24,7 +24,7 @@ contextcraft tree [ROOT_DIR] [OPTIONS]
 
 **Example:**
 ```bash
-contextcraft tree src/ --output project_src_tree.txt --ignore __pycache__
+codebrief tree src/ --output project_src_tree.txt --ignore __pycache__
 ```
 
 ## `flatten` Command
@@ -32,7 +32,7 @@ contextcraft tree src/ --output project_src_tree.txt --ignore __pycache__
 Concatenates files into a single text output.
 
 ```bash
-contextcraft flatten [ROOT_DIR] [OPTIONS]
+codebrief flatten [ROOT_DIR] [OPTIONS]
 ```
 
 **Key Options:**
@@ -43,7 +43,7 @@ contextcraft flatten [ROOT_DIR] [OPTIONS]
 
 **Example:**
 ```bash
-contextcraft flatten . --include "*.py" --include "*.md" --exclude "tests/*" --output context_bundle.txt
+codebrief flatten . --include "*.py" --include "*.md" --exclude "tests/*" --output context_bundle.txt
 ```
 
 *(More commands and details will be added as they are developed.)*

@@ -2,7 +2,7 @@
 
 ## 🔒 Reporting Security Vulnerabilities
 
-We take the security of ContextCraft seriously. If you believe you have found a security vulnerability, please report it to us responsibly.
+We take the security of codebrief seriously. If you believe you have found a security vulnerability, please report it to us responsibly.
 
 ### How to Report
 
@@ -10,8 +10,8 @@ We take the security of ContextCraft seriously. If you believe you have found a 
 
 Instead, please report security vulnerabilities by:
 
-1. **Email**: Send details to [security@contextcraft.dev](mailto:security@contextcraft.dev)
-2. **GitHub Security Advisory**: Use GitHub's [private vulnerability reporting](https://github.com/Shorzinator/ContextCraft/security/advisories/new)
+1. **Email**: Send details to [security@codebrief.dev](mailto:security@codebrief.dev)
+2. **GitHub Security Advisory**: Use GitHub's [private vulnerability reporting](https://github.com/Shorzinator/codebrief/security/advisories/new)
 
 ### What to Include
 
@@ -30,7 +30,7 @@ When reporting a vulnerability, please include:
 Subject: [SECURITY] Path Traversal Vulnerability in File Processing
 
 Description:
-The file processing function in ContextCraft allows path traversal attacks
+The file processing function in codebrief allows path traversal attacks
 through maliciously crafted filenames, potentially allowing access to
 files outside the intended directory.
 
@@ -40,11 +40,11 @@ crafting filenames with "../" sequences.
 
 Reproduction:
 1. Create a file named "../../etc/passwd"
-2. Run: contextcraft flatten "../../etc/passwd"
+2. Run: codebrief flatten "../../etc/passwd"
 3. Observe that the command processes the file outside the intended directory
 
 Environment:
-- ContextCraft version: 0.1.0
+- codebrief version: 0.1.0
 - Python version: 3.11.5
 - OS: Ubuntu 22.04
 
@@ -100,7 +100,7 @@ We provide security updates for the following versions:
 
 ### File System Access
 
-ContextCraft operates on the file system and processes user-specified files and directories. Users should be aware that:
+codebrief operates on the file system and processes user-specified files and directories. Users should be aware that:
 
 - The tool respects file system permissions
 - Symbolic links are handled carefully to prevent traversal attacks
@@ -130,12 +130,12 @@ We regularly monitor and update dependencies for security vulnerabilities:
 
 ```bash
 # Verify package integrity
-pip install contextcraft --verify
+pip install codebrief --verify
 
 # Use virtual environments
-python -m venv contextcraft-env
-source contextcraft-env/bin/activate
-pip install contextcraft
+python -m venv codebrief-env
+source codebrief-env/bin/activate
+pip install codebrief
 ```
 
 ### Usage Security
@@ -145,10 +145,10 @@ pip install contextcraft
 cat .llmignore
 
 # Use specific paths instead of wildcards when possible
-contextcraft flatten src/specific/module.py
+codebrief flatten src/specific/module.py
 
 # Be cautious with output file permissions
-contextcraft bundle -o output.md
+codebrief bundle -o output.md
 chmod 600 output.md  # Restrict access if needed
 ```
 
@@ -156,7 +156,7 @@ chmod 600 output.md  # Restrict access if needed
 
 ```toml
 # In pyproject.toml, be explicit about exclusions
-[tool.contextcraft]
+[tool.codebrief]
 global_exclude_patterns = [
     "*.key",
     "*.pem",
@@ -169,13 +169,13 @@ global_exclude_patterns = [
 
 ## 📞 Contact Information
 
-- **Security Team**: [security@contextcraft.dev](mailto:security@contextcraft.dev)
-- **General Contact**: [contact@contextcraft.dev](mailto:contact@contextcraft.dev)
-- **GitHub Security**: [Private vulnerability reporting](https://github.com/Shorzinator/ContextCraft/security/advisories/new)
+- **Security Team**: [security@codebrief.dev](mailto:security@codebrief.dev)
+- **General Contact**: [contact@codebrief.dev](mailto:contact@codebrief.dev)
+- **GitHub Security**: [Private vulnerability reporting](https://github.com/Shorzinator/codebrief/security/advisories/new)
 
 ## 🙏 Acknowledgments
 
-We appreciate security researchers and users who help keep ContextCraft secure. Responsible disclosure helps protect all users.
+We appreciate security researchers and users who help keep codebrief secure. Responsible disclosure helps protect all users.
 
 ### Hall of Fame
 
