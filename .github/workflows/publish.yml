@@ -51,13 +51,13 @@ jobs:
           poetry run ruff check src/ tests/
           poetry run ruff format --check src/ tests/
           # TODO: Re-enable MyPy after resolving module path conflicts
-          # cd src && poetry run mypy contextcraft
+          # cd src && poetry run mypy codebrief
 
       - name: Security scan
         run: poetry run bandit -r src/
 
       - name: Run test suite
-        run: poetry run pytest --cov=src/contextcraft --cov-report=xml --cov-report=term-missing
+        run: poetry run pytest --cov=src/codebrief --cov-report=xml --cov-report=term-missing
 
       - name: Validate package metadata
         run: |
@@ -122,9 +122,9 @@ jobs:
 
       - name: Publication success
         run: |
-          echo "ContextCraft successfully published to PyPI!"
-          echo "Package: https://pypi.org/project/contextcraft/"
-          echo "Installation: pip install contextcraft"
+          echo "CodeBrief successfully published to PyPI!"
+          echo "Package: https://pypi.org/project/codebrief/"
+          echo "Installation: pip install codebrief"
 
   post-publish:
     name: Post-publish Actions
@@ -137,8 +137,8 @@ jobs:
 
       - name: Create release notification
         run: |
-          echo "ContextCraft has been published to PyPI!"
+          echo "CodeBrief has been published to PyPI!"
           echo "Version: ${{ github.event.release.tag_name || github.sha }}"
-          echo "PyPI: https://pypi.org/project/contextcraft/"
-          echo "Docs: https://shorzinator.github.io/ContextCraft/"
+          echo "PyPI: https://pypi.org/project/codebrief/"
+          echo "Docs: https://shorzinator.github.io/CodeBrief/"
           echo "Release completed successfully!"
