@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures for ContextCraft tests."""
+"""Pytest configuration and fixtures for CodeBrief tests."""
 
 import pytest
 

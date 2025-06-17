@@ -1,6 +1,6 @@
-# Git Provider API Reference
+# Git Provider
 
-::: contextcraft.tools.git_provider
+::: codebrief.tools.git_provider
 
 ## Overview
 

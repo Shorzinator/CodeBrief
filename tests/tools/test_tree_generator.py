@@ -5,8 +5,8 @@ from unittest import mock
 
 import pytest
 
-from src.contextcraft.tools import tree_generator
-from src.contextcraft.utils import ignore_handler  # For .llmignore
+from src.codebrief.tools import tree_generator
+from src.codebrief.utils import ignore_handler  # For .llmignore
 
 
 # You can reuse or adapt the create_project_structure fixture

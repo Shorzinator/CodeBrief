@@ -1,8 +1,8 @@
-# Flattener (`contextcraft.tools.flattener`)
+# Flattener (`codebrief.tools.flattener`)
 
-This module contains the logic for flattening code and text files from a directory.
+Documentation for the flattener module.
 
-::: contextcraft.tools.flattener
+::: codebrief.tools.flattener
     handler: python
     options:
         show_root_heading: true

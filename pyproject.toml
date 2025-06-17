@@ -5,8 +5,8 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "contextcraft"
-version = "1.0.3"
+name = "codebrief"
+version = "1.1.0"
 description = "A CLI toolkit to generate comprehensive project context for LLMs."
 authors = ["Shourya Maheshwari <shorz2905@gmail.com>"]
 license = "MIT"
@@ -25,7 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Utilities"
 ]
-packages = [{include = "contextcraft", from = "src"}]
+packages = [{include = "codebrief", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
@@ -74,7 +74,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "S603", "S607"]
-"src/contextcraft/tools/git_provider.py" = ["S603", "S607"]
+"src/codebrief/tools/git_provider.py" = ["S603", "S607"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -84,21 +84,21 @@ ignore_missing_imports = true
 strict = true
 exclude = ["tests/"]
 mypy_path = "src"
-packages = ["contextcraft"]
+packages = ["codebrief"]
 namespace_packages = true
 explicit_package_bases = true
 
 # Configuration for Pytest (optional, many things are auto-discovered)
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --cov=src/contextcraft --cov-report=term-missing --cov-report=xml" # Ensure xml for CI later
+addopts = "-ra -q --cov=src/codebrief --cov-report=term-missing --cov-report=xml" # Ensure xml for CI later
 testpaths = [
     "tests",
 ]
 
 # Configuration for Coverage
 [tool.coverage.run]
-source = ["src/contextcraft"] # Directory where your source code lives
+source = ["src/codebrief"] # Directory where your source code lives
 branch = true
 
 [tool.coverage.report]
@@ -124,4 +124,4 @@ exclude_dirs = ["tests"]
 
 # Add a script entry point for your CLI
 [tool.poetry.scripts]
-contextcraft = "contextcraft.main:app"
+codebrief = "codebrief.main:app"

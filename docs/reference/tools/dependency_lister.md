@@ -1,6 +1,6 @@
 # Dependency Lister API Reference
 
-::: contextcraft.tools.dependency_lister
+::: codebrief.tools.dependency_lister
     handler: python
     options:
         show_root_heading: true

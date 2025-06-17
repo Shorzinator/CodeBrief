@@ -1,8 +1,8 @@
 # Config Manager
 
-::: contextcraft.utils.config_manager
+::: codebrief.utils.config_manager
 
-The config manager module provides configuration management functionality for ContextCraft, handling default settings and user-defined configurations.
+The config manager module provides configuration management functionality for CodeBrief, handling default settings and user-defined configurations.
 
 ## Overview
 
@@ -15,7 +15,7 @@ The config manager is responsible for:
 
 ## Configuration Files
 
-ContextCraft supports configuration through:
+CodeBrief supports configuration through:
 
 - Project-level configuration files
 - User-level configuration files
@@ -24,7 +24,7 @@ ContextCraft supports configuration through:
 
 ## Default Configuration
 
-The config manager provides sensible defaults for all configuration options, ensuring that ContextCraft works out of the box without requiring extensive configuration.
+The config manager provides sensible defaults for all configuration options, ensuring that CodeBrief works out of the box without requiring extensive configuration.
 
 ## Related Modules
 

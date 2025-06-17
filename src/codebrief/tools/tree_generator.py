@@ -1,4 +1,4 @@
-# src/contextcraft/tools/tree_generator.py
+# src/codebrief/tools/tree_generator.py
 
 """Directory Tree Generation Utilities.
 

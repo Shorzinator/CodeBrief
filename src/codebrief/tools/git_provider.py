@@ -1,6 +1,6 @@
-# src/contextcraft/tools/git_provider.py
+# src/codebrief/tools/git_provider.py
 """
-Git Context Provider for ContextCraft.
+Git Context Provider for CodeBrief.
 
 This module provides functions to extract Git context information from a project
 repository, including current branch, status, uncommitted changes, and recent commits.

@@ -1,4 +1,4 @@
-# src/contextcraft/utils/config_manager.py
+# src/codebrief/utils/config_manager.py
 """Configuration management utilities."""
 
 import warnings
@@ -11,7 +11,7 @@ except ImportError:
     import tomli as tomllib
 
 # Constants for backward compatibility with tests
-CONFIG_SECTION_NAME = "contextcraft"
+CONFIG_SECTION_NAME = "codebrief"
 
 # Default configuration values
 EXPECTED_DEFAULTS: Dict[str, Any] = {
@@ -79,9 +79,9 @@ def _validate_and_merge_config(raw_config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def load_config(project_root: Path) -> Dict[str, Any]:
-    """Load configuration from contextcraft.toml or pyproject.toml."""
+    """Load configuration from codebrief.toml or pyproject.toml."""
     config_paths = [
-        project_root / "contextcraft.toml",
+        project_root / "codebrief.toml",
         project_root / "pyproject.toml",
     ]
 
@@ -93,10 +93,10 @@ def load_config(project_root: Path) -> Dict[str, Any]:
 
                 raw_config = {}
                 if config_path.name == "pyproject.toml":
-                    # Extract contextcraft section from pyproject.toml
+                    # Extract codebrief section from pyproject.toml
                     raw_config = data.get("tool", {}).get(CONFIG_SECTION_NAME, {})
                 else:
-                    # For contextcraft.toml, return the whole thing
+                    # For codebrief.toml, return the whole thing
                     raw_config = data
 
                 return _validate_and_merge_config(raw_config)

@@ -1,6 +1,8 @@
 # tests/utils/test_config_manager.py
 
-"""Unit tests for the src.contextcraft.config_manager module.
+"""Unit tests for the src.codebrief.config_manager module.
+
+This module tests configuration loading and validation functionality.
 """
 
 import tempfile
@@ -8,11 +10,12 @@ import unittest.mock as mock
 import warnings
 from pathlib import Path
 from typing import Any
+from unittest.mock import mock_open, patch
 
 import pytest
 import toml
 
-from src.contextcraft.utils import config_manager
+from src.codebrief.utils import config_manager
 
 # Default values expected from config_manager if nothing is loaded or section missing
 
@@ -214,3 +217,39 @@ def test_load_config_parsing_error_issues_warning(mock_open_method):
 
         # Should return all defaults
         assert config == EXPECTED_DEFAULTS
+
+
+def test_load_config_no_codebrief_section():
+    """Test loading config when [tool.codebrief] section is missing."""
+    project_root = Path("test_project")
+    mock_data = {"tool": {"other_tool": {"setting": "value"}}}
+
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.open", mock_open()),
+        patch(
+            "src.codebrief.utils.config_manager._get_toml_loader",
+            return_value=lambda f: mock_data,
+        ),
+    ):
+        config = config_manager.load_config(project_root)
+        assert config == config_manager.EXPECTED_DEFAULTS
+
+
+def test_load_config_empty_codebrief_section():
+    """Test loading config when [tool.codebrief] section is empty."""
+    project_root = Path("test_project")
+    mock_data = {
+        "tool": {config_manager.CONFIG_SECTION_NAME: {}}
+    }  # Empty codebrief section
+
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.open", mock_open()),
+        patch(
+            "src.codebrief.utils.config_manager._get_toml_loader",
+            return_value=lambda f: mock_data,
+        ),
+    ):
+        config = config_manager.load_config(project_root)
+        assert config == config_manager.EXPECTED_DEFAULTS

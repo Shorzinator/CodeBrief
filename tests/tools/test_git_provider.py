@@ -1,11 +1,11 @@
-"""Tests for the Git Provider tool."""
+"""Tests for the git provider module."""
 
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from contextcraft.tools import git_provider
+from codebrief.tools import git_provider
 
 
 class TestGetGitContext:

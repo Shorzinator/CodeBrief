@@ -1,6 +1,6 @@
-# Bundler API Reference
+# Bundler
 
-::: contextcraft.tools.bundler
+::: codebrief.tools.bundler
 
 ## Overview
 

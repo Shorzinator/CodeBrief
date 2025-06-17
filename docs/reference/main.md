@@ -1,8 +1,8 @@
-# Main CLI (`contextcraft.main`)
+# Main CLI (`codebrief.main`)
 
-This section provides an API reference for the main CLI application and its commands, generated from the source code docstrings.
+Documentation for the main CLI module.
 
-::: contextcraft.main
+::: codebrief.main
     handler: python
     options:
         show_root_heading: true

@@ -1,11 +1,11 @@
-# src/contextcraft/__init__.py
-"""ContextCraft: A CLI toolkit for generating comprehensive project context for LLMs.
+# src/codebrief/__init__.py
+"""CodeBrief: A CLI toolkit for generating comprehensive project context for LLMs.
 """
 import importlib.metadata
 
 try:
     # This will try to get the version from the installed package metadata
-    __version__ = importlib.metadata.version("contextcraft")
+    __version__ = importlib.metadata.version("codebrief")
 except importlib.metadata.PackageNotFoundError:  # pragma: no cover
     # Fallback for when the package is not installed (e.g., during development directly from source)
     # You might need to adjust this if you have a single source of truth for the version

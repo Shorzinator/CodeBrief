@@ -1,14 +1,14 @@
 # mkdocs.yml
 # This comment indicates the path of the file relative to the project root.
 
-# MkDocs configuration for the ContextCraft project documentation.
+# MkDocs configuration for the CodeBrief project documentation.
 # yaml-language-server: $schema=https://json.schemastore.org/mkdocs-material.json
 
 
 # Project information
-site_name: ContextCraft
+site_name: CodeBrief
 site_url: "https://Shorzinator.github.io/ContextCraft"
-site_author: ContextCraft Team
+site_author: CodeBrief Team
 site_description: "A powerful CLI toolkit to generate comprehensive project context for Large Language Models (LLMs)"
 
 # Repository
@@ -17,7 +17,7 @@ repo_name: Shorzinator/ContextCraft
 edit_uri: edit/main/docs/
 
 # Copyright
-copyright: Copyright © 2024 ContextCraft Team
+copyright: Copyright © 2024 CodeBrief Team
 
 # Theme Configuration
 theme:
@@ -181,7 +181,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/Shorzinator/ContextCraft
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/contextcraft/
+      link: https://pypi.org/project/codebrief/
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/Shorzinator
   analytics:

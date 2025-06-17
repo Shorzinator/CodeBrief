@@ -1,17 +1,19 @@
-# Welcome to ContextCraft
+# Welcome to CodeBrief
 
-<div align="center" class="hero-section">
-  <h2 class="hero-title">The Missing Link Between Your Codebase and AI Assistants</h2>
-  <p class="hero-subtitle"><em>Stop copying files. Start solving problems.</em></p>
-</div>
+!!! tip "Quick Start"
+    Ready to streamline your LLM workflows? Jump to [Quick Start](getting-started/quick-start.md) or [Installation](getting-started/installation.md).
 
----
+## The Missing Link Between Your Codebase and AI Assistants
 
-**ContextCraft** is a production-ready Command Line Interface (CLI) toolkit designed to solve the core problem developers face when working with AI assistants: manually preparing context from their projects. Whether you're debugging with ChatGPT, explaining your codebase to Claude, or preparing documentation for any LLM, ContextCraft provides the essential tools to create rich, contextual project summaries in seconds, not minutes.
+**CodeBrief** is a production-ready Command Line Interface (CLI) toolkit designed to solve the core problem developers face when working with AI assistants: manually preparing context from their projects. Whether you're debugging with ChatGPT, explaining your codebase to Claude, or preparing documentation for any LLM, CodeBrief provides the essential tools to create rich, contextual project summaries in seconds, not minutes.
+
+## Stop Copying Files. Start Solving Problems.
+
+Developers waste 10+ minutes per day copying and pasting project files, directory structures, and configuration details to provide context every time they need AI assistance. CodeBrief reduces this to a single command that takes seconds.
 
 ## Core Problem Solved
 
-Developers waste 5-10 minutes manually copying files, explaining project structure, and gathering context every time they need AI assistance. ContextCraft reduces this to a single command that takes seconds.
+Developers waste 5-10 minutes manually copying files, explaining project structure, and gathering context every time they need AI assistance. CodeBrief reduces this to a single command that takes seconds.
 
 ## Essential Features
 
@@ -41,57 +43,85 @@ Copy output directly to clipboard with `--to-clipboard` or `-c` flag on all comm
 
 ## Quick Start
 
-Get started with ContextCraft in minutes:
+Get started with CodeBrief in minutes:
 
-### Installation
+=== "pip"
+    ```bash
+    pip install codebrief
+    ```
 
-```bash
-# Install from PyPI
-pip install contextcraft
+=== "poetry"
+    ```bash
+    poetry add codebrief
+    ```
 
-# Or install with Poetry
-poetry add contextcraft
-```
+=== "Basic tree generation"
+    ```bash
+    codebrief tree
+    ```
 
-### Basic Usage
+=== "Copy tree to clipboard"
+    ```bash
+    codebrief tree --to-clipboard
+    ```
 
-```bash
-# Generate a directory tree
-contextcraft tree
+=== "Flatten Python files to a single output"
+    ```bash
+    codebrief flatten . --include "*.py" --output context.md
+    ```
 
-# Copy tree to clipboard
-contextcraft tree --to-clipboard
+=== "Flatten Python files to clipboard"
+    ```bash
+    codebrief flatten . --include "*.py" -c
+    ```
 
-# Flatten your Python code
-contextcraft flatten . --include "*.py" --output context.md
+=== "Extract dependencies"
+    ```bash
+    codebrief deps --output deps.md
+    ```
 
-# Copy flattened code to clipboard
-contextcraft flatten . --include "*.py" -c
+=== "Git context extraction"
+    ```bash
+    codebrief git-info --output git-context.md
+    ```
 
-# Analyze dependencies
-contextcraft deps --output deps.md
+=== "Bundle everything"
+    ```bash
+    codebrief bundle --output project-bundle.md
+    ```
 
-# Extract Git context
-contextcraft git-info --output git-context.md
+=== "Bundle to clipboard"
+    ```bash
+    codebrief bundle -c
+    ```
 
-# Create comprehensive bundle
-contextcraft bundle --output project-bundle.md
+=== "Complex bundle with specific paths"
+    ```bash
+    codebrief bundle \
+        --output comprehensive-context.md \
+        --flatten src/ --flatten tests/ \
+        --git-log-count 10 --git-full-diff
+    ```
 
-# Copy bundle to clipboard
-contextcraft bundle -c
-```
+=== "Bundle selective sections"
+    ```bash
+    codebrief bundle \
+        --exclude-deps --exclude-git \
+        --flatten src/core/ \
+        --output focused-context.md
+    ```
 
 ### Advanced Workflow
 
 ```bash
 # Create comprehensive project context with bundle
-contextcraft bundle \
+codebrief bundle \
     --output complete-context.md \
     --git-log-count 15 \
     --flatten src/ tests/
 
 # Focused code review bundle
-contextcraft bundle \
+codebrief bundle \
     --exclude-deps \
     --git-full-diff \
     --flatten src/ tests/ \
@@ -145,7 +175,7 @@ echo "*.log\n__pycache__/\n.venv/" > .llmignore
 
 ## Architecture
 
-ContextCraft is built with modern Python best practices:
+CodeBrief is built with modern Python best practices:
 
 - **CLI Framework**: [Typer](https://typer.tiangolo.com/) for intuitive command-line interfaces
 - **Rich Output**: [Rich](https://rich.readthedocs.io/) for clean terminal output
@@ -269,7 +299,7 @@ ContextCraft is built with modern Python best practices:
 
     ---
 
-    Help improve ContextCraft! Read our comprehensive contribution guidelines.
+    Help improve CodeBrief! Read our comprehensive contribution guidelines.
 
     [:octicons-arrow-right-24: Contribute](development/contributing.md)
 

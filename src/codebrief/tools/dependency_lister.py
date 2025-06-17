@@ -1,4 +1,4 @@
-# src/contextcraft/tools/dependency_lister.py
+# src/codebrief/tools/dependency_lister.py
 """Dependency Listing Utilities.
 
 This module provides functions to identify and list project dependencies from various

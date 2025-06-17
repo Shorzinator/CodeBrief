@@ -1,4 +1,4 @@
-# src/contextcraft/utils/ignore_handler.py
+# src/codebrief/utils/ignore_handler.py
 """Handles parsing of .llmignore files and mathcing paths against ignore patterns.
 
 This module uses the pathspec library to provide functionality similar

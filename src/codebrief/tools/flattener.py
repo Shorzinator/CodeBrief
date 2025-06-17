@@ -1,4 +1,4 @@
-# src/contextcraft/tools/flattener.py
+# src/codebrief/tools/flattener.py
 """Code Flattening Utilities.
 
 This module provides functions to "flatten" a directory structure by concatenating

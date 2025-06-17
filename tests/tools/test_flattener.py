@@ -1,14 +1,15 @@
 # tests/tools/test_flattener.py
-"""Tests for the src.contextcraft.tools.flattener module.
-Focuses on the flatten_code_logic function and its interactions.
+"""Tests for the src.codebrief.tools.flattener module.
+
+This module contains tests for file flattening functionality.
 """
 from pathlib import Path
 from typing import Optional
 
 import pytest
 
-from src.contextcraft.tools import flattener
-from src.contextcraft.utils import ignore_handler
+from src.codebrief.tools import flattener
+from src.codebrief.utils import ignore_handler
 
 
 @pytest.fixture()

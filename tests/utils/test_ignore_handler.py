@@ -1,5 +1,8 @@
 # tests/utils/test_ignore_handler.py
-"""Unit tests for the src.contextcraft.utils.ignore_handler module.
+"""Unit tests for the src.codebrief.utils.ignore_handler module.
+
+This module tests the functionality for parsing .llmignore files and matching
+paths against ignore patterns using pathspec.
 """
 
 import tempfile
@@ -8,7 +11,7 @@ from unittest import mock
 
 import pytest
 
-from src.contextcraft.utils import ignore_handler
+from src.codebrief.utils import ignore_handler
 
 
 # Helper function to create a temporary .llmignore file
@@ -79,7 +82,7 @@ def setup_test_directory():
     """Sets up a temporary directory with a predefined structure and .llmignore file.
     Returns the root Path object of this temporary directory.
     """
-    with tempfile.TemporaryDirectory(prefix="contextcraft_test_") as tmpdir_name:
+    with tempfile.TemporaryDirectory(prefix="codebrief_test_") as tmpdir_name:
         root_dir = Path(tmpdir_name)
 
         # Create .llmignore

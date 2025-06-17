@@ -1,5 +1,5 @@
-# src/contextcraft/main.py
-"""Main CLI entry point for the ContextCraft application.
+# src/codebrief/main.py
+"""Main CLI entry point for the CodeBrief application.
 
 This module uses Typer to define and manage CLI commands. It orchestrates
 functionalities from other modules, like generating directory trees or
@@ -26,13 +26,13 @@ def version_callback(value: bool) -> None:
     """Show version information and exit."""
     if value:
         console.print(
-            f"[bold green]ContextCraft[/bold green] Version: [bold cyan]{__version__}[/bold cyan]"
+            f"[bold green]CodeBrief[/bold green] Version: [bold cyan]{__version__}[/bold cyan]"
         )
         raise typer.Exit()
 
 
 app = typer.Typer(
-    name="contextcraft",
+    name="codebrief",
     help="A CLI toolkit to generate comprehensive project context for LLMs.",
     add_completion=False,
 )
@@ -53,14 +53,14 @@ def main_options(
     """
     A CLI toolkit to generate comprehensive project context for LLMs.
 
-    ContextCraft helps you create detailed project context files for use with
+    CodeBrief helps you create detailed project context files for use with
     Large Language Models (LLMs). It can generate directory trees, flatten code
     files, extract git information, list dependencies, and create comprehensive
     bundles combining multiple outputs.
     """
     if ctx.invoked_subcommand is None:
         console.print(
-            "[dim]Run [bold]contextcraft --help[/bold] to see available commands.[/dim]"
+            "[dim]Run [bold]codebrief --help[/bold] to see available commands.[/dim]"
         )
 
 
@@ -79,7 +79,7 @@ def _copy_to_clipboard_with_feedback(content: str) -> None:
 @app.command()
 def hello(name: str = typer.Option("World", help="The person to greet.")) -> None:
     """Greets a person. (Example command)"""
-    console.print(f"Hello {name} from ContextCraft!")
+    console.print(f"Hello {name} from CodeBrief!")
 
 
 @app.command(name="tree")
@@ -656,6 +656,6 @@ def bundle_command(
 
 
 # This block ensures that the Typer app runs when the script is executed directly
-# (e.g., `python -m src.contextcraft.main`) or via the Poetry script entry point.
+# (e.g., `python -m src.codebrief.main`) or via the Poetry script entry point.
 if __name__ == "__main__":  # pragma: no cover
     app()

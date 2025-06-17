@@ -1,8 +1,8 @@
-# Tree Generator (`contextcraft.tools.tree_generator`)
+# Tree Generator (`codebrief.tools.tree_generator`)
 
-This module provides the core logic for generating directory tree structures.
+Documentation for the tree generator module.
 
-::: contextcraft.tools.tree_generator
+::: codebrief.tools.tree_generator
     handler: python
     options:
         show_root_heading: true

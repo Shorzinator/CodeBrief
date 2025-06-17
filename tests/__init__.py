@@ -1,1 +1,1 @@
-"""Tests package for ContextCraft."""
+"""Tests package for CodeBrief."""

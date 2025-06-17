@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-from src.contextcraft.tools.dependency_lister import (
+from src.codebrief.tools.dependency_lister import (
     DependencyInfo,
     PackageJsonParser,
     PyProjectTomlParser,
