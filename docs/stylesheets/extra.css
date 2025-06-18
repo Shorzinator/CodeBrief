@@ -1,5 +1,17 @@
 /* Custom CSS for codebrief Documentation */
 
+/* Prevent flash of invisible content - ensure headings are always visible */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  opacity: 1 !important;
+  visibility: visible !important;
+  -webkit-text-fill-color: initial !important;
+}
+
 /* Root variables for consistent theming */
 :root {
   --cc-primary: #2563eb;
@@ -29,6 +41,17 @@
   font-size: 3rem;
   line-height: 1.1;
   margin-bottom: 1.5rem;
+  /* Ensure visibility during load */
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Fallback for browsers that don't support background-clip */
+@supports not (-webkit-background-clip: text) {
+  .md-typeset h1:first-child {
+    -webkit-text-fill-color: initial !important;
+    color: var(--cc-primary-dark);
+  }
 }
 
 /* Hero section styling */

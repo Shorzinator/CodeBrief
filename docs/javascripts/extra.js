@@ -1,21 +1,47 @@
 // Custom JavaScript for codebrief Documentation
 
+// Ensure headings are visible immediately
+document.documentElement.style.setProperty('--heading-visibility', 'visible');
+
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Ensure all headings are visible first
+    ensureHeadingVisibility();
 
-    // Initialize all features
-    initSmoothScrolling();
-    initCodeCopyEnhancements();
-    initScrollToTop();
-    initProgressIndicator();
-    initSearchEnhancements();
-    initCardAnimations();
-    initTableEnhancements();
-    initThemeTransitions();
-    initLEDEffects();
+    // Initialize all features with a small delay to prevent rendering issues
+    setTimeout(() => {
+        initSmoothScrolling();
+        initCodeCopyEnhancements();
+        initScrollToTop();
+        initProgressIndicator();
+        initSearchEnhancements();
+        initCardAnimations();
+        initTableEnhancements();
+        initThemeTransitions();
 
-    console.log('codebrief documentation enhanced! 🚀');
+        // Initialize LED effects last to prevent interference
+        setTimeout(() => {
+            initLEDEffects();
+        }, 100);
+
+        console.log('codebrief documentation enhanced! 🚀');
+    }, 50);
 });
+
+/**
+ * Ensure headings are always visible
+ */
+function ensureHeadingVisibility() {
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach(heading => {
+        heading.style.opacity = '1';
+        heading.style.visibility = 'visible';
+        // Prevent text-fill-color issues during load
+        if (getComputedStyle(heading).webkitTextFillColor === 'rgba(0, 0, 0, 0)') {
+            heading.style.webkitTextFillColor = 'initial';
+        }
+    });
+}
 
 /**
  * Enhanced smooth scrolling for anchor links

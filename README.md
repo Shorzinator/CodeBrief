@@ -2,8 +2,8 @@
 
 # codebrief
 
-[![CI](https://github.com/Shorzinator/codebrief/workflows/codebrief%20CI/badge.svg)](https://github.com/Shorzinator/codebrief/actions)
-[![Coverage](https://img.shields.io/badge/coverage-77%25-yellow)](https://github.com/Shorzinator/codebrief)
+[![CI](https://github.com/Shorzinator/CodeBrief/workflows/CodeBrief%20CI/badge.svg)](https://github.com/Shorzinator/CodeBrief/actions)
+[![Coverage](https://img.shields.io/badge/coverage-77%25-yellow)](https://github.com/Shorzinator/CodeBrief)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -142,16 +142,16 @@ global_exclude_patterns = [
 
 ## Documentation
 
-**[Live Documentation Website](https://shorzinator.github.io/codebrief/)**
+**[Live Documentation Website](https://shorzinator.github.io/CodeBrief/)**
 
 Comprehensive documentation including:
 
-- **[Getting Started](https://shorzinator.github.io/codebrief/getting-started/installation/)** - Installation and basic usage
-- **[CLI Commands](https://shorzinator.github.io/codebrief/user-guide/cli-commands/)** - Complete command reference
-- **[Configuration](https://shorzinator.github.io/codebrief/getting-started/configuration/)** - Advanced configuration options
-- **[API Reference](https://shorzinator.github.io/codebrief/reference/)** - Detailed API documentation
-- **[Examples](https://shorzinator.github.io/codebrief/examples/)** - Real-world usage examples
-- **[Tutorials](https://shorzinator.github.io/codebrief/tutorials/)** - Step-by-step guides
+- **[Getting Started](https://shorzinator.github.io/CodeBrief/getting-started/installation/)** - Installation and basic usage
+- **[CLI Commands](https://shorzinator.github.io/CodeBrief/user-guide/cli-commands/)** - Complete command reference
+- **[Configuration](https://shorzinator.github.io/CodeBrief/getting-started/configuration/)** - Advanced configuration options
+- **[API Reference](https://shorzinator.github.io/CodeBrief/reference/)** - Detailed API documentation
+- **[Examples](https://shorzinator.github.io/CodeBrief/examples/)** - Real-world usage examples
+- **[Tutorials](https://shorzinator.github.io/CodeBrief/tutorials/)** - Step-by-step guides
 
 ## Development
 
@@ -165,8 +165,8 @@ Comprehensive documentation including:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Shorzinator/codebrief.git
-cd codebrief
+git clone https://github.com/Shorzinator/CodeBrief.git
+cd CodeBrief
 
 # Install dependencies
 poetry install --with dev
@@ -226,7 +226,7 @@ codebrief is actively developed and maintained. Current status:
 
 <div align="center">
 
-**[Documentation](https://shorzinator.github.io/codebrief/) • [Issues](https://github.com/Shorzinator/codebrief/issues) • [Discussions](https://shorzinator.github.io/codebrief/community/)**
+**[Documentation](https://shorzinator.github.io/CodeBrief/) • [Issues](https://github.com/Shorzinator/CodeBrief/issues) • [Discussions](https://shorzinator.github.io/CodeBrief/community/)**
 
 Made for the developer community
 
