@@ -75,16 +75,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-docs-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-docs-v2-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            venv-docs-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
+            venv-docs-v2-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --with docs
 
-      - name: Ensure dependencies are installed
-        run: poetry install --no-interaction --with docs
+      - name: Verify mkdocs installation
+        run: |
+          echo "Checking mkdocs installation..."
+          poetry run which mkdocs || echo "mkdocs not found in PATH"
+          poetry run mkdocs --version || echo "mkdocs --version failed"
 
       - name: Validate MkDocs configuration
         id: validation
@@ -140,15 +142,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-docs-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-docs-v2-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-            venv-docs-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
+            venv-docs-v2-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies-deploy.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with docs
-
-      - name: Ensure dependencies are installed
         run: poetry install --no-interaction --with docs
 
       - name: Build MkDocs site
