@@ -10,7 +10,7 @@ We take the security of codebrief seriously. If you believe you have found a sec
 
 Instead, please report security vulnerabilities by:
 
-1. **Email**: Send details to [security@codebrief.dev](mailto:security@codebrief.dev)
+1. **Email**: Send details to [shorz2905@gmail.com](mailto:shorz2905@gmail.com)
 2. **GitHub Security Advisory**: Use GitHub's [private vulnerability reporting](https://github.com/Shorzinator/codebrief/security/advisories/new)
 
 ### What to Include
